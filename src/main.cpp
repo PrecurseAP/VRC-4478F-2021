@@ -11,23 +11,98 @@
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller                    
-// leftFront            motor         1               
-// rightFront           motor         8               
-// leftArm              motor         20              
-// rightArm             motor         9               
-// leftBack             motor         19              
-// intakeLeft           motor         18              
-// intakeRight          motor         7               
+// leftFront            motor         19              
+// rightFront           motor         9               
+// leftArm              motor         5               
+// rightArm             motor         2               
+// leftBack             motor         20              
+// intakeLeft           motor         7               
+// intakeRight          motor         8               
 // rightBack            motor         10              
+// autonSel             pot           B               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include <cmath>
 
 using namespace vex;
 
 // A global instance of competition
 competition Competition;
 int pathChoice = 0;
+
+float floatAbs(float a) {
+  if (a < 0) return a*-1; else return a;
+}
+void stopDrive() {
+  leftFront.stop();
+  rightFront.stop();
+  leftBack.stop();
+  rightBack.stop();
+}
+void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool wait, bool fwd) {
+  Brain.Screen.setCursor(1,1);
+  leftBack.setPosition(0, degrees);
+  leftFront.setPosition(0, degrees);
+  rightBack.setPosition(0, degrees);
+  rightFront.setPosition(0, degrees);
+  float deriv, error, prevError;
+  float integ = 0;
+  float intThres = 20;
+  error = target;
+  bool complete = false;
+  directionType rightDir, leftDir;
+  if (fwd == true) {
+    leftDir = forward;
+    rightDir = reverse;
+  } else {
+    leftDir = reverse;
+    rightDir = forward;
+  }
+  //everything below here goes into a 
+  while(!complete) {
+
+    float leftVal = (floatAbs(leftFront.rotation(degrees)) + floatAbs(leftBack.rotation(degrees))) / 2;
+    float rightVal = (floatAbs(rightFront.rotation(degrees)) + floatAbs(rightBack.rotation(degrees))) / 2;
+    float currentVal = (leftVal + rightVal) / 2;
+
+    prevError = error;
+
+    error = target - currentVal; 
+
+    if (floatAbs(error) < intThres) {
+      integ += error;
+    } else {
+      integ = 0;
+    }
+
+    deriv = error - prevError;
+
+    Brain.Screen.newLine();
+
+    float SPEED = kP*error + kI*integ + kD*deriv;
+
+    Brain.Screen.print(SPEED);
+
+    SPEED = !(SPEED < maxSpeed) ? maxSpeed : SPEED;
+
+    leftFront.spin(leftDir, SPEED, velocityUnits::pct);
+    leftBack.spin(leftDir, SPEED, velocityUnits::pct);
+    rightFront.spin(rightDir, SPEED, velocityUnits::pct);
+    rightBack.spin(rightDir, SPEED, velocityUnits::pct);
+
+    if (SPEED <= 9) {
+      stopDrive();
+      complete = true;
+    }
+
+    task::sleep(40);
+  }
+}
+
+void turnPID(float target, float kP, float kI, float kD, bool wait, int dir) {
+  //placeholder
+}
 
 void driveAuton (int leftFrontRotations, int rightFrontRotations, int globalSpeed) {
   leftFront.setVelocity(globalSpeed, velocityUnits::pct);
@@ -50,175 +125,46 @@ void intakeAuton(directionType dir) {
   intakeLeft.spin(dir, 100, velocityUnits::pct);
   intakeRight.spin(dir, 100, velocityUnits::pct);
 }
-void stopDrive() {
-  leftFront.stop(brakeType::hold);
-  rightFront.stop(brakeType::hold);
-  leftBack.stop(brakeType::hold);
-  rightBack.stop(brakeType::hold);
-}
-//this function draws a red square at coordinates
-void redSquare(int x, int y) {
-  Brain.Screen.drawRectangle(x, y, 35, 35, "#ff0000");
-}
 
-//this draws a blue square are given coordinates
-void blueSquare(int x, int y) {
-  Brain.Screen.drawRectangle(x, y, 35, 35, "#0000ff");
-}
-
-void highlightedSquare(int x, int y) {
-  Brain.Screen.drawRectangle(x, y, 35, 35, "#ffffff");
-}
-
-void graySquare(int x, int y) {
-  Brain.Screen.drawRectangle(x, y, 35, 35, "#9e9e9e");
-}
-
-void confirmButton(int x, int y) {
-  Brain.Screen.drawRectangle(x, y, 100, 35, "#00ff00");
-  Brain.Screen.printAt(x+16, y+24, false, "Confirm");
-}
-
-//function for receiving touchscreen input
-int currentSelection = NONE;
-int TouchscreenInput() {
-  
-  int tx = Brain.Screen.xPosition();
-  int ty = Brain.Screen.yPosition();
-
-  if (Brain.Screen.pressing()) {
-    if ((tx >= 180) && (tx <= 216)) {
-      if ((ty >= 36) && (ty <= 72)) {
-        currentSelection = TOPBLUE;
-      } else if ((ty > 72) && (ty <= 108)) {
-        currentSelection = SECONDBLUE;
-      } else if ((ty > 108) && (ty <= 144)) {
-        currentSelection = THIRDBLUE;
-      } else if ((ty > 144) && (ty <= 180)) {
-        currentSelection = BOTTOMBLUE;
-      }
-    }
-    if ((tx >= 0) && (tx <= 36)) {
-      if ((ty >= 36) && (ty <= 72)) {
-        currentSelection = TOPRED;
-      } else if ((ty > 72) && (ty <= 108)) {
-        currentSelection = SECONDRED;
-      } else if ((ty > 108) && (ty <= 144)) {
-        currentSelection = THIRDRED;
-      } else if ((ty > 144) && (ty <= 180)) {
-        currentSelection = BOTTOMRED;
-      }
-    }
-  }
-  return currentSelection;
-}
-
-int selectionStage = 0;
-int finalSelection;
-//This is the function the draws all of the squares on the auton selection screen.
-void drawSquares() {
-
-  TouchscreenInput();
-
-  int tx = Brain.Screen.xPosition();
-  int ty = Brain.Screen.yPosition();
-
-  Brain.Screen.setPenColor("#9e9e9e");
-
-  for(int row = 1; row < 7; row++) {
-    for(int column = 1; column < 7; column++) {
-      int dx = column * 35 + column - 36;
-      int dy = row * 35 + row - 36;
-      if ((column == 1) && (row == 1)) {
-        graySquare(0,0);
-      } else if ((column == 2) && (row == 1)) {
-        redSquare(dx, dy);
-      } else if ((column == 5) && (row == 1)) {
-        blueSquare(dx, dy);
-      } else if ((column == 1) && (row == 2)) {
-        if (currentSelection == TOPRED) {
-          highlightedSquare(dx, dy);
-        } else {
-          redSquare(dx, dy);
-        }
-      } else if ((column == 6) && (row == 2)) {
-        if (currentSelection == TOPBLUE) {
-          highlightedSquare(dx, dy);
-        } else {
-          blueSquare(dx, dy);
-        }
-      } else {
-        graySquare(dx, dy);
-      }
-      if ((column == 1) && (row == 3)) {
-        if (currentSelection == SECONDRED) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      if ((column == 1) && (row == 4)) {
-        if (currentSelection == THIRDRED) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      if ((column == 1) && (row == 5)) {
-        if (currentSelection == BOTTOMRED) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      if ((column == 6) && (row == 3)) {
-        if (currentSelection == SECONDBLUE) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      if ((column == 6) && (row == 4)) {
-        if (currentSelection == THIRDBLUE) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      if ((column == 6) && (row == 5)) {
-        if (currentSelection == BOTTOMBLUE) {
-          highlightedSquare(dx, dy);
-        } else {
-          graySquare(dx, dy);
-        }
-      }
-      
-      confirmButton(252, 90);
-
-    }      
-  } 
-
-  if ((tx >= 252) && (tx <= 312) && (ty >= 90) && (ty <= 125) && (currentSelection != NONE)) {
-    finalSelection = currentSelection;
-    selectionStage = 1;
-    Brain.Screen.clearScreen(); //get rid of residual stuff
-  }
-
-  wait(50, msec); // dont let the brain go crazy
-}
-
+int autonSelection;
 void pre_auton( void ) {
   vexcodeInit();
-  bool complete = false;
-  
-  while(!complete) {
-    if (selectionStage == 0) {
-      drawSquares(); 
-    } else if (selectionStage == 1) {
-      complete = true;
-      Brain.Screen.clearScreen();
+  /*while(true) {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print(autonSel.angle(degrees));
+    Brain.Screen.newLine();
+    int a = autonSel.angle(degrees);
+    if ((a >= 0) && (a <= 15)) {
+      Brain.Screen.print("Top Red");
+      autonSelection = 1;
+    } else if (a <= 42) {
+      Brain.Screen.print("Bottom Red");
+      autonSelection = 2;
+    } else if (a <= 68) {
+      Brain.Screen.print("Top Blue");
+      autonSelection = 3;
+    } else if (a <= 101) {
+      Brain.Screen.print("Bottom Blue");
+      autonSelection = 4;
+    } else if (a <= 134) {
+      Brain.Screen.print("Programming Skills");
+      autonSelection = 5;
+    } else {
+      Brain.Screen.print("No program set");
+      autonSelection = 0;
     }
-  }
+    Brain.Screen.newLine();
+    Brain.Screen.print(leftFront.rotation(degrees));
+    Brain.Screen.newLine();
+    Brain.Screen.print(leftBack.rotation(degrees));
+    Brain.Screen.newLine();
+    Brain.Screen.print(rightBack.rotation(degrees));
+    Brain.Screen.newLine();
+    Brain.Screen.print(rightFront.rotation(degrees));
+    Brain.Screen.newLine();
+    wait(50, msec);
+  }*/
 }
 
 /*---------------------------------------------------------------------------*/
@@ -232,79 +178,30 @@ void pre_auton( void ) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-      intakeLeft.stop(brakeType::hold);
-      intakeRight.stop(brakeType::hold);
-      armAuton(80, 120);
-      wait(300, msec);
-      driveAuton(20, -20, 100);
-      wait(20, msec);
-      stopDrive();
-      wait(30, msec);
-      driveAuton(80, -80, 100);
-      wait(700, msec);
-      intakeAuton(directionType::rev);
-      driveAuton(80, -80, 80);
-      armAuton(80, -80);
-      wait(300, msec);
-      armAuton(80, 500);
-      wait(600, msec);
-      driveAuton(578, -570, 40);
-      wait(1500, msec);
-      armAuton(80, -400);
-      wait(1000, msec);
-      driveAuton(-560, 580, 60);
-      wait(100, msec);
-      armAuton(80, -60);
-      wait(1100, msec);
-      driveAuton(410, 410, 50);
-      wait(1500, msec);
-      driveAuton(1000, -1000, 50);
-      wait(1500, msec);
-      intakeAuton(directionType::fwd);
-      driveAuton(20, -20, 75);
-      wait(100, msec);
-      armAuton(80, 550);
-      wait(1000, msec);
-      armAuton(80, -450);
-  switch(finalSelection) {
-    case TOPRED: {
+  leftFront.setPosition(0, degrees);
+  leftBack.setPosition(0, degrees);
+  rightFront.setPosition(0, degrees);
+  rightBack.setPosition(0, degrees);
 
-      break;
+  switch(autonSelection) {
+    case 1: {
+      drivePID(1000, 0.2, 0.1, 0.1, 70, true, true);
     }
-    case SECONDRED: {
+    case 2: {
 
-      break;
     }
-    case THIRDRED: {
+    case 3: {
 
-      break;
     }
-    case BOTTOMRED: {
-      driveAuton(300, -300, 100);
-      wait(1000, msec);
-      driveAuton(-300, 300, 100);
-      break;
-    }
-    case TOPBLUE: {
+    case 4: {
 
-      break;
     }
-    case SECONDBLUE: {
+    case 5: {
 
-      break;
     }
-    case THIRDBLUE: {
-
-      break;
-    }
-    case BOTTOMBLUE: {
-      driveAuton(300, -300, 100);
-      wait(1000, msec);
-      driveAuton(-300, 300, 100);
-      break;
-    }
-  }  
-}
+  }
+  
+  }
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -315,25 +212,26 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-double driveFactor = 1.25;
+double driveFactor = 3.00;
 
 void switchDriveSpeed() {
   if (driveFactor == 1.25) {
-    driveFactor = 2.50;
-  } else if (driveFactor == 2.50) {
+    driveFactor = 3.00;
+  } else if (driveFactor == 3.00) {
     driveFactor = 1.25;
   } else {
     driveFactor = 2; //backup in case something dumb happens and this code is reached
   }
 }
-
+void testPID() {
+  drivePID(1000, 0.3, 0.2, 0.1, 80, true, true);
+}
 void usercontrol(void) {
   // User control code here, inside the loop
-  int armPCT = 60;
-  int intakePCT = 75;
+  int armPCT = 100;
+  int intakePCT = 100;
   while (1) {
     Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
-
     // The following code drives the robot, while accounting for DRIFT THAT SHOULDNT BE THERE
     if (abs(Controller1.Axis3.position()) >= 4) {
       leftFront.spin(directionType::fwd, Controller1.Axis3.position()/driveFactor, velocityUnits::pct);
@@ -350,7 +248,17 @@ void usercontrol(void) {
       rightFront.stop();
       rightBack.stop();
     } 
-
+    if (Controller1.ButtonUp.pressing()) {
+      leftFront.spin(directionType::fwd, 50, velocityUnits::pct);
+      leftBack.spin(directionType::fwd, 50, velocityUnits::pct);
+      rightFront.spin(directionType::rev, 50, velocityUnits::pct);
+      rightBack.spin(directionType::rev, 50, velocityUnits::pct);
+    } else if (Controller1.ButtonDown.pressing()) {
+      leftFront.spin(directionType::rev, 50, velocityUnits::pct);
+      leftBack.spin(directionType::rev, 50, velocityUnits::pct);
+      rightFront.spin(directionType::fwd, 50, velocityUnits::pct);
+      rightBack.spin(directionType::fwd, 50, velocityUnits::pct);
+    }
     // the following code raises the arm
     if (Controller1.ButtonL1.pressing()) {
       rightArm.spin(directionType::fwd, armPCT, velocityUnits::pct);
@@ -362,7 +270,7 @@ void usercontrol(void) {
       rightArm.spin(directionType::rev, armPCT-10, velocityUnits::pct);
     }
     //this makes sure that when we arent moving the arm it is locked in place
-    else if (!Controller1.ButtonB.Pressing()) {
+    else if (!Controller1.ButtonB.pressing()) {
       leftArm.stop(brakeType::hold);
       rightArm.stop(brakeType::hold);
     }
@@ -390,7 +298,7 @@ void usercontrol(void) {
     } else if (Controller1.ButtonB.pressing()) {
       rightArm.rotateTo(leftArm.rotation(rotationUnits::rev), rotationUnits::rev, false);
     }
-    task::sleep(20); //Sleep the task for a short amount of time to prevent wasted resources.
+    task::sleep(50); //Sleep the task for a short amount of time to prevent wasted resources.
   }
 }
 
