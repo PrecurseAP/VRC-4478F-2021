@@ -11,11 +11,11 @@ brain  Brain;
 controller Controller1 = controller(primary);
 motor leftFront = motor(PORT19, ratio18_1, false);
 motor rightFront = motor(PORT9, ratio18_1, false);
-motor leftArm = motor(PORT5, ratio36_1, true);
-motor rightArm = motor(PORT2, ratio36_1, false);
+motor leftArm = motor(PORT12, ratio36_1, true);
+motor rightArm = motor(PORT1, ratio36_1, false);
 motor leftBack = motor(PORT20, ratio18_1, false);
-motor intakeLeft = motor(PORT7, ratio18_1, false);
-motor intakeRight = motor(PORT8, ratio18_1, true);
+motor intakeLeft = motor(PORT11, ratio18_1, false);
+motor intakeRight = motor(PORT2, ratio18_1, true);
 motor rightBack = motor(PORT10, ratio18_1, false);
 pot autonSel = pot(Brain.ThreeWirePort.B);
 

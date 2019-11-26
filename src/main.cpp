@@ -13,11 +13,11 @@
 // Controller1          controller                    
 // leftFront            motor         19              
 // rightFront           motor         9               
-// leftArm              motor         5               
-// rightArm             motor         2               
+// leftArm              motor         12              
+// rightArm             motor         1               
 // leftBack             motor         20              
-// intakeLeft           motor         7               
-// intakeRight          motor         8               
+// intakeLeft           motor         11              
+// intakeRight          motor         2               
 // rightBack            motor         10              
 // autonSel             pot           B               
 // ---- END VEXCODE CONFIGURED DEVICES ----
@@ -100,8 +100,63 @@ void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool w
   }
 }
 
-void turnPID(float target, float kP, float kI, float kD, bool wait, int dir) {
-  //placeholder
+void turnPID(float target, float kP, float kI, float kD, int maxSpeed, bool wait, int dir) {
+  Brain.Screen.setCursor(1,1);
+  leftBack.setPosition(0, degrees);
+  leftFront.setPosition(0, degrees);
+  rightBack.setPosition(0, degrees);
+  rightFront.setPosition(0, degrees);
+  float derivR, derivL, errorL, errorR, prevErrorL, prevErrorR;
+  float integL = 0;
+  float integR = 0;
+  float intThres = 20;
+  bool complete = false;
+  //directionType rightDir, leftDir;
+  if (dir == 1) {   //right
+    //leftDir = forward;
+    //rightDir = reverse;
+    errorL = target;
+    errorR = target;
+  } else {          //left
+    //leftDir = reverse;
+    //rightDir = forward;
+    errorL = -target;
+    errorR = -target;
+  }
+  //everything below here goes into a 
+  while(!complete) {
+    float leftVal = (leftFront.rotation(degrees) + leftBack.rotation(degrees)) / 2;
+    prevErrorL = errorL;
+    errorL = dir*target - leftVal;
+    if (floatAbs(errorL) < intThres) {
+      integL += errorL;
+    } else {
+      integL = 0;
+    } 
+    derivL = errorL - prevErrorL;   
+    float SPEED = kP*errorL + kI*integL + kD*derivL;
+    SPEED = !(floatAbs(SPEED) < maxSpeed) ? maxSpeed : SPEED;
+
+    leftFront.spin(forward, SPEED, velocityUnits::pct); //could cause problems with directions & negative speed
+    leftBack.spin(forward, SPEED, velocityUnits::pct);
+
+
+
+    float rightVal = (rightFront.rotation(degrees) + rightBack.rotation(degrees)) / 2;
+    prevErrorR = errorR;
+    errorR = dir*target - rightVal;
+    if (floatAbs(errorR) < intThres) {
+      integR += errorR;
+    } else {
+      integR = 0;
+    } 
+    derivR = errorR - prevErrorR;   
+    SPEED = kP*errorR + kI*integR + kD*derivR;
+    SPEED = !(floatAbs(SPEED) < maxSpeed) ? maxSpeed : SPEED;
+
+    rightFront.spin(reverse, SPEED, velocityUnits::pct); //could cause problems with directions & negative speed
+    rightBack.spin(reverse, SPEED, velocityUnits::pct);
+  } 
 }
 
 void driveAuton (int leftFrontRotations, int rightFrontRotations, int globalSpeed) {
@@ -129,7 +184,7 @@ void intakeAuton(directionType dir) {
 int autonSelection;
 void pre_auton( void ) {
   vexcodeInit();
-  /*while(true) {
+  while(true) {
     Brain.Screen.clearScreen();
     Brain.Screen.setCursor(1, 1);
     Brain.Screen.print(autonSel.angle(degrees));
@@ -164,7 +219,7 @@ void pre_auton( void ) {
     Brain.Screen.print(rightFront.rotation(degrees));
     Brain.Screen.newLine();
     wait(50, msec);
-  }*/
+  }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -188,7 +243,7 @@ void autonomous(void) {
       drivePID(1000, 0.2, 0.1, 0.1, 70, true, true);
     }
     case 2: {
-
+      turnPID(500, 0.2, 0.1, 0.1, 70, true, 1);
     }
     case 3: {
 
@@ -212,7 +267,7 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-double driveFactor = 3.00;
+double driveFactor = 1.50;
 
 void switchDriveSpeed() {
   if (driveFactor == 1.25) {
@@ -228,7 +283,7 @@ void testPID() {
 }
 void usercontrol(void) {
   // User control code here, inside the loop
-  int armPCT = 100;
+  int armPCT = 70;
   int intakePCT = 100;
   while (1) {
     Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
@@ -266,8 +321,8 @@ void usercontrol(void) {
     }
     // this is the reverse, lowering the arm
     else if (Controller1.ButtonL2.pressing()) {
-      leftArm.spin(directionType::rev, armPCT-10, velocityUnits::pct);
-      rightArm.spin(directionType::rev, armPCT-10, velocityUnits::pct);
+      leftArm.spin(directionType::rev, armPCT-20, velocityUnits::pct);
+      rightArm.spin(directionType::rev, armPCT-20, velocityUnits::pct);
     }
     //this makes sure that when we arent moving the arm it is locked in place
     else if (!Controller1.ButtonB.pressing()) {
