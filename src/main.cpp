@@ -278,12 +278,9 @@ void switchDriveSpeed() {
     driveFactor = 2; //backup in case something dumb happens and this code is reached
   }
 }
-void testPID() {
-  drivePID(1000, 0.3, 0.2, 0.1, 80, true, true);
-}
 void usercontrol(void) {
   // User control code here, inside the loop
-  int armPCT = 70;
+  int armPCT = 60;
   int intakePCT = 100;
   while (1) {
     Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
@@ -295,7 +292,7 @@ void usercontrol(void) {
       leftFront.stop();
       leftBack.stop();
     }
-
+   
     if (abs(Controller1.Axis2.position()) >= 4) {
       rightFront.spin(directionType::rev, Controller1.Axis2.position()/driveFactor, velocityUnits::pct);
       rightBack.spin(directionType::rev, Controller1.Axis2.position()/driveFactor, velocityUnits::pct);
@@ -353,7 +350,16 @@ void usercontrol(void) {
     } else if (Controller1.ButtonB.pressing()) {
       rightArm.rotateTo(leftArm.rotation(rotationUnits::rev), rotationUnits::rev, false);
     }
-    task::sleep(50); //Sleep the task for a short amount of time to prevent wasted resources.
+
+    if (Controller1.ButtonY.pressing() && !Controller1.ButtonR1.pressing() && 
+    !Controller1.ButtonR2.pressing() && !Controller1.ButtonL1.pressing() && 
+    !Controller1.ButtonL2.pressing()) {
+      intakeLeft.spin(directionType::fwd, intakePCT, velocityUnits::pct);
+      intakeRight.spin(directionType::fwd, intakePCT, velocityUnits::pct);
+      rightArm.spin(directionType::fwd, 47, velocityUnits::pct);
+      leftArm.spin(directionType::fwd, 47, velocityUnits::pct);      
+    }
+    task::sleep(40); //Sleep the task for a short amount of time to prevent wasted resources.
   }
 }
 
