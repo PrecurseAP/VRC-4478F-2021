@@ -17,7 +17,7 @@
 // rightArm             motor         1               
 // leftBack             motor         20              
 // intakeLeft           motor         11              
-// intakeRight          motor         2               
+// intakeRight          motor         3               
 // rightBack            motor         10              
 // autonSel             pot           B               
 // ---- END VEXCODE CONFIGURED DEVICES ----
@@ -40,7 +40,7 @@ void stopDrive() {
   leftBack.stop();
   rightBack.stop();
 }
-void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool wait, bool fwd) {
+void drivePID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
   Brain.Screen.setCursor(1,1);
   leftBack.setPosition(0, degrees);
   leftFront.setPosition(0, degrees);
@@ -50,15 +50,10 @@ void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool w
   float integ = 0;
   float intThres = 20;
   error = target;
+  float kP = 0.2;
+  float kI = 0.1;
+  float kD = 0.1;
   bool complete = false;
-  directionType rightDir, leftDir;
-  if (fwd == true) {
-    leftDir = forward;
-    rightDir = reverse;
-  } else {
-    leftDir = reverse;
-    rightDir = forward;
-  }
   //everything below here goes into a 
   while(!complete) {
 
@@ -86,12 +81,12 @@ void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool w
 
     SPEED = !(SPEED < maxSpeed) ? maxSpeed : SPEED;
 
-    leftFront.spin(leftDir, SPEED, velocityUnits::pct);
-    leftBack.spin(leftDir, SPEED, velocityUnits::pct);
-    rightFront.spin(rightDir, SPEED, velocityUnits::pct);
-    rightBack.spin(rightDir, SPEED, velocityUnits::pct);
+    leftFront.spin(forward, dir*SPEED, velocityUnits::pct);
+    leftBack.spin(forward, dir*SPEED, velocityUnits::pct);
+    rightFront.spin(reverse, dir*SPEED, velocityUnits::pct);
+    rightBack.spin(reverse, dir*SPEED, velocityUnits::pct);
 
-    if (SPEED <= 9) {
+    if (SPEED <= minSpeed) {
       stopDrive();
       complete = true;
     }
@@ -100,63 +95,145 @@ void drivePID(float target, float kP, float kI, float kD, float maxSpeed, bool w
   }
 }
 
-void turnPID(float target, float kP, float kI, float kD, int maxSpeed, bool wait, int dir) {
+void turnPID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
   Brain.Screen.setCursor(1,1);
   leftBack.setPosition(0, degrees);
   leftFront.setPosition(0, degrees);
   rightBack.setPosition(0, degrees);
   rightFront.setPosition(0, degrees);
-  float derivR, derivL, errorL, errorR, prevErrorL, prevErrorR;
+  float derivL, errorL, prevErrorL, derivR, errorR, prevErrorR;
   float integL = 0;
   float integR = 0;
   float intThres = 20;
+  errorL = target;
+  errorR = target;
+  bool completeL = false;
+  bool completeR = false;
   bool complete = false;
-  //directionType rightDir, leftDir;
-  if (dir == 1) {   //right
-    //leftDir = forward;
-    //rightDir = reverse;
-    errorL = target;
-    errorR = target;
-  } else {          //left
-    //leftDir = reverse;
-    //rightDir = forward;
-    errorL = -target;
-    errorR = -target;
-  }
+  float kP = 0.2;
+  float kI = 0.1;
+  float kD = 0.1;
   //everything below here goes into a 
   while(!complete) {
-    float leftVal = (leftFront.rotation(degrees) + leftBack.rotation(degrees)) / 2;
-    prevErrorL = errorL;
-    errorL = dir*target - leftVal;
-    if (floatAbs(errorL) < intThres) {
-      integL += errorL;
+    if (!completeL) {
+      float leftVal = (floatAbs(leftFront.rotation(degrees)) + floatAbs(leftBack.rotation(degrees))) / 2;
+
+      prevErrorL = errorL;
+
+      errorL = target - leftVal; 
+
+      if (floatAbs(errorL) < intThres) {
+        integL += errorL;
+      } else {
+        integL = 0;
+      }
+
+      derivL = errorL - prevErrorL;
+
+      Brain.Screen.newLine();
+
+      float SPEEDL = kP*errorL + kI*integL + kD*derivL;
+
+      Brain.Screen.print(SPEEDL);
+
+      SPEEDL = !(SPEEDL < maxSpeed) ? maxSpeed : SPEEDL; //min was acting weird so i went RAW
+
+      leftFront.spin(forward, dir*SPEEDL, velocityUnits::pct);
+      leftBack.spin(forward, dir*SPEEDL, velocityUnits::pct);
+
+      if (SPEEDL <= minSpeed) {
+        leftFront.stop();
+        leftBack.stop();
+        completeL = true;
+      } 
+    }
+    if (!completeR) {
+      float rightVal = (floatAbs(rightFront.rotation(degrees)) + floatAbs(rightBack.rotation(degrees))) / 2;
+
+      prevErrorR = errorR;
+
+      errorR = target - rightVal; 
+
+      if (floatAbs(errorR) < intThres) {
+        integR += errorR;
+      } else {
+        integR = 0;
+      }
+
+      derivR = errorR - prevErrorR;
+
+      Brain.Screen.newLine();
+
+      float SPEEDR = kP*errorR + kI*integR + kD*derivR;
+
+      Brain.Screen.print(SPEEDR);
+
+      SPEEDR = !(SPEEDR < maxSpeed) ? maxSpeed : SPEEDR; //min was acting weird so i went RAW
+
+      rightFront.spin(forward, dir*SPEEDR, velocityUnits::pct);
+      rightBack.spin(forward, dir*SPEEDR, velocityUnits::pct);
+
+      if (SPEEDR <= minSpeed) {
+        rightFront.stop();
+        rightBack.stop();
+        completeR = true;
+      }
+    }
+    if (completeL && completeR) {
+      stopDrive();
+      complete = true;
+    }
+    task::sleep(40);
+  }
+}
+void armPID(int target, int maxSpeed, bool wait, int dir, int minSpeed) {
+  Brain.Screen.setCursor(1,1);
+  leftArm.setPosition(0, degrees);
+  rightArm.setPosition(0, degrees);
+  float deriv, error, prevError;
+  float integ = 0;
+  float intThres = 20;
+  error = target;
+  bool complete = false;
+  float kP = 0.2;
+  float kI = 0.1;
+  float kD = 0.1;
+  //everything below here goes into a 
+  while(!complete) {
+
+    float currentVal = (floatAbs(leftArm.rotation(degrees)) + floatAbs(rightArm.rotation(degrees))) / 2;
+
+    prevError = error;
+
+    error = target - currentVal; 
+
+    if (floatAbs(error) < intThres) {
+      integ += error;
     } else {
-      integL = 0;
-    } 
-    derivL = errorL - prevErrorL;   
-    float SPEED = kP*errorL + kI*integL + kD*derivL;
-    SPEED = !(floatAbs(SPEED) < maxSpeed) ? maxSpeed : SPEED;
+      integ = 0;
+    }
 
-    leftFront.spin(forward, SPEED, velocityUnits::pct); //could cause problems with directions & negative speed
-    leftBack.spin(forward, SPEED, velocityUnits::pct);
+    deriv = error - prevError;
 
+    Brain.Screen.newLine();
 
+    float SPEED = kP*error + kI*integ + kD*deriv;
 
-    float rightVal = (rightFront.rotation(degrees) + rightBack.rotation(degrees)) / 2;
-    prevErrorR = errorR;
-    errorR = dir*target - rightVal;
-    if (floatAbs(errorR) < intThres) {
-      integR += errorR;
-    } else {
-      integR = 0;
-    } 
-    derivR = errorR - prevErrorR;   
-    SPEED = kP*errorR + kI*integR + kD*derivR;
-    SPEED = !(floatAbs(SPEED) < maxSpeed) ? maxSpeed : SPEED;
+    Brain.Screen.print(SPEED);
 
-    rightFront.spin(reverse, SPEED, velocityUnits::pct); //could cause problems with directions & negative speed
-    rightBack.spin(reverse, SPEED, velocityUnits::pct);
-  } 
+    SPEED = !(SPEED < maxSpeed) ? maxSpeed : SPEED;
+
+    leftArm.spin(forward, dir*SPEED, velocityUnits::pct);
+    rightArm.spin(forward, dir*SPEED, velocityUnits::pct);
+
+    if (SPEED <= minSpeed) {
+      leftArm.stop();
+      rightArm.stop();
+      complete = true;
+    }
+
+    task::sleep(40);
+  }  
 }
 
 void driveAuton (int leftFrontRotations, int rightFrontRotations, int globalSpeed) {
@@ -240,13 +317,32 @@ void autonomous(void) {
 
   switch(autonSelection) {
     case 1: {
-      drivePID(1000, 0.2, 0.1, 0.1, 70, true, true);
+      //BIG BLUE
+      armAuton(50, 90);
+      driveAuton(30, -30, 50);
+      wait(400, msec);
+      driveAuton(-40, 40, 50);
+      wait(700, msec);
+      intakeLeft.spin(reverse, 75, velocityUnits::pct);
+      intakeRight.spin(reverse, 75, velocityUnits::pct);
+      armAuton(100, 150);
+      wait(200, msec);
+      driveAuton(100, -100, 100);
+      wait(500, msec);
+      armAuton(40, -140);
+      wait(1200, msec);
+      armPID(300, 80, true, 1, 20);
+      drivePID(400, 100, true, 1, 30);
+      break;
+
     }
     case 2: {
-      turnPID(500, 0.2, 0.1, 0.1, 70, true, 1);
+      //turnPID(200, 0.2, 0.1, 0.1, 70, true, -1);
+      break;
     }
     case 3: {
-
+      //armPID(500, 75, true, -1);
+      break;
     }
     case 4: {
 
@@ -255,8 +351,7 @@ void autonomous(void) {
 
     }
   }
-  
-  }
+}
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -281,7 +376,7 @@ void switchDriveSpeed() {
 void usercontrol(void) {
   // User control code here, inside the loop
   int armPCT = 60;
-  int intakePCT = 100;
+  int intakePCT = 50;
   while (1) {
     Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
     // The following code drives the robot, while accounting for DRIFT THAT SHOULDNT BE THERE
