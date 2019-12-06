@@ -17,7 +17,7 @@
 // rightArm             motor         1               
 // leftBack             motor         20              
 // intakeLeft           motor         11              
-// intakeRight          motor         3               
+// intakeRight          motor         4               
 // rightBack            motor         10              
 // autonSel             pot           B               
 // ---- END VEXCODE CONFIGURED DEVICES ----
@@ -227,8 +227,8 @@ void armPID(int target, int maxSpeed, bool wait, int dir, int minSpeed) {
     rightArm.spin(forward, dir*SPEED, velocityUnits::pct);
 
     if (SPEED <= minSpeed) {
-      leftArm.stop();
-      rightArm.stop();
+      leftArm.stop(brakeType::hold);
+      rightArm.stop(brakeType::hold);
       complete = true;
     }
 
@@ -318,21 +318,31 @@ void autonomous(void) {
   switch(autonSelection) {
     case 1: {
       //BIG BLUE
-      armAuton(50, 90);
-      driveAuton(30, -30, 50);
-      wait(400, msec);
-      driveAuton(-40, 40, 50);
-      wait(700, msec);
       intakeLeft.spin(reverse, 75, velocityUnits::pct);
       intakeRight.spin(reverse, 75, velocityUnits::pct);
       armAuton(100, 150);
-      wait(200, msec);
-      driveAuton(100, -100, 100);
+      wait(500, msec);
+      driveAuton(80, -80, 100);
       wait(500, msec);
       armAuton(40, -140);
       wait(1200, msec);
-      armPID(300, 80, true, 1, 20);
-      drivePID(400, 100, true, 1, 30);
+      intakeLeft.stop();
+      intakeRight.stop();
+      armPID(670, 80, true, 1, 20);
+      driveAuton(20, 0, 50);
+      wait(500, msec);
+      drivePID(660, 40, true, 1, 8);
+      intakeLeft.spin(reverse, 75, velocityUnits::pct);
+      intakeRight.spin(reverse, 75, velocityUnits::pct);
+      armAuton(25, -400);
+      wait(2500, msec);
+      intakeLeft.stop();
+      intakeRight.stop();
+      armAuton(50, 50);
+      wait(500, msec);
+      drivePID(500, 50, true, -1, 8);
+      turnPID(400, 90, true, 1, 7);
+      drivePID(900, 100, true, 1, 10);
       break;
 
     }
@@ -376,7 +386,7 @@ void switchDriveSpeed() {
 void usercontrol(void) {
   // User control code here, inside the loop
   int armPCT = 60;
-  int intakePCT = 50;
+  int intakePCT = 75;
   while (1) {
     Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
     // The following code drives the robot, while accounting for DRIFT THAT SHOULDNT BE THERE
@@ -451,8 +461,8 @@ void usercontrol(void) {
     !Controller1.ButtonL2.pressing()) {
       intakeLeft.spin(directionType::fwd, intakePCT, velocityUnits::pct);
       intakeRight.spin(directionType::fwd, intakePCT, velocityUnits::pct);
-      rightArm.spin(directionType::fwd, 47, velocityUnits::pct);
-      leftArm.spin(directionType::fwd, 47, velocityUnits::pct);      
+      rightArm.spin(directionType::fwd, 29, velocityUnits::pct);
+      leftArm.spin(directionType::fwd, 29, velocityUnits::pct);      
     }
     task::sleep(40); //Sleep the task for a short amount of time to prevent wasted resources.
   }

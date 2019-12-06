@@ -15,7 +15,7 @@ motor leftArm = motor(PORT12, ratio36_1, true);
 motor rightArm = motor(PORT1, ratio36_1, false);
 motor leftBack = motor(PORT20, ratio18_1, false);
 motor intakeLeft = motor(PORT11, ratio18_1, false);
-motor intakeRight = motor(PORT3, ratio18_1, true);
+motor intakeRight = motor(PORT4, ratio18_1, true);
 motor rightBack = motor(PORT10, ratio18_1, false);
 pot autonSel = pot(Brain.ThreeWirePort.B);
 
