@@ -17,7 +17,7 @@
 // rightArm             motor         1               
 // leftBack             motor         20              
 // intakeLeft           motor         11              
-// intakeRight          motor         4               
+// intakeRight          motor         6               
 // rightBack            motor         10              
 // autonSel             pot           B               
 // ---- END VEXCODE CONFIGURED DEVICES ----
@@ -40,7 +40,7 @@ void stopDrive() {
   leftBack.stop();
   rightBack.stop();
 }
-void drivePID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
+void drivePID(float target, float maxSpeed, int dir, int minSpeed) {
   Brain.Screen.setCursor(1,1);
   leftBack.setPosition(0, degrees);
   leftFront.setPosition(0, degrees);
@@ -53,8 +53,7 @@ void drivePID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
   float kP = 0.2;
   float kI = 0.1;
   float kD = 0.1;
-  bool complete = false;
-  //everything below here goes into a 
+  bool complete = false; 
   while(!complete) {
 
     float leftVal = (floatAbs(leftFront.rotation(degrees)) + floatAbs(leftBack.rotation(degrees))) / 2;
@@ -95,7 +94,7 @@ void drivePID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
   }
 }
 
-void turnPID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
+void turnPID(float target, float maxSpeed, int dir, int minSpeed) {
   Brain.Screen.setCursor(1,1);
   leftBack.setPosition(0, degrees);
   leftFront.setPosition(0, degrees);
@@ -186,7 +185,7 @@ void turnPID(float target, float maxSpeed, bool wait, int dir, int minSpeed) {
     task::sleep(40);
   }
 }
-void armPID(int target, int maxSpeed, bool wait, int dir, int minSpeed) {
+void armPID(int target, int maxSpeed, int dir, int minSpeed) {
   Brain.Screen.setCursor(1,1);
   leftArm.setPosition(0, degrees);
   rightArm.setPosition(0, degrees);
@@ -324,14 +323,14 @@ void autonomous(void) {
       wait(500, msec);
       driveAuton(80, -80, 100);
       wait(500, msec);
-      armAuton(40, -140);
+      armAuton(40, -100);
       wait(1200, msec);
       intakeLeft.stop();
       intakeRight.stop();
-      armPID(670, 80, true, 1, 20);
-      driveAuton(20, 0, 50);
+      armPID(820, 80, 1, 50);
+      driveAuton(25, 0, 50);
       wait(500, msec);
-      drivePID(660, 40, true, 1, 8);
+      drivePID(705, 60, 1, 15);
       intakeLeft.spin(reverse, 75, velocityUnits::pct);
       intakeRight.spin(reverse, 75, velocityUnits::pct);
       armAuton(25, -400);
@@ -339,10 +338,22 @@ void autonomous(void) {
       intakeLeft.stop();
       intakeRight.stop();
       armAuton(50, 50);
+      wait(300, msec);
+      drivePID(880, 50, -1, 20);
+      turnPID(450, 90, 1, 20);
+      drivePID(1100, 75, 1, 20);
+      armAuton(100, -110);
       wait(500, msec);
-      drivePID(500, 50, true, -1, 8);
-      turnPID(400, 90, true, 1, 7);
-      drivePID(900, 100, true, 1, 10);
+      intakeLeft.spin(directionType::fwd, 95, velocityUnits::pct);
+      intakeRight.spin(directionType::fwd, 95, velocityUnits::pct);
+      rightArm.spin(directionType::fwd, 30, velocityUnits::pct);
+      leftArm.spin(directionType::fwd, 30, velocityUnits::pct);
+      wait(3000, msec);
+      intakeLeft.stop();
+      intakeRight.stop();
+      rightArm.stop(brakeType::hold);
+      leftArm.stop(brakeType::hold);
+      driveAuton(-250, 250, 30);
       break;
 
     }
