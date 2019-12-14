@@ -257,6 +257,13 @@ void intakeAuton(directionType dir) {
   intakeRight.spin(dir, 100, velocityUnits::pct);
 }
 
+void stopDrive() {
+  leftFront.stop(brakeType::hold);
+  rightFront.stop(brakeType::hold);
+  leftBack.stop(brakeType::hold);
+  rightBack.stop(brakeType::hold);
+}
+
 int autonSelection;
 void pre_auton( void ) {
   vexcodeInit();
@@ -385,21 +392,13 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 double driveFactor = 1.50;
 
-void switchDriveSpeed() {
-  if (driveFactor == 1.25) {
-    driveFactor = 3.00;
-  } else if (driveFactor == 3.00) {
-    driveFactor = 1.25;
-  } else {
-    driveFactor = 2; //backup in case something dumb happens and this code is reached
-  }
+
 }
 void usercontrol(void) {
   // User control code here, inside the loop
   int armPCT = 60;
   int intakePCT = 75;
   while (1) {
-    Controller1.ButtonX.pressed(switchDriveSpeed); // <-- Changes the scale at which the drive motors spin. Useful for precision movements
     // The following code drives the robot, while accounting for DRIFT THAT SHOULDNT BE THERE
     if (abs(Controller1.Axis3.position()) >= 4) {
       leftFront.spin(directionType::fwd, Controller1.Axis3.position()/driveFactor, velocityUnits::pct);
