@@ -1,5 +1,5 @@
 #ifndef __SPED__
-# define __SPED__ //@FuzzySn0wman
+#define __SPED__ //@FuzzySn0wman
 
 #include <math.h>
 
@@ -50,4 +50,11 @@ float dasin  (float INPUT)     { return asin(INPUT)*radToDeg; }
 float datan  (int INPUT)       { return atan(INPUT)*radToDeg; } 
 double datan  (double INPUT)    { return atan(INPUT)*radToDeg; }
 float datan  (float INPUT)     { return atan(INPUT)*radToDeg; }
+
+#define toRadians(INPUT)          \
+  return ((INPUT) * degToRad)
+
+#define toDegrees(INPUT)          \
+  return ((INPUT) * radToDeg)
+
 #endif //__SPED__
