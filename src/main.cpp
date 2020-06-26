@@ -66,7 +66,7 @@ void usercontrol(void) {
     if (goalAngle <= 0) {
       goalAngle = 360 - fabs(goalAngle);
     }
-    
+    //
     double vel = (sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2); //get velocity value out of joystick values
 
     double x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));
@@ -110,7 +110,8 @@ void usercontrol(void) {
     angleDerivative = previousAngle - angleError;
 
     double turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative);
-    for (int i = 0; i <= 3; i++) 
+
+    for(int i = 0; i <= 3; i++) 
       motorSpeeds[i] -= turnValue;
     
     /*fL -= turnValue; //Include the value of the turning axis in the output.
@@ -121,7 +122,7 @@ void usercontrol(void) {
     double maxAxis = MAX(fabs(joyX), fabs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
     double maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
       
-    if(maxOutput == 0 || maxAxis == 0)
+    if (maxOutput == 0 || maxAxis == 0)
       normalizer = 0; //Prevent the undefined value for normalizer
     else
       normalizer = maxAxis / maxOutput;
