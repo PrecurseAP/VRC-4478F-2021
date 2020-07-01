@@ -81,18 +81,9 @@ void usercontrol(void) {
     for(int i = 0, addAngle = 45; i <= 3; i++, addAngle += 90)
       motorSpeeds[i] = -dsin(datanx2y2 + addAngle) * sqrtx2y2;
 
-    /*double bL = -dsin(datanx2y2 + 45) * sqrtx2y2; //Set the motors to their appropriate speed based on the formula (each are offset by a factor of pi/2 to account for the 90 degree difference in the wheels)
-    double bR = -dsin(datanx2y2 + 135) * sqrtx2y2;
-    double fR = -dsin(datanx2y2 + 225) * sqrtx2y2;
-    double fL = -dsin(datanx2y2 + 315) * sqrtx2y2;*/
-
     if (x2 < 0)  //Inverts the motors when x2 is less than 0 to account for the nonnegative sine curve
       for(int i = 0; i <= 3; i++)
         motorSpeeds[i] *= -1;
-      /*fL *= -1;
-      fR *= -1;
-      bR *= -1;
-      bL *= -1;*/
 
     previousAngle = angleError;
 
@@ -114,11 +105,6 @@ void usercontrol(void) {
     for(int i = 0; i <= 3; i++) 
       motorSpeeds[i] -= turnValue;
     
-    /*fL -= turnValue; //Include the value of the turning axis in the output.
-    fR -= turnValue;
-    bR -= turnValue;
-    bL -= turnValue;*/
-    
     double maxAxis = MAX(fabs(joyX), fabs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
     double maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
       
@@ -129,10 +115,6 @@ void usercontrol(void) {
 
     for (int i = 0; i <= 3; i++) 
       motorSpeeds[i] *= normalizer;
-    /*fL *= normalizer;
-    fR *= normalizer;
-    bR *= normalizer;
-    bL *= normalizer;*/
 
     backLeft.spin(forward, motorSpeeds[_bL_], percent);
     backRight.spin(forward, motorSpeeds[_bR_], percent);
