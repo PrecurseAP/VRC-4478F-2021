@@ -9,6 +9,10 @@ extern motor frontLeft;
 extern motor frontRight;
 extern motor backLeft;
 extern motor backRight;
+extern motor LeftFlipOut;
+extern motor RightFlipOut;
+extern motor MiddleIntakeMotor;
+extern motor FinalIntakeMotor;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.
