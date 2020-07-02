@@ -7,24 +7,13 @@
 #define _fR_ 2
 #define _fL_ 3
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// GYRO                 inertial      11              
-// Controller1          controller                    
-// frontLeft            motor         1               
-// frontRight           motor         2               
-// backLeft             motor         3               
-// backRight            motor         4               
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 using namespace vex;
 
 competition Competition;
 
 void stopAllDrive() {
   /** 
-  //Stops all motors
+  *Stops all motors
   */
   backLeft.stop();
   backRight.stop();
@@ -34,7 +23,7 @@ void stopAllDrive() {
 
 void resetGyro() {
   /**
-  //Stops all motors then calibrates the gyro
+  *Stops all motors then calibrates the gyro
   */
   stopAllDrive();
   GYRO.calibrate();
@@ -162,6 +151,41 @@ void usercontrol(void) {
     Brain.Screen.print(angleError);
     Brain.Screen.newLine();
 
+    if (Controller1.ButtonR1.pressing())    //brings ball straight up and into tower
+    {
+      leftFlipOut.spin(forward, 100, percent);
+      rightFlipOut.spin(forward, 100, percent);
+      middleIntake.spin(forward, 100, percent);
+      finalIntake.spin(forward, 100, percent);
+    }
+    else if(Controller1.ButtonL1.pressing()) //brings ball to hoarder cell, by spionning the roler above it backwards
+    {
+      leftFlipOut.spin(forward, 100, percent);
+      rightFlipOut.spin(forward, 100, percent);
+      middleIntake.spin(forward, 100, percent);
+      finalIntake.spin(forward, -100, percent);
+    }
+    else if(Controller1.ButtonR2.pressing()) //brings balls up, does not shoot them out
+    {
+      leftFlipOut.spin(forward, 100, percent);
+      rightFlipOut.spin(forward, 100, percent);
+      middleIntake.spin(forward, 100, percent);
+      finalIntake.stop(coast);
+    }
+    else if (Controller1.ButtonL2.pressing()) //outakes balls out the intake
+    {
+      leftFlipOut.spin(forward, -100, percent);
+      rightFlipOut.spin(forward, -100, percent);
+      middleIntake.spin(forward, -100, percent);
+      finalIntake.stop(coast);
+    }
+    else //stops all intake motors
+    {
+      leftFlipOut.stop(coast);
+      rightFlipOut.stop(coast);
+      middleIntake.stop(coast);
+      finalIntake.stop(coast);
+    }
     wait(20, msec); 
   }
 }

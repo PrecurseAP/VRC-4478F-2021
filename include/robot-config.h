@@ -9,9 +9,13 @@ extern motor frontLeft;
 extern motor frontRight;
 extern motor backLeft;
 extern motor backRight;
+extern motor leftFlipOut;
+extern motor rightFlipOut;
+extern motor middleIntake;
+extern motor finalIntake;
 
 /**
- * Used to initialize code/tasks/devices added using tools in VEXcode Text.
+ * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  * 
  * This should be called at the start of your int main function.
  */
