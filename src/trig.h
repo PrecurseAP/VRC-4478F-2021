@@ -3,17 +3,8 @@
 
 #include <math.h>
 
-/*
-written by aiden pringle very dumbly :)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
-*/
-
-#ifndef radToDeg
 # define radToDeg   57.2957795130823
-#endif
-
-#ifndef degToRad
 # define degToRad   0.01745329251994
-#endif
 
 //multiple function declarations are required because of overloading, so that any type works.
 /* dsin functions | returns sine of INPUT but input and output are in degrees, same goes for all other functions */
