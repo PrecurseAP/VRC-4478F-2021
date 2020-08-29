@@ -9,10 +9,6 @@
 #define _fR_ 2    
 #define _fL_ 3
 
-//define macros for easier reading of some of the pre-auton drawing code
-#define HIGHLIGHTED "#CCCCCC"
-#define DEFAULTTILESHADE "#888888"
-
 using namespace vex;
 
 competition Competition;
@@ -34,116 +30,71 @@ void resetGyro() {
   stopAllDrive(hold);
   GYRO.calibrate();
 }
+
+void drawGoal(int x, int y, color ballC) {
+  Brain.Screen.drawCircle(x, y, 9, color::transparent);
+  Brain.Screen.drawCircle(x, y, 8, color::transparent);
+  Brain.Screen.drawCircle(x, y, 7, color::transparent);
+  Brain.Screen.drawCircle(x, y, 6, ballC);
+}
+
 void pre_auton(void) {
-  /**
-   * Draws the entire field onto the brain screen during pre-auton. (touch screen functionality is wip)
-   */
-  bool autonSelected = true;
+  /*    -The pre_auton function draws the field diagram on the screen and sets up the auton path-*/
+
+  bool autonSelected = false;
   while(!autonSelected) {
+    
     Brain.Screen.setPenColor("#777777");
+    
     for (int ROW = 0; ROW < 6; ROW++) 
       for (int COL = 0; COL < 6; COL++) 
-        Brain.Screen.drawRectangle((COL * 35) + 130 , (ROW * 35) + 18 , 35 , 35 , "#888888");
-    
-    Brain.Screen.setPenColor(color::red);
+        Brain.Screen.drawRectangle( (COL * 35) + 130 , (ROW * 35) + 18 , 35 , 35 , "#888888");
+    //^^ The above nested loop generates the 6x6 grid of field tiles in gray
 
-    Brain.Screen.drawLine(110, 20, 110, 225);
-    Brain.Screen.drawLine(111, 20, 111, 225); //draw the red line on the left
-    Brain.Screen.drawLine(112, 20, 112, 225);
+    Brain.Screen.setPenColor(color::red);
+    Brain.Screen.drawRectangle(110, 20, 3, 205, color::red);   //draw leftmost red line
 
     Brain.Screen.setPenColor(color::blue);
-
-    Brain.Screen.drawLine(360, 20, 360, 225);
-    Brain.Screen.drawLine(361, 20, 361, 225); //draw blue line on the right
-    Brain.Screen.drawLine(362, 20, 362, 225);
+    Brain.Screen.drawRectangle(360, 20, 3, 205, color::blue);  //draw rightmost blue line 
 
     Brain.Screen.setPenColor(color::white);
 
-    Brain.Screen.drawLine(130, 120, 165, 120); 
-    Brain.Screen.drawLine(130, 121, 165, 121);
-                                              //draw two horizontal white lines on the left
-    Brain.Screen.drawLine(130, 124, 165, 124);
-    Brain.Screen.drawLine(130, 125, 165, 125);
+    Brain.Screen.drawRectangle(130, 120, 35, 2);               //draw two horizontal white lines on the left
+    Brain.Screen.drawRectangle(130, 124, 35, 2);               //
+                                                
+    Brain.Screen.drawRectangle(164, 18, 2, 209);               //draw vertical white line on the left
 
-    Brain.Screen.drawLine(164, 18, 164, 227); //draw vertical white line on the left
-    Brain.Screen.drawLine(165, 18, 165, 227);
-                                              
-    Brain.Screen.drawLine(232, 18, 232, 227); 
-    Brain.Screen.drawLine(233, 18, 233, 227);
-                                              //draw two vertical white lines in the center
-    Brain.Screen.drawLine(236, 18, 236, 227); 
-    Brain.Screen.drawLine(237, 18, 237, 227);
+    Brain.Screen.drawRectangle(232, 18, 2, 209);               //draw two vertical white lines in the center                                  
+    Brain.Screen.drawRectangle(236, 18, 2, 209);               //
 
-    Brain.Screen.drawLine(304, 18, 304, 227); //draw vertical white line on the right
-    Brain.Screen.drawLine(305, 18, 305, 227);
+    Brain.Screen.drawRectangle(304, 18, 2, 209);               //draw vertical white line on the right
 
-    Brain.Screen.drawLine(305, 120, 339, 120); 
-    Brain.Screen.drawLine(305, 121, 339, 121);
-                                              //draw two horizontal white lines on the right
-    Brain.Screen.drawLine(305, 124, 339, 124);
-    Brain.Screen.drawLine(305, 125, 339, 125);
-    
+    Brain.Screen.drawRectangle(305, 120, 34, 2);               //draw two horizontal white lines on the right                                                                                    
+    Brain.Screen.drawRectangle(305, 124, 34, 2);               //
+
     Brain.Screen.setPenColor("#444444");
 
-    Brain.Screen.drawLine(130, 18, 339, 18);
-    Brain.Screen.drawLine(130, 19, 339, 19);    
-
-    Brain.Screen.drawLine(130, 226, 339, 226);
-    Brain.Screen.drawLine(130, 227, 339, 227); 
-
-    Brain.Screen.drawLine(130, 18, 130, 227);
-    Brain.Screen.drawLine(131, 18, 131, 227); 
-
-    Brain.Screen.drawLine(338, 18, 338, 227);
-    Brain.Screen.drawLine(339, 18, 339, 227); 
+    Brain.Screen.drawRectangle(130, 18, 209, 2); //
+                                                 //
+    Brain.Screen.drawRectangle(130, 226, 209, 2);// 
+                                                 //    Draw field border walls in dark gray
+    Brain.Screen.drawRectangle(130, 18, 2, 209); //
+                                                 //
+    Brain.Screen.drawRectangle(338, 18, 2, 209); //
 
     Brain.Screen.setPenColor("#222222");
 
-    Brain.Screen.drawCircle(141, 29, 9, color::transparent);
-    Brain.Screen.drawCircle(141, 29, 8, color::transparent);
-    Brain.Screen.drawCircle(141, 29, 7, color::transparent);
-    Brain.Screen.drawCircle(141, 29, 6, color::blue);
+    drawGoal(141, 29, color::blue);              //                
+    drawGoal(235, 29, color::red);               //draw top three goals
+    drawGoal(328, 29, color::red);               //
 
-    Brain.Screen.drawCircle(235, 29, 9, color::transparent);
-    Brain.Screen.drawCircle(235, 29, 8, color::transparent);    //draw top three goals
-    Brain.Screen.drawCircle(235, 29, 7, color::transparent); 
-    Brain.Screen.drawCircle(235, 29, 6, color::red);  
+    drawGoal(141, 123, color::blue);             // 
+    drawGoal(235, 123, color::transparent);      //draw middle three goals
+    drawGoal(328, 123, color::red);              //
 
-    Brain.Screen.drawCircle(328, 29, 9, color::transparent);
-    Brain.Screen.drawCircle(328, 29, 8, color::transparent);
-    Brain.Screen.drawCircle(328, 29, 7, color::transparent);
-    Brain.Screen.drawCircle(328, 29, 6, color::red);
-
-
-    Brain.Screen.drawCircle(141, 123, 9, color::transparent);
-    Brain.Screen.drawCircle(141, 123, 8, color::transparent);
-    Brain.Screen.drawCircle(141, 123, 7, color::transparent);
-    Brain.Screen.drawCircle(141, 123, 6, color::blue);
-
-    Brain.Screen.drawCircle(235, 123, 9, color::transparent);   
-    Brain.Screen.drawCircle(235, 123, 8, color::transparent);   //draw middle three goals
-    Brain.Screen.drawCircle(235, 123, 7, color::transparent);
-
-    Brain.Screen.drawCircle(328, 123, 9, color::transparent);
-    Brain.Screen.drawCircle(328, 123, 8, color::transparent);
-    Brain.Screen.drawCircle(328, 123, 7, color::transparent);
-    Brain.Screen.drawCircle(328, 123, 6, color::red);
-
-
-    Brain.Screen.drawCircle(141, 216, 9, color::transparent);
-    Brain.Screen.drawCircle(141, 216, 8, color::transparent);
-    Brain.Screen.drawCircle(141, 216, 7, color::transparent);
-    Brain.Screen.drawCircle(141, 216, 6, color::blue);
-
-    Brain.Screen.drawCircle(235, 216, 9, color::transparent);
-    Brain.Screen.drawCircle(235, 216, 8, color::transparent);   //draw bottom three goals
-    Brain.Screen.drawCircle(235, 216, 7, color::transparent);
-    Brain.Screen.drawCircle(235, 216, 6, color::blue);
-
-    Brain.Screen.drawCircle(328, 216, 9, color::transparent);
-    Brain.Screen.drawCircle(328, 216, 8, color::transparent);
-    Brain.Screen.drawCircle(328, 216, 7, color::transparent);
-    Brain.Screen.drawCircle(328, 216, 6, color::red);
+    drawGoal(141, 216, color::blue);             // 
+    drawGoal(235, 216, color::blue);             //draw bottom three goals
+    drawGoal(328, 216, color::red);              //
 
     Brain.Screen.drawCircle(152, 40, 6, color::red);
 
@@ -153,7 +104,7 @@ void pre_auton(void) {
 
     Brain.Screen.drawCircle(152, 205, 6, color::red);
 
-    Brain.Screen.drawCircle(235, 70, 6, color::red);          //DRAW ALL THE DAMN BALLS
+    Brain.Screen.drawCircle(235, 70, 6, color::red);          //DRAW ALL THE DAMN BALLS )that arent in goals(
 
     Brain.Screen.drawCircle(235, 175, 6, color::blue);
 
@@ -164,6 +115,9 @@ void pre_auton(void) {
     Brain.Screen.drawCircle(219, 123, 6, color::blue);
 
     Brain.Screen.drawCircle(251, 123, 6, color::red);
+
+    wait(50, msec);
+    
   }
 }
 
@@ -181,6 +135,7 @@ void usercontrol(void) {
   double normalizer, angleDerivative, previousAngle;
   double kP = 1.5, kI = 0.015, kD = 0.8;
   double motorSpeeds[4];
+
   while (1) {
     double gyroAngle = GYRO.heading();       //grab and store the gyro value
 
@@ -198,7 +153,7 @@ void usercontrol(void) {
     double vel = (sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2); //get velocity value out of joystick values
 
     double x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));     //i believe these generate coordinates based off the joystick
-    double y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move.
+    double y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move by simulating a graph
 
 
     if (x2 == 0) 
@@ -216,7 +171,7 @@ void usercontrol(void) {
 
     previousAngle = angleError;                         //store previous error value for use in derivative
 
-    angleError = (gyroAngle - goalAngle);               //difference between the current angle and the goal angle
+    angleError = gyroAngle - goalAngle;               //difference between the current angle and the goal angle
     
     if (angleError > 180)                               //adjust the angle error to force the pid to follow the shortest
       angleError = -((360 - gyroAngle) + goalAngle);    //route to the goal.

@@ -1,6 +1,6 @@
 #ifndef __AIDENMATH__
 #define __AIDENMATH__
-//written because i need some funny math functions or crap like std::math was broken for some shtty reason
+//dont question why i made this
 
 //sign values 
 #define sign(val) \
