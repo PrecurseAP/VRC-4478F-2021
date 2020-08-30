@@ -3,11 +3,27 @@
 #include "custommath.h"
 #include "odom.h"
 
-//define macros for indices of motor speeds in main speed array
-#define _bL_ 0
-#define _bR_ 1
-#define _fR_ 2    
-#define _fL_ 3
+enum motorIndex {
+  _bL_ = 0,
+  _bR_ = 1,
+  _fR_ = 2,                 //enum to simplify human readability for motor speed indices in the motor speeds array
+  _fL_ = 3
+};
+
+enum autonSquare {
+  leftRed,
+  rightRed,
+  leftBlue,               //enum to simplify human readability of autonomous start positions
+  rightBlue,
+  none
+};
+
+struct preautonStats {
+  int tx;
+  int ty;                             //structure to act as a container for touch screen variables
+  autonSquare touchedSquare = none;
+  bool autSel = false;
+} p;
 
 using namespace vex;
 
@@ -15,7 +31,7 @@ competition Competition;
 
 void stopAllDrive(brakeType bT) {
   /** 
-   * Stops all motors with a specific brakeType. Parameter must be given.
+   * Stops all motors with a specific brakeType.
    */
   backLeft.stop(bT);
   backRight.stop(bT);
@@ -25,104 +41,152 @@ void stopAllDrive(brakeType bT) {
 
 void resetGyro() {
   /**
-   * Stops all motors then calibrates the gyro.
+   * Stops all motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
    */
   stopAllDrive(hold);
   GYRO.calibrate();
 }
 
 void drawGoal(int x, int y, color ballC) {
+  /* this draws a black circle filled with a colored ball in the middle, looks exactly like a goal from top down */
+  /* give color::transparent for ballC to make a goal with no ball */
   Brain.Screen.drawCircle(x, y, 9, color::transparent);
   Brain.Screen.drawCircle(x, y, 8, color::transparent);
   Brain.Screen.drawCircle(x, y, 7, color::transparent);
   Brain.Screen.drawCircle(x, y, 6, ballC);
 }
 
-void pre_auton(void) {
-  /*    -The pre_auton function draws the field diagram on the screen and sets up the auton path-*/
-
-  bool autonSelected = false;
-  while(!autonSelected) {
+void renderScreen() {
+  //for reference the screen is 480 x 272 pixels
+  Brain.Screen.clearScreen();
+  Brain.Screen.setPenColor("#777777"); //change border color of squares to a slightly darker gray, separates tiles
     
-    Brain.Screen.setPenColor("#777777");
-    
-    for (int ROW = 0; ROW < 6; ROW++) 
-      for (int COL = 0; COL < 6; COL++) 
-        Brain.Screen.drawRectangle( (COL * 35) + 130 , (ROW * 35) + 18 , 35 , 35 , "#888888");
-    //^^ The above nested loop generates the 6x6 grid of field tiles in gray
+  for (int ROW = 0; ROW < 6; ROW++) 
+    for (int COL = 0; COL < 6; COL++) 
+      Brain.Screen.drawRectangle( (COL * 35) + 133 , (ROW * 35) + 18 , 35 , 35 , "#888888");
+  //^^ The above nested loop generates the 6x6 grid of field tiles in gray
 
-    Brain.Screen.setPenColor(color::red);
-    Brain.Screen.drawRectangle(110, 20, 3, 205, color::red);   //draw leftmost red line
-
-    Brain.Screen.setPenColor(color::blue);
-    Brain.Screen.drawRectangle(360, 20, 3, 205, color::blue);  //draw rightmost blue line 
-
-    Brain.Screen.setPenColor(color::white);
-
-    Brain.Screen.drawRectangle(130, 120, 35, 2);               //draw two horizontal white lines on the left
-    Brain.Screen.drawRectangle(130, 124, 35, 2);               //
-                                                
-    Brain.Screen.drawRectangle(164, 18, 2, 209);               //draw vertical white line on the left
-
-    Brain.Screen.drawRectangle(232, 18, 2, 209);               //draw two vertical white lines in the center                                  
-    Brain.Screen.drawRectangle(236, 18, 2, 209);               //
-
-    Brain.Screen.drawRectangle(304, 18, 2, 209);               //draw vertical white line on the right
-
-    Brain.Screen.drawRectangle(305, 120, 34, 2);               //draw two horizontal white lines on the right                                                                                    
-    Brain.Screen.drawRectangle(305, 124, 34, 2);               //
-
-    Brain.Screen.setPenColor("#444444");
-
-    Brain.Screen.drawRectangle(130, 18, 209, 2); //
-                                                 //
-    Brain.Screen.drawRectangle(130, 226, 209, 2);// 
-                                                 //    Draw field border walls in dark gray
-    Brain.Screen.drawRectangle(130, 18, 2, 209); //
-                                                 //
-    Brain.Screen.drawRectangle(338, 18, 2, 209); //
-
-    Brain.Screen.setPenColor("#222222");
-
-    drawGoal(141, 29, color::blue);              //                
-    drawGoal(235, 29, color::red);               //draw top three goals
-    drawGoal(328, 29, color::red);               //
-
-    drawGoal(141, 123, color::blue);             // 
-    drawGoal(235, 123, color::transparent);      //draw middle three goals
-    drawGoal(328, 123, color::red);              //
-
-    drawGoal(141, 216, color::blue);             // 
-    drawGoal(235, 216, color::blue);             //draw bottom three goals
-    drawGoal(328, 216, color::red);              //
-
-    Brain.Screen.drawCircle(152, 40, 6, color::red);
-
-    Brain.Screen.drawCircle(317, 40, 6, color::blue);
-
-    Brain.Screen.drawCircle(317, 205, 6, color::blue);
-
-    Brain.Screen.drawCircle(152, 205, 6, color::red);
-
-    Brain.Screen.drawCircle(235, 70, 6, color::red);          //DRAW ALL THE DAMN BALLS )that arent in goals(
-
-    Brain.Screen.drawCircle(235, 175, 6, color::blue);
-
-    Brain.Screen.drawCircle(235, 107, 6, color::red);
-
-    Brain.Screen.drawCircle(235, 139, 6, color::blue);
-
-    Brain.Screen.drawCircle(219, 123, 6, color::blue);
-
-    Brain.Screen.drawCircle(251, 123, 6, color::red);
-
-    wait(50, msec);
-    
+  switch(p.touchedSquare) {
+    case leftRed:
+      Brain.Screen.drawRectangle(133, 53, 35, 35, color::white); break;
+    case rightRed:
+      Brain.Screen.drawRectangle(133, 158, 35, 35, color::white); break;                                                                        
+    case leftBlue:                                                          //logic to highlight the square that was pressed
+      Brain.Screen.drawRectangle(308, 158, 35, 35, color::white); break;
+    case rightBlue:
+      Brain.Screen.drawRectangle(308, 53, 35, 35, color::white); break;
+    default:
+      //do nothing if there is no chosen square
+    break;
   }
+
+  Brain.Screen.setPenColor(color::red);
+  Brain.Screen.drawRectangle(113, 20, 3, 205, color::red);   //draw leftmost red line
+
+  Brain.Screen.setPenColor(color::blue);
+  Brain.Screen.drawRectangle(363, 20, 3, 205, color::blue);  //draw rightmost blue line 
+
+  Brain.Screen.setPenColor(color::white); //change to white
+
+  Brain.Screen.drawRectangle(133, 120, 35, 2);               //draw two horizontal white lines on the left
+  Brain.Screen.drawRectangle(133, 124, 35, 2);               //
+                                                
+  Brain.Screen.drawRectangle(167, 18, 2, 209);               //draw vertical white line on the left
+
+  Brain.Screen.drawRectangle(235, 18, 2, 209);               //draw two vertical white lines in the center                                  
+  Brain.Screen.drawRectangle(239, 18, 2, 209);               //
+
+  Brain.Screen.drawRectangle(307, 18, 2, 209);               //draw vertical white line on the right
+
+  Brain.Screen.drawRectangle(308, 120, 34, 2);               //draw two horizontal white lines on the right                                                                                    
+  Brain.Screen.drawRectangle(308, 124, 34, 2);               //
+
+  Brain.Screen.setPenColor("#444444"); //change color to a dark gray
+
+  Brain.Screen.drawRectangle(133, 18, 209, 2); //
+  Brain.Screen.drawRectangle(133, 226, 209, 2);//     Draw field border walls in dark gray
+  Brain.Screen.drawRectangle(133, 18, 2, 209); //                                                
+  Brain.Screen.drawRectangle(341, 18, 2, 209); //
+
+  Brain.Screen.setPenColor("#222222"); //set color to a very dark gray, pretty much black
+
+  drawGoal(144, 29, color::blue);              //                
+  drawGoal(238, 29, color::red);               //draw top three goals
+  drawGoal(331, 29, color::red);               //
+
+  drawGoal(144, 123, color::blue);             // 
+  drawGoal(238, 123, color::transparent);      //draw middle three goals
+  drawGoal(331, 123, color::red);              //
+
+  drawGoal(144, 216, color::blue);             // 
+  drawGoal(238, 216, color::blue);             //draw bottom three goals
+  drawGoal(331, 216, color::red);              //
+
+  Brain.Screen.drawCircle(155, 40, 6, color::red);
+  Brain.Screen.drawCircle(320, 40, 6, color::blue);
+  Brain.Screen.drawCircle(320, 205, 6, color::blue);
+  Brain.Screen.drawCircle(155, 205, 6, color::red);
+  Brain.Screen.drawCircle(238, 70, 6, color::red);          //DRAW ALL THE DAMN BALLS )that arent in goals(
+  Brain.Screen.drawCircle(238, 175, 6, color::blue);
+  Brain.Screen.drawCircle(238, 107, 6, color::red);
+  Brain.Screen.drawCircle(238, 139, 6, color::blue);
+  Brain.Screen.drawCircle(222, 123, 6, color::blue);
+  Brain.Screen.drawCircle(254, 123, 6, color::red);
+
+  if (p.autSel == false) { 
+    Brain.Screen.drawRectangle(0, 0, 80, 272, "#007F00");       //Draw left and right confirmation buttons
+    Brain.Screen.drawRectangle(400, 0, 80, 272, "#007F00");
+  }
+  else {
+    Brain.Screen.drawRectangle(0, 0, 80, 272, "#00007F");       //Draw left and right unconfirmation buttons
+    Brain.Screen.drawRectangle(400, 0, 80, 272, "#00007F");
+  }
+  Brain.Screen.printAt(4, 17, false, "Confirm");       //
+  Brain.Screen.printAt(4, 234, false, "Confirm");      //     Draw confirm text on confirm buttons
+  Brain.Screen.printAt(405, 17, false, "Confirm");     //
+  Brain.Screen.printAt(405, 234, false, "Confirm");    //
+}
+
+void touchScreenLogic() {
+  p.tx = Brain.Screen.xPosition();  // grab coordinates of the touch
+  p.ty = Brain.Screen.yPosition();  //
+
+  if (p.autSel == true) goto Render;
+
+  //to make touching squares somewhat easier i included some adjacent tiles in the logic that when touched, count as one tile.
+  if ((p.tx >= 133) && (p.tx <= 168)) {
+    if ((p.ty >= 53) && (p.ty <= 121)) {               //is it the leftmost red-side position?
+      p.touchedSquare = leftRed;
+    }
+    else if ((p.ty >= 123) && (p.ty <= 193)) {         //is it the rightmost red-side position?
+      p.touchedSquare = rightRed;
+    }
+  }                                                                       //logic to determine which autonomous square was pressed, if any
+  
+  else if ((p.tx >= 308) && (p.tx <= 343)) {
+    if ((p.ty >= 53) && (p.ty <= 121)) {               //is it the rightmost blue-side position?
+      p.touchedSquare = rightBlue;
+    }
+    else if ((p.ty >= 123) && (p.ty <= 193)) {         //is it the leftmost blue-side position?
+      p.touchedSquare = leftBlue;
+    }
+  }
+
+  else if (((p.tx <= 80) || (p.tx >= 400)) && (p.touchedSquare != none)) {
+    p.autSel = p.autSel ? false : true;
+  }
+  Render: renderScreen();
+}
+
+
+void pre_auton(void) {
+  /* The pre_auton function draws the field diagram on the screen and sets up the auton path */
+  renderScreen(); //draw the brain on the screen once.
+  Brain.Screen.pressed(touchScreenLogic); //callback so that the drawing and logic code is only executed when the screen is touched. (this saves tons of resources as opposed to a loop)
 }
 
 void autonomous(void) {
-
+  Brain.Screen.clearScreen(); //vamos no auton
 }
 
 void usercontrol(void) {
@@ -133,11 +197,11 @@ void usercontrol(void) {
 
   double goalAngle = 0, angleIntegral = 0, angleError = 0;
   double normalizer, angleDerivative, previousAngle;
-  double kP = 1.5, kI = 0.015, kD = 0.8;
+  double kP = 1.5, kI = 0.015, kD = 0.8;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
   double motorSpeeds[4];
 
   while (1) {
-    double gyroAngle = GYRO.heading();       //grab and store the gyro value
+    double gyroAngle = GYRO.heading();       //grab and store the gyro value as a double for precision
 
     double joyX = Controller1.Axis4.position();       // Set variables for each joystick axis
     double joyY = -Controller1.Axis3.position();      // joyY is negative because driving would be backwards otherwise
@@ -174,14 +238,14 @@ void usercontrol(void) {
     angleError = gyroAngle - goalAngle;               //difference between the current angle and the goal angle
     
     if (angleError > 180)                               //adjust the angle error to force the pid to follow the shortest
-      angleError = -((360 - gyroAngle) + goalAngle);    //route to the goal.
+      angleError = -((360 - gyroAngle) + goalAngle);    //direction to the goal
     
-    if (angleError < -180)                              //^^
-      angleError = (360 - goalAngle) + gyroAngle; 
+    if (angleError < -180)                              //^^second part of above comment
+      angleError = (360 - goalAngle) + gyroAngle;       //
     
     if (fabs(angleError) < 10)                          //if the angle error is small enough, activate the integral
-      angleIntegral += angleError; 
-    else 
+      angleIntegral += angleError;                      //
+    else                                                //
       angleIntegral = 0;                                //set it to 0 if it's too big
 
     angleDerivative = previousAngle - angleError;       //calculation of derivative pid value
@@ -189,7 +253,7 @@ void usercontrol(void) {
     double turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
 
     for(int i = 0; i <= 3; i++) 
-      motorSpeeds[i] -= turnValue;
+      motorSpeeds[i] -= turnValue; //apply turning
     
     double maxAxis = MAX(fabs(joyX), fabs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
     double maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
@@ -231,13 +295,12 @@ void usercontrol(void) {
       middleIntake.spin(reverse, 100, percent);
       finalIntake.stop(coast);
     }
-    else { //stops all intake motors
+    else {                                    //stops all intake motors
       leftFlipOut.stop(coast);
       rightFlipOut.stop(coast);
       middleIntake.stop(coast);
       finalIntake.stop(coast);
     }
-     
     wait(10, msec); 
   }
 }
@@ -249,7 +312,5 @@ int main() {
 
   pre_auton();
 
-  while (true) {
-    wait(100, msec);
-  }
+  while (true) { wait(100, msec); }
 }
