@@ -1,3 +1,21 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         1               
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// middleIntake         motor         7               
+// finalIntake          motor         8               
+// leftEncoder          encoder       A, B            
+// rightEncoder         encoder       C, D            
+// backEncoder          encoder       E, F            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
 #include "vex.h"
 #include "trig.h"
 #include "custommath.h"
@@ -187,6 +205,7 @@ void pre_auton(void) {
 
 void autonomous(void) {
   Brain.Screen.clearScreen(); //vamos no auton
+  thread ODOM = thread(tracking);
 }
 
 void usercontrol(void) {
@@ -313,4 +332,4 @@ int main() {
   pre_auton();
 
   while (true) { wait(100, msec); }
-}
+} 

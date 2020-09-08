@@ -18,6 +18,9 @@ motor leftFlipOut = motor(PORT5, ratio6_1, false);
 motor rightFlipOut = motor(PORT6, ratio6_1, true);
 motor middleIntake = motor(PORT7, ratio6_1, false);
 motor finalIntake = motor(PORT8, ratio6_1, false);
+encoder leftEncoder = encoder(Brain.ThreeWirePort.A);
+encoder rightEncoder = encoder(Brain.ThreeWirePort.C);
+encoder backEncoder = encoder(Brain.ThreeWirePort.E);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

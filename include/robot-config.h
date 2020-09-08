@@ -13,6 +13,9 @@ extern motor leftFlipOut;
 extern motor rightFlipOut;
 extern motor middleIntake;
 extern motor finalIntake;
+extern encoder leftEncoder;
+extern encoder rightEncoder;
+extern encoder backEncoder;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
