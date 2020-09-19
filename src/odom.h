@@ -60,8 +60,8 @@ int tracking() {
     float averageOrientation = prevTheta + (deltaTheta/2); //calculate average orientation, which is the difference between the local and global offsets.
     prevTheta = theta; //store gyro angle for use in next cycle
 
-    globalOffset[0] = (dcos(averageOrientation)*localOffset[0]) - (dsin(averageOrientation)*localOffset[0]); //calculate global offset vector
-    globalOffset[1] = (dsin(averageOrientation)*localOffset[1]) - (dcos(averageOrientation)*localOffset[1]);
+    globalOffset[0] = (dcos(averageOrientation)*localOffset[0]) - (dsin(averageOrientation)*localOffset[1]); //calculate global offset vector
+    globalOffset[1] = (dsin(averageOrientation)*localOffset[0]) - (dcos(averageOrientation)*localOffset[1]);
 
     rX += globalOffset[0]; //calculate position by compounding the global offset every cycle. the summation of all global offset vectors = current position.
     rY += globalOffset[1];
