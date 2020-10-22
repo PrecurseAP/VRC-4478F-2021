@@ -1,31 +1,23 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// GYRO                 inertial      11              
-// Controller1          controller                    
-// frontLeft            motor         1               
-// frontRight           motor         2               
-// backLeft             motor         3               
-// backRight            motor         4               
-// leftFlipOut          motor         5               
-// rightFlipOut         motor         6               
-// middleIntake         motor         7               
-// finalIntake          motor         8               
-// leftEncoder          encoder       A, B            
-// rightEncoder         encoder       C, D            
-// backEncoder          encoder       E, F            
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 #include "vex.h"
 #include "trig.h"
 #include "custommath.h"
 #include "odom.h"
+#include <cmath>
+#include <vex_timer.h>
+timer turningTimer;
+
+
+
+enum turningModes {
+  MANUAL = 0,
+  AUTOCORRECT = 1
+};
 
 enum motorIndex {
   _bL_ = 0,
   _bR_ = 1,
   _fR_ = 2,                 //enum to simplify human readability for motor speed indices in the motor speeds array
-  _fL_ = 3
+  _fL_ = 3                  //this is probably a bad and convoluted solution to a non-problem but aiden does what he does
 };
 
 enum autonSquare {
@@ -49,7 +41,7 @@ competition Competition;
 
 void stopAllDrive(brakeType bT) {
   /** 
-   * Stops all motors with a specific brakeType.
+   * Stops all drive motors with a specific brakeType.
    */
   backLeft.stop(bT);
   backRight.stop(bT);
@@ -59,19 +51,19 @@ void stopAllDrive(brakeType bT) {
 
 void resetGyro() {
   /**
-   * Stops all motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
+   * Stops all drive motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
    */
   stopAllDrive(hold);
   GYRO.calibrate();
 }
 
-void drawGoal(int x, int y, color ballC) {
+void drawGoal(int x, int y, color ballColor) {
   /* this draws a black circle filled with a colored ball in the middle, looks exactly like a goal from top down */
   /* give color::transparent for ballC to make a goal with no ball */
   Brain.Screen.drawCircle(x, y, 9, color::transparent);
   Brain.Screen.drawCircle(x, y, 8, color::transparent);
   Brain.Screen.drawCircle(x, y, 7, color::transparent);
-  Brain.Screen.drawCircle(x, y, 6, ballC);
+  Brain.Screen.drawCircle(x, y, 6, ballColor);
 }
 
 void renderScreen() {
@@ -179,8 +171,9 @@ void touchScreenLogic() {
     else if ((p.ty >= 123) && (p.ty <= 193)) {         //is it the rightmost red-side position?
       p.touchedSquare = rightRed;
     }
-  }                                                                       //logic to determine which autonomous square was pressed, if any
-  
+  }                                                           //these if statements are logic to determine which
+  //                                                          //autonomous square was pressed, if any
+  //
   else if ((p.tx >= 308) && (p.tx <= 343)) {
     if ((p.ty >= 53) && (p.ty <= 121)) {               //is it the rightmost blue-side position?
       p.touchedSquare = rightBlue;
@@ -212,69 +205,81 @@ void usercontrol(void) {
   /**
    * All of our drive code, used to move the robot around.
    */
+  wait(2500, msec);
   Controller1.ButtonA.pressed(resetGyro); //bind a button to reset the gyro
 
-  double goalAngle = 0, angleIntegral = 0, angleError = 0;
-  double normalizer, angleDerivative, previousAngle;
-  double kP = 1.5, kI = 0.015, kD = 0.8;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
-  double motorSpeeds[4];
+  float goalAngle, angleIntegral = 0, angleError = 0;
+  float normalizer, angleDerivative, previousError = 0;
+  const float kP = 1.5, kI = 0.00015, kD = 0.8;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
+  float motorSpeeds[4];
+  bool timerActive = false;
+  turningModes turningMode = MANUAL;
 
   while (1) {
-    double gyroAngle = GYRO.heading();       //grab and store the gyro value as a double for precision
+    float gyroAngle = GYRO.heading();       //grab and store the gyro value
 
-    double joyX = Controller1.Axis4.position();       // Set variables for each joystick axis
-    double joyY = -Controller1.Axis3.position();      // joyY is negative because driving would be backwards otherwise
-    double joyZ = Controller1.Axis1.position()/30.0;    // this here is divided by 30 to make rotation slower and less unwieldy
+    int joyX = Controller1.Axis4.position();       // Set variables for each joystick axis
+    int joyY = -Controller1.Axis3.position();      // joyY is negative because driving would be backwards otherwise
+    float joyZ = Controller1.Axis1.position()/2.0;    // this here is divided by 2 to make rotation slower and less unwieldy
     
-    goalAngle += joyZ; //shift the goal angle when the right joystick is tilted
+    float vel = (sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2); //get velocity value out of joystick values
 
-    if (goalAngle >= 360) 
-      goalAngle -= 360;       //adjust goalAngle to wrap around to 0 from 360 and vice versa
-    if (goalAngle <= 0)
-      goalAngle = 360 - fabs(goalAngle);
-    
-    double vel = (sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2); //get velocity value out of joystick values
-
-    double x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));     //i believe these generate coordinates based off the joystick
-    double y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move by simulating a graph
+    float x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));     //i believe these generate coordinates based off the joystick
+    float y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move by simulating a graph
 
 
     if (x2 == 0) 
-      x2 = 0.0001; //safeguard against x2 being zero so no errors occur.
+      x2 = 0.00001; //safeguard against x2 being zero so no errors occur.
     
-    double datanx2y2 = datan(y2/x2);            //save the code from calculating this every single run of the for loop
-    double sqrtx2y2 = sqrt((x2*x2) + (y2*y2));  //^^ i believe this line finds the length of the segment made by the joystick to the home position
+    float datanx2y2 = datan(y2/x2);            //save the code from calculating this every single run of the for loop
+    float sqrtx2y2 = sqrt((x2*x2) + (y2*y2));  //^^ i believe this line finds the length of the segment made by the joystick to the home position
     
     for(int i = 0, addAngle = 45; i <= 3; i++, addAngle += 90)  //calculates motor speeds and puts them into an array
-      motorSpeeds[i] = -dsin(datanx2y2 + addAngle) * sqrtx2y2;  //add angle offsets each motor calc by 90 degrees because the wheels are offset themselves
+      motorSpeeds[i] = -dsin(datanx2y2 + addAngle) * sqrtx2y2;  //"addAngle" offsets each speed calculation by 90 degrees to compensate for the wheel orientation in xdrive
 
     if (x2 < 0)                                         //Inverts the motors when x2 is less than 0 to account for the nonnegative sine curve
       for(int i = 0; i <= 3; i++)
         motorSpeeds[i] *= -1;
 
-    previousAngle = angleError;                         //store previous error value for use in derivative
+    //BEGIN TURNING CODE***********************/
+      
+    if (fabs(joyZ) > 1) {
+      goalAngle = 0.001;
+      turningTimer.reset();
+      for(int i = 0; i <= 3; i++) {
+        motorSpeeds[i] += joyZ; //apply turning
+      }
+    } 
+    if (turningTimer.time() >= 1000) {
+      
+      if (goalAngle == 0.001) goalAngle = GYRO.heading(degrees);                  //switch mode to angle correction and setup for PID
+     
+      previousError = angleError;                         //store previous error value for use in derivative
 
-    angleError = gyroAngle - goalAngle;               //difference between the current angle and the goal angle
+      angleError = gyroAngle - goalAngle;                 //difference between the current angle and the goal angle
     
-    if (angleError > 180)                               //adjust the angle error to force the pid to follow the shortest
-      angleError = -((360 - gyroAngle) + goalAngle);    //direction to the goal
+      if (angleError > 180)                               //adjust the angle error to force the pid to follow the shortest
+          angleError = -((360 - gyroAngle) + goalAngle);  //direction to the goal
     
-    if (angleError < -180)                              //^^second part of above comment
-      angleError = (360 - goalAngle) + gyroAngle;       //
+      if (angleError < -180)                              //^^second part of above comment
+        angleError = (360 - goalAngle) + gyroAngle;       //
     
-    if (fabs(angleError) < 10)                          //if the angle error is small enough, activate the integral
-      angleIntegral += angleError;                      //
-    else                                                //
-      angleIntegral = 0;                                //set it to 0 if it's too big
+      if (fabs(angleError) < 10)                          //if the angle error is small enough, activate the integral
+        angleIntegral += angleError;                      //
+      else                                                //
+        angleIntegral = 0;                                //set it to 0 if it's too big
 
-    angleDerivative = previousAngle - angleError;       //calculation of derivative pid value
+        angleDerivative = previousError - angleError;     //calculation of derivative pid value
 
-    double turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
+      double turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
 
-    for(int i = 0; i <= 3; i++) 
-      motorSpeeds[i] -= turnValue; //apply turning
+      for(int i = 0; i <= 3; i++) 
+        motorSpeeds[i] -= turnValue; //apply turning
+    } 
     
-    double maxAxis = MAX(fabs(joyX), fabs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
+    //END TURNING CODE**************************/
+
+    /*double maxAxis = MAX(std::abs(joyX), std::abs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
     double maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
       
     if (maxOutput == 0 || maxAxis == 0)
@@ -283,43 +288,43 @@ void usercontrol(void) {
       normalizer = maxAxis / maxOutput; //calculate normalizer
 
     for (int i = 0; i <= 3; i++) 
-      motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value
+      motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value*/
 
     backLeft.spin(forward, motorSpeeds[_bL_], percent);
     backRight.spin(forward, motorSpeeds[_bR_], percent);    //spin the motors at their calculated/stored speeds.
     frontRight.spin(forward, motorSpeeds[_fR_], percent);
     frontLeft.spin(forward, motorSpeeds[_fL_], percent);
 
-    if (Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
+    if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
+      bottomRollers.spin(forward, 100, percent);
+      upperRollers.spin(reverse, 100, percent);
+    } else {
+      bottomRollers.stop(hold);
+      upperRollers.stop(hold);
+    }
+    if(Controller1.ButtonR2.pressing()) { //bring balls up, does not shoot them out
       leftFlipOut.spin(forward, 100, percent);
-      rightFlipOut.spin(forward, 100, percent);
-      middleIntake.spin(forward, 100, percent);
-      finalIntake.spin(forward, 100, percent);
+      rightFlipOut.spin(forward, 100, percent); 
+    } else {
+      leftFlipOut.stop(hold);
+      rightFlipOut.stop(hold);
+    }     
+    if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
+      leftFlipOut.stop(hold);
+      rightFlipOut.stop(hold);
+      bottomRollers.stop(hold);
+      upperRollers.spin(reverse, 100, percent);
     }
-    else if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
-      leftFlipOut.spin(forward, 100, percent);
-      rightFlipOut.spin(forward, 100, percent);
-      middleIntake.spin(forward, 100, percent);
-      finalIntake.spin(reverse, 100, percent);
+    if (Controller1.ButtonL2.pressing()) { //outtake balls
+      leftFlipOut.spin(reverse, 50, percent);
+      rightFlipOut.spin(reverse, 50, percent);
+      bottomRollers.spin(reverse, 100, percent);
+      upperRollers.spin(forward, 100, percent);
     }
-    else if(Controller1.ButtonR2.pressing()) { //bring balls up, does not shoot them out
-      leftFlipOut.spin(reverse, 100, percent);
-      rightFlipOut.spin(reverse, 100, percent);
-      middleIntake.spin(forward, 100, percent);
-      finalIntake.stop(coast);
-    }
-    else if (Controller1.ButtonL2.pressing()) { //outtake balls
-      leftFlipOut.spin(reverse, 100, percent);
-      rightFlipOut.spin(reverse, 100, percent);
-      middleIntake.spin(reverse, 100, percent);
-      finalIntake.stop(coast);
-    }
-    else {                                    //stops all intake motors
-      leftFlipOut.stop(coast);
-      rightFlipOut.stop(coast);
-      middleIntake.stop(coast);
-      finalIntake.stop(coast);
-    }
+    Brain.Screen.clearScreen();
+    Brain.Screen.print(turningTimer.time());
+    Brain.Screen.setCursor(1,1);
+    //button b make intake retract
     wait(10, msec); 
   }
 }

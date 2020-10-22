@@ -17,13 +17,17 @@ const int centerToRight = 0; //PLEASE CHANGE THESE ONCE WE KNOW WHAT THE REAL WO
 const int centerToBack = 0;
 
 int tracking() {
-  auto leftEnc = leftEncoder.position(degrees);
-  auto rightEnc = rightEncoder.position(degrees); //store encoder values
-  auto backEnc = backEncoder.position(degrees);
+  leftEncoder.setPosition(0, degrees);
+  rightEncoder.setPosition(0, degrees);
+  backEncoder.setPosition(0, degrees);
+
+  int leftEnc = 0;
+  int rightEnc = 0; //store encoder values
+  int backEnc = 0;
   
-  auto prevLeft = leftEnc;
-  auto prevRight = rightEnc; //initialize variables that contain encoder values from previous cycle
-  auto prevBack = backEnc;
+  int prevLeft = 0;
+  int prevRight = 0; //initialize variables that contain encoder values from previous cycle
+  int prevBack = 0;
 
   float theta = GYRO.heading(degrees); //variables for the gyro angle
   float prevTheta = theta;
@@ -52,7 +56,7 @@ int tracking() {
       localOffset[0] = deltaBack;    
       localOffset[1] = deltaRight;
     } else {                                                            //if the orientation has changed, then the local offset is calculated.  
-      auto temp = 2 * dsin(theta/2);      
+      float temp = 2 * dsin(theta/2);      
       localOffset[0] = temp * (deltaBack / deltaTheta) + centerToBack;
       localOffset[1] = temp * (deltaRight / deltaTheta) + centerToRight;
     }
@@ -63,12 +67,11 @@ int tracking() {
     globalOffset[0] = (dcos(averageOrientation)*localOffset[0]) - (dsin(averageOrientation)*localOffset[1]); //calculate global offset vector
     globalOffset[1] = (dsin(averageOrientation)*localOffset[0]) - (dcos(averageOrientation)*localOffset[1]);
 
-    rX += globalOffset[0]; //calculate position by compounding the global offset every cycle. the summation of all global offset vectors = current position.
+    rX += globalOffset[0]; //calculate position by compounding the global offset every cycle. the sum of all global offset vectors = current position.
     rY += globalOffset[1];
 
     this_thread::sleep_for(10);
   }
   return 69420; //funny return int because of thread
 }
-
 #endif //_ODOM_
