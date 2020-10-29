@@ -1,23 +1,136 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       E, F            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       E, F            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       E, F            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       E, F            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       G, H            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       G, H            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       E, F            
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       G, H            
+// rightEncoder         encoder       C, D            
+// backEncoder          encoder       E, F            
+// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 #include "trig.h"
 #include "custommath.h"
 #include "odom.h"
 #include <cmath>
 #include <vex_timer.h>
+
 timer turningTimer;
 
-
-
-enum turningModes {
-  MANUAL = 0,
-  AUTOCORRECT = 1
-};
-
 enum motorIndex {
-  _bL_ = 0,
-  _bR_ = 1,
-  _fR_ = 2,                 //enum to simplify human readability for motor speed indices in the motor speeds array
-  _fL_ = 3                  //this is probably a bad and convoluted solution to a non-problem but aiden does what he does
+  bL = 0,
+  bR = 1,
+  fR = 2,                 //enum to simplify human readability for motor speed indices in the motor speeds array
+  fL = 3                  //this is probably a bad and convoluted solution to a non-problem but aiden does what he does
 };
 
 enum autonSquare {
@@ -198,7 +311,7 @@ void pre_auton(void) {
 
 void autonomous(void) {
   Brain.Screen.clearScreen(); //vamos no auton
-  thread ODOM = thread(tracking);
+
 }
 
 void usercontrol(void) {
@@ -208,21 +321,22 @@ void usercontrol(void) {
   wait(2500, msec);
   Controller1.ButtonA.pressed(resetGyro); //bind a button to reset the gyro
 
-  float goalAngle, angleIntegral = 0, angleError = 0;
+  float goalAngle = 0.01, angleIntegral = 0, angleError = 0;
   float normalizer, angleDerivative, previousError = 0;
   const float kP = 1.5, kI = 0.00015, kD = 0.8;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
   float motorSpeeds[4];
-  bool timerActive = false;
-  turningModes turningMode = MANUAL;
+  float turnValue = 0;
+  bool autoTurn = false;
+  double maxAxis, maxOutput;
 
   while (1) {
     float gyroAngle = GYRO.heading();       //grab and store the gyro value
 
-    int joyX = Controller1.Axis4.position();       // Set variables for each joystick axis
-    int joyY = -Controller1.Axis3.position();      // joyY is negative because driving would be backwards otherwise
-    float joyZ = Controller1.Axis1.position()/2.0;    // this here is divided by 2 to make rotation slower and less unwieldy
-    
-    float vel = (sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2); //get velocity value out of joystick values
+    int joyX = (int) (Controller1.Axis4.position()/1.28);       // Set variables for each joystick axis
+    int joyY = (int) (-Controller1.Axis3.position()/1.28);      // joyY is negative because driving would be backwards otherwise
+    float joyZ = Controller1.Axis1.position()/1.7;    // this here is the turning axis. It is divided by 1.7 to scale the joystick value down a little
+
+    float vel = sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2; //get velocity value out of joystick values
 
     float x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));     //i believe these generate coordinates based off the joystick
     float y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move by simulating a graph
@@ -242,18 +356,20 @@ void usercontrol(void) {
         motorSpeeds[i] *= -1;
 
     //BEGIN TURNING CODE***********************/
-      
     if (fabs(joyZ) > 1) {
-      goalAngle = 0.001;
+      autoTurn = false;
+      turnValue = 0;
       turningTimer.reset();
       for(int i = 0; i <= 3; i++) {
         motorSpeeds[i] += joyZ; //apply turning
       }
-    } 
-    if (turningTimer.time() >= 1000) {
+    } else if (turningTimer.time() >= 1000) {
       
-      if (goalAngle == 0.001) goalAngle = GYRO.heading(degrees);                  //switch mode to angle correction and setup for PID
-     
+      if (autoTurn == false) {
+        autoTurn = true;
+        goalAngle = GYRO.heading(degrees);                //switch mode to angle correction and setup for PID
+      }
+      
       previousError = angleError;                         //store previous error value for use in derivative
 
       angleError = gyroAngle - goalAngle;                 //difference between the current angle and the goal angle
@@ -271,7 +387,7 @@ void usercontrol(void) {
 
         angleDerivative = previousError - angleError;     //calculation of derivative pid value
 
-      double turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
+      turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
 
       for(int i = 0; i <= 3; i++) 
         motorSpeeds[i] -= turnValue; //apply turning
@@ -279,8 +395,9 @@ void usercontrol(void) {
     
     //END TURNING CODE**************************/
 
-    /*double maxAxis = MAX(std::abs(joyX), std::abs(joyY), fabs(angleError)); //Find the maximum input given by the controller's axes and the angle corrector
-    double maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
+    //BEGIN NORMALIZER CODE*********************/
+    maxAxis = MAX(std::abs(joyX), std::abs(joyY), fabs(turnValue), fabs(joyZ)); //Find the maximum input given by the controller's axes and the angle corrector
+    maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
       
     if (maxOutput == 0 || maxAxis == 0)
       normalizer = 0; //Prevent the undefined value for normalizer
@@ -288,12 +405,13 @@ void usercontrol(void) {
       normalizer = maxAxis / maxOutput; //calculate normalizer
 
     for (int i = 0; i <= 3; i++) 
-      motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value*/
+      motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value
+    //END NORMALIZER CODE***********************/
 
-    backLeft.spin(forward, motorSpeeds[_bL_], percent);
-    backRight.spin(forward, motorSpeeds[_bR_], percent);    //spin the motors at their calculated/stored speeds.
-    frontRight.spin(forward, motorSpeeds[_fR_], percent);
-    frontLeft.spin(forward, motorSpeeds[_fL_], percent);
+    backLeft.spin(forward, motorSpeeds[bL], percent);
+    backRight.spin(forward, motorSpeeds[bR], percent);    //spin the motors at their calculated speeds.
+    frontRight.spin(forward, motorSpeeds[fR], percent);
+    frontLeft.spin(forward, motorSpeeds[fL], percent);
 
     if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
       bottomRollers.spin(forward, 100, percent);
@@ -303,8 +421,8 @@ void usercontrol(void) {
       upperRollers.stop(hold);
     }
     if(Controller1.ButtonR2.pressing()) { //bring balls up, does not shoot them out
-      leftFlipOut.spin(forward, 100, percent);
-      rightFlipOut.spin(forward, 100, percent); 
+      leftFlipOut.spin(forward, 200, rpm);
+      rightFlipOut.spin(forward, 200, rpm); 
     } else {
       leftFlipOut.stop(hold);
       rightFlipOut.stop(hold);
@@ -312,18 +430,13 @@ void usercontrol(void) {
     if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
       leftFlipOut.stop(hold);
       rightFlipOut.stop(hold);
-      bottomRollers.stop(hold);
-      upperRollers.spin(reverse, 100, percent);
-    }
-    if (Controller1.ButtonL2.pressing()) { //outtake balls
-      leftFlipOut.spin(reverse, 50, percent);
-      rightFlipOut.spin(reverse, 50, percent);
       bottomRollers.spin(reverse, 100, percent);
       upperRollers.spin(forward, 100, percent);
     }
-    Brain.Screen.clearScreen();
-    Brain.Screen.print(turningTimer.time());
-    Brain.Screen.setCursor(1,1);
+    if (Controller1.ButtonL2.pressing()) { 
+      leftFlipOut.spin(reverse, 50, percent);
+      rightFlipOut.spin(reverse, 50, percent);
+    }
     //button b make intake retract
     wait(10, msec); 
   }
@@ -331,6 +444,8 @@ void usercontrol(void) {
 
 int main() {
   vexcodeInit();
+
+  thread ODOM = thread(tracking);
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 

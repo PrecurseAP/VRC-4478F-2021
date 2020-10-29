@@ -14,13 +14,13 @@ motor frontLeft = motor(PORT19, ratio18_1, false);
 motor frontRight = motor(PORT2, ratio18_1, false);
 motor backLeft = motor(PORT3, ratio18_1, false);
 motor backRight = motor(PORT4, ratio18_1, false);
-motor leftFlipOut = motor(PORT5, ratio6_1, false);
-motor rightFlipOut = motor(PORT6, ratio6_1, true);
+motor leftFlipOut = motor(PORT5, ratio18_1, false);
+motor rightFlipOut = motor(PORT6, ratio18_1, true);
 motor bottomRollers = motor(PORT7, ratio6_1, false);
 motor upperRollers = motor(PORT20, ratio6_1, false);
-encoder leftEncoder = encoder(Brain.ThreeWirePort.A);
-encoder rightEncoder = encoder(Brain.ThreeWirePort.C);
-encoder backEncoder = encoder(Brain.ThreeWirePort.E);
+encoder leftEncoder = encoder(Brain.ThreeWirePort.E);
+encoder rightEncoder = encoder(Brain.ThreeWirePort.A);
+encoder backEncoder = encoder(Brain.ThreeWirePort.C);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

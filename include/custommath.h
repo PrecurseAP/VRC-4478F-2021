@@ -2,10 +2,11 @@
 #define __AIDENMATH__
 //dont question why i made this
 #include <climits>
+#include <math.h>
 //sign values 
 
-template <class S>
-S sign(S val) {
+template <class T>
+T sign(T val) {
   return val > 0 ? 1 : -1;
 }
 
@@ -16,8 +17,8 @@ T MAX(T INPUT, T INPUT2, T INPUT3 = INT_MIN, T INPUT4 = INT_MIN) {
   return _temp > _temp2 ? _temp : _temp2;
 }
 
-template <class U>
-U pointDistance(U x1, U y1, U x2, U y2) {
-  
+template <class T>
+float distanceFormula(T x1, T y1, T x2, T y2) {
+  return sqrt(pow((x2-x1), 2) + pow((y2-y1), 2));
 }
 #endif //__AIDENMATH__
