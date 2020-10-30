@@ -323,7 +323,7 @@ void usercontrol(void) {
 
   float goalAngle = 0.01, angleIntegral = 0, angleError = 0;
   float normalizer, angleDerivative, previousError = 0;
-  const float kP = 1.5, kI = 0.00015, kD = 0.8;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
+  const float kP = 1.0, kI = 0.00004, kD = 0.6;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
   float motorSpeeds[4];
   float turnValue = 0;
   bool autoTurn = false;
@@ -332,11 +332,11 @@ void usercontrol(void) {
   while (1) {
     float gyroAngle = GYRO.heading();       //grab and store the gyro value
 
-    int joyX = (int) (Controller1.Axis4.position()/1.28);       // Set variables for each joystick axis
-    int joyY = (int) (-Controller1.Axis3.position()/1.28);      // joyY is negative because driving would be backwards otherwise
+    int joyX = (Controller1.Axis4.position());       // Set variables for each joystick axis
+    int joyY = (-Controller1.Axis3.position());      // joyY is negative because driving would be backwards otherwise
     float joyZ = Controller1.Axis1.position()/1.7;    // this here is the turning axis. It is divided by 1.7 to scale the joystick value down a little
 
-    float vel = sqrt((joyX * joyX) + (joyY * joyY)) / M_SQRT2; //get velocity value out of joystick values
+    float vel = sqrt((joyX * joyX) + (joyY * joyY)) /*/ M_SQRT2*/; //get velocity value out of joystick values
 
     float x2 = vel * (dcos(datan2(joyY, joyX) - gyroAngle));     //i believe these generate coordinates based off the joystick
     float y2 = vel * (dsin(datan2(joyY, joyX) - gyroAngle));     //values. they are used to calculate the direction the robot should move by simulating a graph

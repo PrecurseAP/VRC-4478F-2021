@@ -12,11 +12,11 @@
 float rX = 0;
 float rY = 0;
 
-float wheelCirc = 8.6393798; //circumference of a 2.75" omni wheel, the ones we use for tracking wheels. This is used to calculate the distance a wheel has traveled.
+const float wheelCirc = 2.75 * M_PI; //circumference of a 2.75" omni wheel, the ones we use for tracking wheels. This is used to calculate the distance a wheel has traveled.
 
-const int centerToLeft = 6; 
-const int centerToRight = 6; //PLEASE CHANGE THESE ONCE WE KNOW WHAT THE REAL WORLD NUMBERS ARE
-const int centerToBack = 4.75;
+const float centerToLeft = 6.0; 
+const float centerToRight = 6.0; //all units in inches
+const float centerToBack = 4.75;
 
 double deltaLeft, deltaRight, deltaBack;
 
@@ -63,11 +63,6 @@ int tracking() {
     float averageOrientation = prevTheta + (deltaTheta/2); //calculate average orientation, which is the difference between the local and global offsets.
     prevTheta = theta; //store gyro angle for use in next cycle
 
-    /*double r = sqrt(pow(localOffset[0], 2) + pow(localOffset[1], 2));
-    double polarTheta = datan(localOffset[1] / localOffset[0]);
-    polarTheta -= averageOrientation;
-    globalOffset[0] = r * dcos(polarTheta);
-    globalOffset[1] = r * dsin(polarTheta);*/
     globalOffset[0] = (dcos(-averageOrientation)*localOffset[0]) - (dsin(-averageOrientation)*localOffset[1]); //calculate global offset vector
     globalOffset[1] = (dcos(-averageOrientation)*localOffset[1]) + (dsin(-averageOrientation)*localOffset[0]);
 
@@ -88,13 +83,30 @@ int tracking() {
 }
 template <class T>
 void travelToPoint(T x, T y, int dspeed = 75, int tspeed = 50, int finalAngle = 420) {
-  
+  int quadrantAdd;
+  float northAngle;
   float xdif = x - rX;
   float ydif = y - rY;
 
   float distanceToGoal = sqrt((xdif*xdif) + (ydif*ydif));
 
-  
+  switch(sign(xdif)) {
+    case 1:
+      quadrantAdd = (sign(ydif) == 1) ? 0 : 90;
+      northAngle = (sign(ydif) == 1) ? datan(xdif/ydif) : datan(ydif/xdif);
+    break;
+    case -1:
+      quadrantAdd = (sign(ydif) == 1) ? 270 : 180;
+      northAngle = (sign(ydif) == 1) ? datan(ydif/xdif) : datan(xdif/ydif);
+    break;
+    default:
+      quadrantAdd = 0;
+      northAngle = 0; //these should never execute. sign() returns only 1 or -1
+    break;
+  }
+  northAngle += quadrantAdd;
+
+
 }
 
 #endif //_ODOM_

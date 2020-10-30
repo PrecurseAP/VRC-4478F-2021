@@ -6,7 +6,7 @@
 //sign values 
 
 template <class T>
-T sign(T val) {
+int sign(T val) {
   return val > 0 ? 1 : -1;
 }
 
