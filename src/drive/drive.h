@@ -9,7 +9,7 @@ extern void stopAllDrive(brakeType);
 
 extern float goalAngle, angleIntegral, angleError;
 extern float normalizer, angleDerivative, previousError;
-extern float kP, kI, kD;                      //i wonder if the doubles consume too much memory compared to floats?? if we add odometry it might get dicey with memory
+extern float kP, kI, kD;                      
 extern float motorSpeeds[4];
 extern float turnValue;
 extern bool autoTurn;
