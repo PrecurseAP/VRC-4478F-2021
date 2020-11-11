@@ -22,7 +22,7 @@ float prevTheta = 0; //variables for the gyro angle
 void updatePositionVars() {
   pos.x = rX;
   pos.y = rY;
-  pos.theta = prevTheta;
+  pos.theta = prevTheta * radToDeg;
 }
 
 const float wheelCirc = 2.75 * M_PI; //circumference of a 2.75" omni wheel, the ones we use for tracking wheels. This is used to calculate the distance a wheel has traveled.
@@ -44,7 +44,7 @@ int tracking() {
   rightEncoder.setPosition(0, degrees);
   backEncoder.setPosition(0, degrees);
 
-  while(!driver) {
+  while(true) {
     leftEnc = -leftEncoder.position(degrees);
     rightEnc = rightEncoder.position(degrees); //store encoder values
     backEnc = -backEncoder.position(degrees);
@@ -96,55 +96,6 @@ int tracking() {
   return 69420; //funny return int because of thread
 }
 
-template <class T>
-void moveToPoint(T x, T y, int finalAngle = 0) {
-  float kPx = 1.7, kPy = kPx, kPt = 0.7;
-  float kDx = 1.0, kDy = kDx, kDt = 0.5;
-  updatePositionVars();
-  float xLast = x - pos.x;
-  float yLast = y - pos.y;
-  float tLast = finalAngle - pos.theta; 
-  float motorSpeeds[4];
 
-  bool complete = false;
-
-  while(!complete) {
-    updatePositionVars();
-
-    /*Calculate the x component of our movement*/
-    float xError = x - pos.x;
-    float xDer = xLast - xError;
-    float xLast = xError;
-    float xComp = kPx*xError + kDx*xDer;
-    /*End x component calculation              */
-
-    /*Calculate the y component of our movement*/
-    float yError = y - pos.y;
-    float yDer = yLast - yError;
-    float yLast = yError;
-    float yComp = kPy*yError + kDy*yDer;
-    /*End y component calculation              */
-
-    /*Calculate turn component of our movement */
-    float tError = finalAngle - pos.theta;
-    float tDer = tLast - tError;
-    float tLast = tError;
-    float tComp = kPt*tError + kDt*tDer; 
-    /*End turn component calculation           */
-
-    motorSpeeds[0] = yComp - xComp - tComp;
-    motorSpeeds[1] = -yComp - xComp - tComp;
-    motorSpeeds[2] = -yComp + xComp + tComp;
-    motorSpeeds[3] = yComp + xComp + tComp;
-
-    float maxValue = 
-
-    backLeft.spin(forward, motorSpeeds[0], percent);
-    backRight.spin(forward, motorSpeeds[1], percent);    //spin the motors at their calculated speeds.
-    frontRight.spin(forward, motorSpeeds[2], percent);
-    frontLeft.spin(forward, motorSpeeds[3], percent);
-    wait(10, msec);
-  }
-}
 
 #endif //_ODOM_

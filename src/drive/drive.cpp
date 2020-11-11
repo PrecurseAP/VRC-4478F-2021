@@ -104,7 +104,7 @@ void _drive() {
         angleIntegral = 0;                                //set it to 0 if it's too big
       }                               
 
-      angleDerivative = previousError - angleError;     //calculation of derivative pid value
+      angleDerivative = angleError - previousError;     //calculation of derivative pid value
 
       turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
 
@@ -150,8 +150,6 @@ void _drive() {
       rightFlipOut.stop(hold);
     }     
     if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
-      leftFlipOut.stop(hold);
-      rightFlipOut.stop(hold);
       bottomRollers.spin(forward, 100, percent);
       upperRollers.spin(reverse, 100, percent);
     }
