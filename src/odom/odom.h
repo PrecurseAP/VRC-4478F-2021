@@ -4,6 +4,7 @@
 #include "vex.h"
 #include "../src/aidenmath/custommath.h"
 #include <vex_timer.h>
+#include "../src/drive/drive.h"
 
 timer distanceCheck;
 timer turnCheck;
@@ -13,11 +14,22 @@ struct robotPosition {
   float y;
   float theta;
 } pos;
-
+float averageOrientation;
 float rX = 0;
 float rY = 0;
 
 float prevTheta = 0; //variables for the gyro angle
+void resetPos() {
+  pos.x = 0;
+  pos.y = 0;
+  pos.theta = 0;
+  rX = 0;
+  rY = 0;
+  prevTheta = 0;
+  averageOrientation = 0;
+}
+
+
 
 void updatePositionVars() {
   pos.x = rX;
@@ -96,6 +108,86 @@ int tracking() {
   return 69420; //funny return int because of thread
 }
 
+template <class T, class U>
+void moveToPoint(T x, U y, int finalAngle = 0) {
+  float kPx = 4.5, kPy = 4.5, kPt = .6;
+  float kDx = 0, kDy = 0, kDt = 0;
+  updatePositionVars();
+  float xLast = x - pos.x;
+  float yLast = y - pos.y;
+  float tLast = finalAngle - pos.theta; 
+  float motorSpeedsA[4];
 
+  bool complete = false;
+
+  while(!complete) {
+    updatePositionVars();
+
+    /*Calculate the x component of our movement*/
+    float xError = x - pos.x;
+    float xDer = xError - xLast;
+    float xLast = xError;
+    float xComp = kPx*xError + kDx*xDer;
+    /*End x component calculation              */
+
+    /*Calculate the y component of our movement*/
+    float yError = y - pos.y;
+    float yDer = yError - yLast;
+    float yLast = yError;
+    float yComp = kPy*yError + kDy*yDer;
+    /*End y component calculation              */
+
+    /*Calculate turn component of our movement */
+    float tError = finalAngle - pos.theta;
+    float tDer = tError - tLast;
+    float tLast = tError;
+    float tComp = (kPt*tError) + (kDt*tDer); 
+    /*End turn component calculation           */
+
+    float targetTheta = datan2((float)(x - pos.x), (float)(y - pos.y)); 
+    float tDist = pos.theta - targetTheta;
+
+    xComp *= dcos(tDist) * fabs(xComp);
+    yComp *= dsin(tDist) * fabs(yComp);
+
+    motorSpeedsA[0] = xComp - yComp + tComp;
+    motorSpeedsA[1] = xComp + yComp + tComp;
+    motorSpeedsA[2] = -xComp - yComp + tComp;
+    motorSpeedsA[3] = -xComp + yComp + tComp;
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(1,1);
+    Brain.Screen.print(pos.x);
+    Brain.Screen.newLine();
+    Brain.Screen.print(pos.y);
+    Brain.Screen.newLine();
+    Brain.Screen.print(xComp);
+    Brain.Screen.newLine();
+    Brain.Screen.print(yComp);
+    Brain.Screen.newLine();
+    Brain.Screen.print(7);
+    Brain.Screen.newLine();
+    std::cout << xComp << std::endl;
+    std::cout << yComp << std::endl;
+    std::cout << tComp << std::endl;
+    std::cout << std::endl;
+    float maxValue = MAX(fabs(motorSpeedsA[0]), fabs(motorSpeedsA[1]), fabs(motorSpeedsA[2]), fabs(motorSpeedsA[3]));
+    if (maxValue > 100) {
+      for (int i = 0; i <= 3; i ++) {
+        motorSpeedsA[i] *= (100 / maxValue);
+      }
+    }
+    frontLeft.spin(forward, motorSpeedsA[0], percent);
+    backLeft.spin(forward, motorSpeedsA[1], percent);
+    frontRight.spin(forward, motorSpeedsA[2], percent);
+    backRight.spin(forward, motorSpeedsA[3], percent);    //spin the motors at their calculated speeds.
+    
+    if ((sqrt((xError*xError) + (yError*yError)) < 1.5) && (tComp < 2)) {
+      complete = true;
+      stopAllDrive(hold);
+    }
+
+    wait(10, msec);
+  }
+}
 
 #endif //_ODOM_

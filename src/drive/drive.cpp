@@ -46,7 +46,7 @@ float normalizer = 0;
 
 void _drive() {
   while(1) {
-    float gyroAngle = GYRO.heading();       //grab and store the gyro value
+    float gyroAngle = GYRO.heading(degrees);       //grab and store the gyro value
 
     int joyX = Controller1.Axis4.position();       // Set variables for each joystick axis
     int joyY = -Controller1.Axis3.position();      // joyY is negative because driving would be backwards otherwise
@@ -128,12 +128,29 @@ void _drive() {
     for (int i = 0; i <= 3; i++) {
       motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value
     }
+    /*float maxValue = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3]));
+    if (maxValue > 100) {
+      for (int i = 0; i <= 3; i ++) {
+        motorSpeeds[i] *= (100 / maxValue);
+      }
+    }*/
     //END NORMALIZER CODE***********************/
 
     backLeft.spin(forward, motorSpeeds[bL], percent);
     backRight.spin(forward, motorSpeeds[bR], percent);    //spin the motors at their calculated speeds.
     frontRight.spin(forward, motorSpeeds[fR], percent);
     frontLeft.spin(forward, motorSpeeds[fL], percent);
+
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(1,1);
+    Brain.Screen.print(motorSpeeds[0]);
+    Brain.Screen.newLine();
+    Brain.Screen.print(motorSpeeds[1]);
+    Brain.Screen.newLine();
+    Brain.Screen.print(motorSpeeds[2]);
+    Brain.Screen.newLine();
+    Brain.Screen.print(motorSpeeds[3]);
+    Brain.Screen.newLine();
 
     if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
       leftFlipOut.spin(forward, 200, rpm);
