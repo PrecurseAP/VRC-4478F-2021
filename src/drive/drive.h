@@ -6,6 +6,8 @@
 extern void _drive(void);
 extern void resetGyro(void);
 extern void stopAllDrive(brakeType);
+extern void spinMotors(int, int, int, int);
+
 
 extern float goalAngle, angleIntegral, angleError;
 extern float normalizer, angleDerivative, previousError;

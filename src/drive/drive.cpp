@@ -14,12 +14,21 @@ void stopAllDrive(brakeType bT) {
   frontRight.stop(bT);
 }
 
+void spinMotors(int fL, int fR, int bR, int bL) {
+  frontLeft.spin(forward, fL, percent);
+  frontRight.spin(forward, -fR, percent);
+  backRight.spin(forward, -bR, percent);
+  backLeft.spin(forward, bL, percent);
+}
+
 void resetGyro() {
   /**
    * Stops all drive motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
    */
-  stopAllDrive(hold);
   GYRO.calibrate();
+  while(GYRO.isCalibrating()) {
+    wait(100, msec);
+  }
 }
 
 timer turningTimer;
@@ -98,7 +107,7 @@ void _drive() {
         angleError = (360 - goalAngle) + gyroAngle;       //
       }
 
-      if (fabs(angleError) < 10) {                        //if the angle error is small enough, activate the integral
+      if (fabs(angleError) < 2) {                        //if the angle error is small enough, activate the integral
         angleIntegral += angleError;                      //
       } else {                                            //
         angleIntegral = 0;                                //set it to 0 if it's too big
