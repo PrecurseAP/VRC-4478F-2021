@@ -132,7 +132,7 @@ void touchScreenLogic() {
     }
   }                                                           //these if statements are logic to determine which
   //                                                          //autonomous square was pressed, if any
-  //
+  
   else if ((p.tx >= 308) && (p.tx <= 343)) {
     if ((p.ty >= 53) && (p.ty <= 121)) {               //is it the rightmost blue-side position?
       p.touchedSquare = rightBlue;

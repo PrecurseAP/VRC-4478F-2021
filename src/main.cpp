@@ -10,10 +10,10 @@ using namespace vex;
 competition Competition;
 
 void pre_auton(void) {
-  renderScreen(); //draw the brain on the screen once.
+  renderScreen(); //draw the field on the screen once.
   Brain.Screen.pressed(touchScreenLogic); //callback so that the drawing and logic code is only executed when the screen is touched. (this saves tons of resources as opposed to a loop)
 }
-//
+
 void autonomous(void) {
   thread ODOM = thread(tracking);
 

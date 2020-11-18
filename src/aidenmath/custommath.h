@@ -1,14 +1,16 @@
 #ifndef __AIDENMATH__
 #define __AIDENMATH__
 //dont question why i made this
-#define radToDeg  57.2957795130823
-#define degToRad  0.01745329251994
 #include <climits>
 #include <math.h>
+
+const float radToDeg = (180/M_PI);
+const float degToRad = (M_PI/180);
+
 //sign values 
 template <class T>
-int sign(T val) {
-  return val > 0 ? 1 : -1;
+T sign(T val) {
+  return val > 0 ? (T)1 : (T)-1;
 }
 
 template <class T>
@@ -54,7 +56,7 @@ float dacos(T INPUT) { return acos(INPUT)*radToDeg; }
 template <class T>
 float dasin(T INPUT) { return asin(INPUT)*radToDeg; }
 
-/* atan functions */
+/* atan function */
 template <class T>
 float datan(T INPUT) { return atan(INPUT)*radToDeg; }
 

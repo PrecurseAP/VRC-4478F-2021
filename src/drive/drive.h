@@ -7,12 +7,16 @@ extern void _drive(void);
 extern void resetGyro(void);
 extern void stopAllDrive(brakeType);
 extern void spinMotors(int, int, int, int);
-
+extern void driveNew(void);
+extern float logDrive_shallow(float);
+extern float logDrive_shallowish(float);
+extern float logDrive_steepish(float);
+extern float logDrive_steep(float);
 
 extern float goalAngle, angleIntegral, angleError;
 extern float normalizer, angleDerivative, previousError;
 extern float kP, kI, kD;                      
-extern float motorSpeeds[4];
+extern float mSpd[4];
 extern float turnValue;
 extern bool autoTurn;
 extern double maxAxis, maxOutput;

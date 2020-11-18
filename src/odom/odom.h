@@ -8,7 +8,7 @@ extern float averageOrientation;
 extern float rX;
 extern float rY;
 
-extern float prevTheta;
+extern float globalOrientation;
 
 void resetPos(void);
 

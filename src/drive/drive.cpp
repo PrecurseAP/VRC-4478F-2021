@@ -4,6 +4,24 @@
 #include "cmath"
 #include "vex_timer.h"
 
+//logarithmic drive functions. this means that lower joystick values are skewed towards zero while higher once rapidly scale up to max speed.
+float logDrive_shallow(float cv) {
+  //pretty slight logarithmic drive, lower joystick values are only slightly skewed towards zero.
+  return (cv*cv) / (sign(cv)*127.0);
+}
+float logDrive_shallowish(float cv) {
+  //less intense logarithmic drive, reaches high speeds at a good distance from joystick limits
+  return pow(fabs(cv), 1.5) / (sign(cv)*sqrt(127.0));
+}
+float logDrive_steepish(float cv) {
+  //pretty steep logarithmic drive, reaches max speed pretty close to the edge of the joystick limits
+  return pow(fabs(cv), 2.5) / (sign(cv)*pow(127, 1.5));
+}
+float logDrive_steep(float cv) {
+  //extremely steep logarithmic drive function, only reaches max speed at very high joystick values
+  return pow(cv, 3) / 16129.0; //127^2
+}
+
 void stopAllDrive(brakeType bT) {
   /** 
    * Stops all drive motors with a specific brakeType.
@@ -15,6 +33,9 @@ void stopAllDrive(brakeType bT) {
 }
 
 void spinMotors(int fL, int fR, int bR, int bL) {
+  /**
+   * Basic movement function to move all the drive motors at a certain speed. this is mainly used for imprecise forward, backward, left, and right movements.
+   */
   frontLeft.spin(forward, fL, percent);
   frontRight.spin(forward, -fR, percent);
   backRight.spin(forward, -bR, percent);
@@ -49,7 +70,7 @@ bool autoTurn = false;
 float kP = 1.4;
 float kI = 0.00003;
 float kD = 0.4;
-float motorSpeeds[4];
+float mSpd[4];
 float angleDerivative = 0;
 float normalizer = 0;
 
@@ -74,11 +95,11 @@ void _drive() {
     float sqrtx2y2 = sqrt((x2*x2) + (y2*y2));  //^^ i believe this line finds the length of the segment made by the joystick to the home position
       
     for(int i = 0, addAngle = 45; i <= 3; i++, addAngle += 90)  //calculates motor speeds and puts them into an array
-      motorSpeeds[i] = -dsin(datanx2y2 + addAngle) * sqrtx2y2;  //"addAngle" offsets each speed calculation by 90 degrees to compensate for the wheel orientation in xdrive
+      mSpd[i] = -dsin(datanx2y2 + addAngle) * sqrtx2y2;  //"addAngle" offsets each speed calculation by 90 degrees to compensate for the wheel orientation in xdrive
 
     if (x2 < 0)                                         //Inverts the motors when x2 is less than 0 to account for the nonnegative sine curve
       for(int i = 0; i <= 3; i++)
-        motorSpeeds[i] *= -1;
+        mSpd[i] *= -1;
 
     //BEGIN TURNING CODE***********************/
     if (fabs(joyZ) > 1) {
@@ -87,7 +108,7 @@ void _drive() {
       turningTimer.reset();
 
       for(int i = 0; i <= 3; i++) {
-        motorSpeeds[i] += joyZ; //apply turning
+        mSpd[i] += joyZ; //apply turning
       }
     } else if (turningTimer.time() >= 1000) {
 
@@ -118,7 +139,7 @@ void _drive() {
       turnValue = (angleError*kP) + (kI*angleIntegral) + (kD*angleDerivative); //final pid calculation
 
       for(int i = 0; i <= 3; i++) {
-        motorSpeeds[i] -= turnValue; //apply turning
+        mSpd[i] -= turnValue; //apply turning
       }
     } 
 
@@ -126,7 +147,7 @@ void _drive() {
 
     //BEGIN NORMALIZER CODE*********************/
     float maxAxis = MAX(std::abs(joyX), std::abs(joyY), fabs(turnValue), fabs(joyZ)); //Find the maximum input given by the controller's axes and the angle corrector
-    float maxOutput = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3])); //Find the maximum output that the drive program has calculated
+    float maxOutput = MAX(fabs(mSpd[0]), fabs(mSpd[1]), fabs(mSpd[2]), fabs(mSpd[3])); //Find the maximum output that the drive program has calculated
 
     if (maxOutput == 0 || maxAxis == 0) {
       normalizer = 0; //Prevent the undefined value for normalizer
@@ -135,31 +156,20 @@ void _drive() {
     }
 
     for (int i = 0; i <= 3; i++) {
-      motorSpeeds[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value
+      mSpd[i] *= normalizer; //caps motor speeds to 100 without losing the ratio between each value
     }
-    /*float maxValue = MAX(fabs(motorSpeeds[0]), fabs(motorSpeeds[1]), fabs(motorSpeeds[2]), fabs(motorSpeeds[3]));
+    /*float maxValue = MAX(fabs(mSpd[0]), fabs(mSpd[1]), fabs(mSpd[2]), fabs(mSpd[3]));
     if (maxValue > 100) {
       for (int i = 0; i <= 3; i ++) {
-        motorSpeeds[i] *= (100 / maxValue);
+        mSpd[i] *= (100 / maxValue);
       }
     }*/
     //END NORMALIZER CODE***********************/
 
-    backLeft.spin(forward, motorSpeeds[bL], percent);
-    backRight.spin(forward, motorSpeeds[bR], percent);    //spin the motors at their calculated speeds.
-    frontRight.spin(forward, motorSpeeds[fR], percent);
-    frontLeft.spin(forward, motorSpeeds[fL], percent);
-
-    Brain.Screen.clearScreen();
-    Brain.Screen.setCursor(1,1);
-    Brain.Screen.print(motorSpeeds[0]);
-    Brain.Screen.newLine();
-    Brain.Screen.print(motorSpeeds[1]);
-    Brain.Screen.newLine();
-    Brain.Screen.print(motorSpeeds[2]);
-    Brain.Screen.newLine();
-    Brain.Screen.print(motorSpeeds[3]);
-    Brain.Screen.newLine();
+    backLeft.spin(forward, mSpd[bL], percent);
+    backRight.spin(forward, mSpd[bR], percent);    //spin the motors at their calculated speeds.
+    frontRight.spin(forward, mSpd[fR], percent);
+    frontLeft.spin(forward, mSpd[fL], percent);
 
     if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
       leftFlipOut.spin(forward, 200, rpm);
@@ -187,6 +197,49 @@ void _drive() {
       upperRollers.stop(hold);
     }
     //button b make intake retract
+    wait(10, msec); 
+  }
+}
+void driveNew() {
+  /**
+   * Brand new optimized and very WIP drive function designed to not be so cluttered and be a little faster, now with smoother control courtesy of logarithmic drive.
+   */
+  while(1) {
+    float gyroAngle = GYRO.heading(degrees);       //grab and store the gyro value, it is the orientation of the bot
+
+    float joyX = logDrive_shallowish(-Controller1.Axis4.position())/1.27;       // this is the left and right axis
+    float joyY = logDrive_shallowish(Controller1.Axis3.position())/1.27;      // this is the forward and backward axis
+    float joyZ = logDrive_shallowish(Controller1.Axis1.position())/1.27/2;    // this here is the turning axis.
+
+    float magnitude = sqrt((joyX*joyX) + (joyY*joyY)) / M_SQRT2; //this calculates the magnitude of the direction vector of the joystick. 
+    float theta = atan2(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.
+
+    float x2 = magnitude * cos(theta);  //these two lines generate new robot centric values based on the magnitude of speed and the offset in angle.
+    float y2 = magnitude * sin(theta);
+
+    mSpd[0] = x2 - y2 + joyZ;
+    mSpd[1] = x2 + y2 + joyZ;
+    mSpd[2] = -x2 - y2 + joyZ; //this is where the x, y, and turn components of holonomic movement are mushed together to calculate motor speeds.
+    mSpd[3] = -x2 + y2 + joyZ;
+
+    float maxAxis = MAX(fabs(joyX), fabs(joyY), fabs(joyZ)); //Find the maximum input given by the controller's axes and the angle corrector
+    float maxOutput = MAX(fabs(mSpd[0]), fabs(mSpd[1]), fabs(mSpd[2]), fabs(mSpd[3])); //Find the maximum output that the drive program has calculated
+
+    if (maxOutput == 0 || maxAxis == 0) {
+      normalizer = 0; //Prevent the undefined value for normalizer
+    } else {
+      normalizer = maxAxis / maxOutput; //calculate normalizer
+    }
+
+    for (int i = 0; i <= 3; i++) {
+      mSpd[i] *= normalizer; //caps motor speeds to the greatest input without losing the ratio between each speed, so as to not warp the direction of movement too much.
+    }
+
+    frontLeft.spin(forward, mSpd[0], percent);
+    backLeft.spin(forward, mSpd[1], percent);
+    frontRight.spin(forward, mSpd[2], percent);
+    backRight.spin(forward, mSpd[3], percent);    //spin the motors at their calculated speeds.
+    //bear in mind that this new driving function is in a testing state and there is no automatic angle correction or roller/intake movement. There is only translational movement.
     wait(10, msec); 
   }
 }
