@@ -207,12 +207,12 @@ void driveNew() {
   while(1) {
     float gyroAngle = GYRO.heading(degrees);       //grab and store the gyro value, it is the orientation of the bot
 
-    float joyX = logDrive_shallowish(-Controller1.Axis4.position())/1.27;       // this is the left and right axis
-    float joyY = logDrive_shallowish(Controller1.Axis3.position())/1.27;      // this is the forward and backward axis
-    float joyZ = logDrive_shallowish(Controller1.Axis1.position())/1.27/2;    // this here is the turning axis.
+    float joyX = logDrive_shallowish(-Controller1.Axis4.position(percent));       // this is the left and right axis
+    float joyY = logDrive_shallowish(Controller1.Axis3.position(percent));      // this is the forward and backward axis
+    float joyZ = logDrive_shallowish(Controller1.Axis1.position(percent))/2;    // this here is the turning axis.
 
     float magnitude = sqrt((joyX*joyX) + (joyY*joyY)) / M_SQRT2; //this calculates the magnitude of the direction vector of the joystick. 
-    float theta = atan2(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.
+    float theta = atan2f(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.
 
     float x2 = magnitude * cos(theta);  //these two lines generate new robot centric values based on the magnitude of speed and the offset in angle.
     float y2 = magnitude * sin(theta);
@@ -240,6 +240,33 @@ void driveNew() {
     frontRight.spin(forward, mSpd[2], percent);
     backRight.spin(forward, mSpd[3], percent);    //spin the motors at their calculated speeds.
     //bear in mind that this new driving function is in a testing state and there is no automatic angle correction or roller/intake movement. There is only translational movement.
+   
+    if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
+      leftFlipOut.spin(forward, 200, rpm);
+      rightFlipOut.spin(forward, 200, rpm); 
+    } else {
+      leftFlipOut.stop(hold);
+      rightFlipOut.stop(hold);
+    }
+    if(Controller1.ButtonR2.pressing()) { //bring balls up, does not shoot them out
+      leftFlipOut.spin(reverse, 100, rpm);
+      rightFlipOut.spin(reverse, 100, rpm); 
+    } else if (!Controller1.ButtonR1.pressing()) {
+    leftFlipOut.stop(hold);
+      rightFlipOut.stop(hold);
+    }     
+    if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
+      bottomRollers.spin(forward, 100, percent);
+      upperRollers.spin(reverse, 100, percent);
+    }
+    if (Controller1.ButtonL2.pressing()) { 
+      bottomRollers.spin(reverse, 100, percent);
+      upperRollers.spin(forward, 100, percent);
+    } else if (!Controller1.ButtonL1.pressing()) {
+      bottomRollers.stop(hold);
+      upperRollers.stop(hold);
+    }
+    
     wait(10, msec); 
   }
 }

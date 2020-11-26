@@ -56,7 +56,7 @@ void autonomous(void) {
 void usercontrol(void) {
   ODOM.thread::interrupt();
   
-  _drive();
+  driveNew();
 }
 
 int main() {

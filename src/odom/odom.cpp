@@ -61,6 +61,7 @@ void updatePositionVars() {
   pos.y = rY;
   pos.thetaDeg = globalOrientation * radToDeg;
   pos.thetaRad = globalOrientation;
+  pos.gyroheadRad = GYRO.heading(degrees) * degToRad;
 }
 
 int tracking() {
@@ -120,8 +121,9 @@ void swerve(float x, float y, int finalAngle = 0) {
   updatePositionVars();
   float xLast = x - pos.x;
   float yLast = y - pos.y;
-  float tLast = finalAngle - pos.thetaDeg; 
+  float tLast = finalAngle - pos.gyroheadRad; 
   float mS[4];
+  float normalizer;
 
   atPoint = false;
 
@@ -150,7 +152,7 @@ void swerve(float x, float y, int finalAngle = 0) {
     /*End turn component calculation           */
 
     float targetTheta = atan2f((x - pos.x), (y - pos.y)); 
-    float tDist = pos.thetaRad - targetTheta;
+    float tDist = pos.gyroheadRad + targetTheta;
 
     xComp *= cos(tDist) /** fabs(xComp)*/;
     yComp *= sin(tDist) /** fabs(yComp)*/;
@@ -160,11 +162,17 @@ void swerve(float x, float y, int finalAngle = 0) {
     mS[2] = -xComp - yComp + tComp;
     mS[3] = -xComp + yComp + tComp;
 
-    float maxValue = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mS[2]), fabs(mS[3]));
-    if (maxValue > 100) {
-      for (int i = 0; i <= 3; i ++) {
-        mS[i] *= (100 / maxValue);
-      }
+    float maxAxis = MAX(fabs(xComp), fabs(yComp), fabs(tComp)); //Find the maximum input given by the controller's axes and the angle corrector
+    float maxOutput = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mSpd[2]), fabs(mSpd[3])); //Find the maximum output that the drive program has calculated
+
+    if (maxOutput == 0 || maxAxis == 0) {
+      normalizer = 0; //Prevent the undefined value for normalizer
+    } else {
+      normalizer = maxAxis / maxOutput; //calculate normalizer
+    }
+
+    for (int i = 0; i <= 3; i++) {
+      mS[i] *= normalizer; //caps motor speeds to the greatest input without losing the ratio between each speed, so as to not warp the direction of movement too much.
     }
 
     initDebug();
