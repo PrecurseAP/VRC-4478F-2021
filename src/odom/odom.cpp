@@ -61,7 +61,7 @@ void updatePositionVars() {
   pos.y = rY;
   pos.thetaDeg = globalOrientation * radToDeg;
   pos.thetaRad = globalOrientation;
-  pos.gyroheadRad = GYRO.heading(degrees) * degToRad;
+  //pos.gyroheadRad = GYRO.heading(degrees) * degToRad;
 }
 
 int tracking() {
@@ -121,7 +121,7 @@ void swerve(float x, float y, int finalAngle = 0) {
   updatePositionVars();
   float xLast = x - pos.x;
   float yLast = y - pos.y;
-  float tLast = finalAngle - pos.gyroheadRad; 
+  float tLast = finalAngle - pos.thetaRad; 
   float mS[4];
   float normalizer;
 
@@ -152,7 +152,7 @@ void swerve(float x, float y, int finalAngle = 0) {
     /*End turn component calculation           */
 
     float targetTheta = atan2f((x - pos.x), (y - pos.y)); 
-    float tDist = pos.gyroheadRad + targetTheta;
+    float tDist = pos.thetaRad + targetTheta;
 
     xComp *= cos(tDist) /** fabs(xComp)*/;
     yComp *= sin(tDist) /** fabs(yComp)*/;

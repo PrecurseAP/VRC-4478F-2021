@@ -1,3 +1,20 @@
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// GYRO                 inertial      11              
+// Controller1          controller                    
+// frontLeft            motor         19              
+// frontRight           motor         2               
+// backLeft             motor         3               
+// backRight            motor         4               
+// leftFlipOut          motor         5               
+// rightFlipOut         motor         6               
+// bottomRollers        motor         7               
+// upperRollers         motor         20              
+// leftEncoder          encoder       E, F            
+// rightEncoder         encoder       A, B            
+// backEncoder          encoder       C, D            
+// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 #include "robot-config.h"
 #include "../src/odom/odom.h"
@@ -56,7 +73,7 @@ void autonomous(void) {
 void usercontrol(void) {
   ODOM.thread::interrupt();
   
-  driveNew();
+  driveTheDamnRobot();
 }
 
 int main() {
