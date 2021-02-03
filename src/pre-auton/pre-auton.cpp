@@ -1,5 +1,5 @@
 #include "vex.h"
-#include "../src/pre-auton/pre-auton.h"
+#include "pre-auton.h"
 
 enum autonSquare {
   leftRed,

@@ -1,27 +1,18 @@
-#include "../src/drive/drive.h"
+#include "drive.h"
 #include "vex.h"
-#include "../src/aidenmath/custommath.h"
+#include "custommath.h"
 #include "cmath"
 #include "vex_timer.h"
 
-//logarithmic drive functions. this means that lower joystick values are skewed towards zero while higher once rapidly scale up to max speed.
-float logDrive_shallow(float cv) {
-  //pretty slight logarithmic drive, lower joystick values are only slightly skewed towards zero.
-  return (cv*cv) / (sign(cv)*127.0);
-}
-float logDrive_shallowish(float cv) {
+//logarithmic drive function. this means that lower joystick values are skewed towards zero while higher ones still scale up to max speed.
+float logDrive(float cv) {
   //less intense logarithmic drive, reaches high speeds at a good distance from joystick limits
-  return pow(fabs(cv), 1.5) / (sign(cv)*sqrt(127.0));
+  return pow(fabs(cv), 1.5) / (sign(cv)*sqrt(100));
 }
-float logDrive_steepish(float cv) {
-  //pretty steep logarithmic drive, reaches max speed pretty close to the edge of the joystick limits
-  return pow(fabs(cv), 2.5) / (sign(cv)*pow(127, 1.5));
+float logDriveT(float cv) {
+  //less intense logarithmic drive, reaches high speeds at a good distance from joystick limits
+  return pow(fabs(cv), 1.5) / (sign(cv)*sqrt(50));
 }
-float logDrive_steep(float cv) {
-  //extremely steep logarithmic drive function, only reaches max speed at very high joystick values
-  return pow(cv, 3) / 16129.0; //127^2
-}
-
 void stopAllDrive(brakeType bT) {
   /** 
    * Stops all drive motors with a specific brakeType.
@@ -71,9 +62,9 @@ void driveTheDamnRobot() {
   while(1) {
     float gyroAngle = GYRO.heading(degrees);       //grab and store the gyro value, it is the orientation of the bot
 
-    float joyX = logDrive_shallowish(-Controller1.Axis4.position(percent));       // this is the left and right axis
-    float joyY = logDrive_shallowish(Controller1.Axis3.position(percent));      // this is the forward and backward axis
-    float joyZ = logDrive_shallowish(Controller1.Axis1.position(percent))/2;    // this here is the turning axis.
+    float joyX = logDrive(-Controller1.Axis4.position(percent));       // this is the left and right axis
+    float joyY = logDrive(Controller1.Axis3.position(percent));      // this is the forward and backward axis
+    float joyZ = logDriveT(Controller1.Axis1.position(percent))/2;    // this here is the turning axis.
 
     float magnitude = sqrt((joyX*joyX) + (joyY*joyY)) / M_SQRT2; //this calculates the magnitude of the direction vector of the joystick. 
     float theta = atan2f(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.

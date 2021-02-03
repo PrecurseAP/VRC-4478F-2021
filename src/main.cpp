@@ -17,10 +17,10 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 #include "robot-config.h"
-#include "../src/odom/odom.h"
-#include "../src/drive/drive.h"
-#include "../src/pre-auton/pre-auton.h"
-#include "../src/drive/drive.h"
+#include "odom.h"
+#include "drive.h"
+#include "pre-auton.h"
+#include "drive.h"
 
 using namespace vex;
 

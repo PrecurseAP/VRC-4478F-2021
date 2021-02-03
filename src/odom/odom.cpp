@@ -1,9 +1,9 @@
-#include "../src/odom/odom.h"
+#include "odom.h"
 #include <iostream> //yo my slime, i know you dont really know mandem like that, but i was wondering if, like, i could purchase summin styl fam. just a bit of grub my drilla
 #include "vex.h"
-#include "../src/aidenmath/custommath.h"
+#include "custommath.h"
 #include <vex_timer.h>
-#include "../src/drive/drive.h"
+#include "drive.h"
 
 thread ODOM;
 
@@ -108,20 +108,17 @@ int tracking() {
 
     globalOrientation += deltaTheta; //update global position variable
     
-    this_thread::sleep_for(10); //add a 10ms delay between tracking code executions
+    this_thread::sleep_for(10); //add a 10ms delay between each run of the loop
   }
-  return 69420; //funny return int because threads require an int return
+  return 69420; //return int because threads require an int return
 }
 
-void swerve(float x, float y, int finalAngle = 0) {
+void moveToPoint(float x, float y, int finalAngle = 0, float xMult = 1, float yMult = 1, float tMult = 1) {
   /**
    * This function is the primary movement function for autonomous.
    * It works by simulating controller inputs based on the error in x, y, and orientation.
    */
   updatePositionVars();
-  float xLast = x - pos.x;
-  float yLast = y - pos.y;
-  float tLast = finalAngle - pos.thetaRad; 
   float mS[4];
   float normalizer;
 
@@ -130,50 +127,30 @@ void swerve(float x, float y, int finalAngle = 0) {
   while(!atPoint) {
     updatePositionVars();
 
-    /*Calculate the x component of our movement*/
-    float xError = x - pos.x;
-    float xDer = xError - xLast;
-    float xLast = xError;
-    float xComp = kPx*xError + kDx*xDer;
-    /*End x component calculation              */
-
-    /*Calculate the y component of our movement*/
-    float yError = y - pos.y;
-    float yDer = yError - yLast;
-    float yLast = yError;
-    float yComp = kPy*yError + kDy*yDer;
-    /*End y component calculation              */
-
-    /*Calculate turn component of our movement */
-    float tError = finalAngle - pos.thetaDeg;
-    float tDer = tError - tLast;
-    float tLast = tError;
-    float tComp = (kPt*tError) + (kDt*tDer); 
-    /*End turn component calculation           */
+    float magnitude = sqrt((x*x) + (y*y));
 
     float targetTheta = atan2f((x - pos.x), (y - pos.y)); 
     float tDist = pos.thetaRad + targetTheta;
 
-    xComp *= cos(tDist) /** fabs(xComp)*/;
-    yComp *= sin(tDist) /** fabs(yComp)*/;
+    float xF = magnitude * cos(tDist) * xMult;
+    float yF = magnitude * sin(tDist) * yMult;
 
-    mS[0] = xComp - yComp + tComp;
-    mS[1] = xComp + yComp + tComp;
-    mS[2] = -xComp - yComp + tComp;
-    mS[3] = -xComp + yComp + tComp;
+    float tComp = (finalAngle - pos.thetaDeg) * tMult;
 
-    float maxAxis = MAX(fabs(xComp), fabs(yComp), fabs(tComp)); //Find the maximum input given by the controller's axes and the angle corrector
-    float maxOutput = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mSpd[2]), fabs(mSpd[3])); //Find the maximum output that the drive program has calculated
+    mS[0] = xF - yF + tComp;
+    mS[1] = xF + yF + tComp;
+    mS[2] = -xF - yF + tComp;
+    mS[3] = -xF + yF + tComp;
 
-    if (maxOutput == 0 || maxAxis == 0) {
-      normalizer = 0; //Prevent the undefined value for normalizer
-    } else {
-      normalizer = maxAxis / maxOutput; //calculate normalizer
+    float maxOutput = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mS[2]), fabs(mS[3])); //Find the maximum output that the drive program has calculated
+
+    if (maxOutput > 100) {
+      normalizer = 100 / maxOutput;
+      for (int i = 0; i <= 3; i++) {
+        mS[i] *= normalizer; //caps motor speeds to 100 while keeping the ratio between each value, so that the direction of movement does not get warped by higher speeds than the motors can be sent.
+      }
     }
-
-    for (int i = 0; i <= 3; i++) {
-      mS[i] *= normalizer; //caps motor speeds to the greatest input without losing the ratio between each speed, so as to not warp the direction of movement too much.
-    }
+    
 
     initDebug();
     debug(mS[0]);
@@ -186,7 +163,7 @@ void swerve(float x, float y, int finalAngle = 0) {
     frontRight.spin(forward, mS[2], percent);
     backRight.spin(forward, mS[3], percent);    //spin the motors at their calculated speeds.
     
-    if ((sqrt((xError*xError) + (yError*yError)) < 1.5) && (tComp < 2)) {
+    if ((magnitude < 1.5) && (tComp < 2)) {
       atPoint = true;
       stopAllDrive(hold);
     }
