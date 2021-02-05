@@ -19,84 +19,62 @@ void autonomous(void) {
 
   resetPos();
 
-  leftFlipOut.spin(forward, 100, percent);
-  rightFlipOut.spin(forward, 100, percent);
+  //leftFlipOut.spin(forward, 100, percent);
+  //rightFlipOut.spin(forward, 100, percent);
 
-  wait(800, msec);
+  //wait(800, msec);
 
-  leftFlipOut.spin(reverse, 90, percent);
-  rightFlipOut.spin(reverse, 90, percent);
-  wait(400, msec);
-  leftFlipOut.stop(hold);
-  rightFlipOut.stop(hold);
-
-  moveToPoint(23, 7.7, 180, 7, 8, 1);
-  spinMotors(35, 35, 35, 35);
+  //leftFlipOut.spin(reverse, 90, percent);
+  //rightFlipOut.spin(reverse, 90, percent);
+  //wait(400, msec);
+  //leftFlipOut.stop(hold);
+  //rightFlipOut.stop(hold);
+  moveToPoint(23, 6.7, 180, 7, 6, 1);
+  spinMotors(60, 60, 60, 60);
   wait(200, msec);
   stopAllDrive(hold);
   upperRollers.spin(forward, 100, percent);
   bottomRollers.spin(forward, 100, percent);
-  wait(1000, msec);
+  wait(850, msec);
   upperRollers.stop(hold);
   bottomRollers.stop(hold);
   
-  moveToPoint(-21, 4, 226, 5, 5, 1.1);
   leftFlipOut.spin(forward, 100, percent);
   rightFlipOut.spin(forward, 100, percent);
-  spinMotors(40, 40, 40, 40);
-  wait(750, msec);
-  stopAllDrive(hold);
-  wait(200, msec);
+  moveToPoint(-20, 5, 226, 4, 4, 1);
+  //leftFlipOut.spin(forward, 100, percent);
+  //rightFlipOut.spin(forward, 100, percent);
+  spinMotors(27, 27, 27, 27);
+  wait(700, msec);
   upperRollers.spin(forward, 100, percent);
-  bottomRollers.spin(forward, 100, percent);
-  leftFlipOut.spin(reverse, 60, percent);
-  rightFlipOut.spin(reverse, 60, percent);
-  wait(1300, msec);
+  bottomRollers.spin(forward, 100, percent);  
+
+  wait(300, msec);  
+  leftFlipOut.stop(hold);
+  rightFlipOut.stop(hold);
+  stopAllDrive(hold);
+  //leftFlipOut.spin(reverse, 60, percent);
+  //rightFlipOut.spin(reverse, 60, percent);
+  wait(1100, msec);
   spinMotors(-100, -100, -100, -100);
-  wait(600, msec);
+  wait(1100, msec);
   stopAllDrive(hold);
   upperRollers.stop();
   bottomRollers.stop();
-  leftFlipOut.stop(hold);
-  rightFlipOut.stop(hold);
-  moveToPoint(72, 13, 135, 5, 3, .8);
-
-  /*
+  //leftFlipOut.stop(hold);
+  //rightFlipOut.stop(hold);
+  moveToPoint(63, 14, 134, 3, 3, 1);
   leftFlipOut.spin(forward, 100, percent);
   rightFlipOut.spin(forward, 100, percent);
-  wait(1000, msec);
-  leftFlipOut.spin(reverse, 50, percent);
-  rightFlipOut.spin(reverse, 50, percent);
-  Brain.Screen.clearScreen(); //vamos no auton
-  swerve(25.8, 6.9, 180);
-  wait(30, msec);
-  resetPos();
-  wait(30, msec);
-  spinMotors(20, 20, 20, 20);
-  wait(250, msec);
-  stopAllDrive(hold);
-  upperRollers.spin(reverse, 100, percent);
-  bottomRollers.spin(forward, 100, percent);
-  wait(2000, msec);
-  
-  upperRollers.stop(hold);
-  bottomRollers.stop(hold);
-  */
-  /*swerve(42, -5.5, 45);
-  wait(200, msec);
-  resetPos();
-  spinMotors(20, 20, 20, 20);
+  spinMotors(30, 30, 30, 30);
   wait(300, msec);
-  stopAllDrive(hold);
-  leftFlipOut.spin(forward, 100, percent);
-  rightFlipOut.spin(forward, 100, percent);
-  upperRollers.spin(reverse, 100, percent);
+  upperRollers.spin(forward, 100, percent);
   bottomRollers.spin(forward, 100, percent);
-  wait(2000, msec);
-  bottomRollers.stop(hold);
-  upperRollers.stop(hold);
-  leftFlipOut.spin(reverse, 50, percent);
-  rightFlipOut.spin(reverse, 50, percent);*/
+  wait(1100, msec);
+  stopAllDrive(hold);
+  wait(200, msec);
+  //upperRollers.spin(forward, 100, percent);
+  //bottomRollers.spin(forward, 100, percent);
 }
 
 void usercontrol(void) {
@@ -107,11 +85,12 @@ void usercontrol(void) {
 
 int main() {
   vexcodeInit();
-
+  
+  resetGyro();
+  
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
-  resetGyro();
   pre_auton();
 
   while (true) { wait(100, msec); }

@@ -38,9 +38,7 @@ void resetGyro() {
    * Stops all drive motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
    */
   GYRO.calibrate();
-  while(GYRO.isCalibrating()) {
-    wait(100, msec);
-  }
+  wait(3500, msec);
 }
 
 timer turningTimer;

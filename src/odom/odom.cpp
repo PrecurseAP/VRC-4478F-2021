@@ -167,13 +167,15 @@ void moveToPoint(float x, float y, int finalAngle = 0, float xMult = 1, float yM
     debug(yF);
     debug(pos.x);
     debug(pos.y);
-
+    std::cout << pos.x << std::endl;
+    std::cout << pos.y << std::endl;
+    std::cout << pos.thetaDeg << std::endl;
     frontLeft.spin(forward, mS[0], percent);
     backLeft.spin(forward, mS[1], percent);
     frontRight.spin(forward, mS[2], percent);
     backRight.spin(forward, mS[3], percent);    //spin the motors at their calculated speeds.
     
-    if ((sqrt((xE*xE) + (yE*yE)) < 1.2) && (tE < 2.2)) { //check if the robot is close to its goal. If so, end the loop.
+    if ((sqrt((xE*xE) + (yE*yE)) < 1.1) && (fabs(tE) < 2)) { //check if the robot is close to its goal. If so, end the loop.
       atPoint = true;   
       stopAllDrive(hold);
     }
