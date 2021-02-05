@@ -1,20 +1,3 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// GYRO                 inertial      11              
-// Controller1          controller                    
-// frontLeft            motor         19              
-// frontRight           motor         2               
-// backLeft             motor         3               
-// backRight            motor         4               
-// leftFlipOut          motor         5               
-// rightFlipOut         motor         6               
-// bottomRollers        motor         7               
-// upperRollers         motor         20              
-// leftEncoder          encoder       E, F            
-// rightEncoder         encoder       A, B            
-// backEncoder          encoder       C, D            
-// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 #include "robot-config.h"
 #include "odom.h"
@@ -34,6 +17,51 @@ void pre_auton(void) {
 void autonomous(void) {
   thread ODOM = thread(tracking);
 
+  resetPos();
+
+  leftFlipOut.spin(forward, 100, percent);
+  rightFlipOut.spin(forward, 100, percent);
+
+  wait(800, msec);
+
+  leftFlipOut.spin(reverse, 90, percent);
+  rightFlipOut.spin(reverse, 90, percent);
+  wait(400, msec);
+  leftFlipOut.stop(hold);
+  rightFlipOut.stop(hold);
+
+  moveToPoint(23, 7.7, 180, 7, 8, 1);
+  spinMotors(35, 35, 35, 35);
+  wait(200, msec);
+  stopAllDrive(hold);
+  upperRollers.spin(forward, 100, percent);
+  bottomRollers.spin(forward, 100, percent);
+  wait(1000, msec);
+  upperRollers.stop(hold);
+  bottomRollers.stop(hold);
+  
+  moveToPoint(-21, 4, 226, 5, 5, 1.1);
+  leftFlipOut.spin(forward, 100, percent);
+  rightFlipOut.spin(forward, 100, percent);
+  spinMotors(40, 40, 40, 40);
+  wait(750, msec);
+  stopAllDrive(hold);
+  wait(200, msec);
+  upperRollers.spin(forward, 100, percent);
+  bottomRollers.spin(forward, 100, percent);
+  leftFlipOut.spin(reverse, 60, percent);
+  rightFlipOut.spin(reverse, 60, percent);
+  wait(1300, msec);
+  spinMotors(-100, -100, -100, -100);
+  wait(600, msec);
+  stopAllDrive(hold);
+  upperRollers.stop();
+  bottomRollers.stop();
+  leftFlipOut.stop(hold);
+  rightFlipOut.stop(hold);
+  moveToPoint(72, 13, 135, 5, 3, .8);
+
+  /*
   leftFlipOut.spin(forward, 100, percent);
   rightFlipOut.spin(forward, 100, percent);
   wait(1000, msec);
@@ -50,9 +78,10 @@ void autonomous(void) {
   upperRollers.spin(reverse, 100, percent);
   bottomRollers.spin(forward, 100, percent);
   wait(2000, msec);
-
+  
   upperRollers.stop(hold);
   bottomRollers.stop(hold);
+  */
   /*swerve(42, -5.5, 45);
   wait(200, msec);
   resetPos();

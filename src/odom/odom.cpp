@@ -127,44 +127,54 @@ void moveToPoint(float x, float y, int finalAngle = 0, float xMult = 1, float yM
   while(!atPoint) {
     updatePositionVars();
 
-    float magnitude = sqrt((x*x) + (y*y));
+    float xE = -(x - pos.x);
+    float yE = y - pos.y;                 //calculate the errors in x, y, and orientation
+    float tE = finalAngle - pos.thetaDeg;
 
-    float targetTheta = atan2f((x - pos.x), (y - pos.y)); 
-    float tDist = pos.thetaRad + targetTheta;
+    float thetaOffset = pos.thetaRad;
+    //rotate the goalpoint (error) counterclockwise by the robot's current orientation
+    float xF = (yE * cos(thetaOffset)) - (xE * sin(thetaOffset));
+    float yF = (xE * cos(thetaOffset)) + (yE * sin(thetaOffset));
 
-    float xF = magnitude * cos(tDist) * xMult;
-    float yF = magnitude * sin(tDist) * yMult;
+    //apply the multipliers given as arguments
+    float tF = tE * tMult;
 
-    float tComp = (finalAngle - pos.thetaDeg) * tMult;
+    /*if (sqrt(xE*xE + yE*yE) < 5) {
+      xF *= 1;
+      yF *= 1;
+      tF += .1;
+    }*/
 
-    mS[0] = xF - yF + tComp;
-    mS[1] = xF + yF + tComp;
-    mS[2] = -xF - yF + tComp;
-    mS[3] = -xF + yF + tComp;
+    xF *= yMult;
+    yF *= xMult;
 
-    float maxOutput = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mS[2]), fabs(mS[3])); //Find the maximum output that the drive program has calculated
+    mS[0] = xF - yF + tF;
+    mS[1] = xF + yF + tF;
+    mS[2] = -xF - yF + tF;    //combine each axis into motor speeds
+    mS[3] = -xF + yF + tF;
 
-    if (maxOutput > 100) {
+    float maxOutput = MAX(fabs(mS[0]), fabs(mS[1]), fabs(mS[2]), fabs(mS[3])); //Find the maximum output that the program has calculated
+
+    if ((maxOutput > 100) && (maxOutput != 0)) {
       normalizer = 100 / maxOutput;
       for (int i = 0; i <= 3; i++) {
         mS[i] *= normalizer; //caps motor speeds to 100 while keeping the ratio between each value, so that the direction of movement does not get warped by higher speeds than the motors can be sent.
       }
     }
     
-
     initDebug();
-    debug(mS[0]);
-    debug(mS[1]);
-    debug(mS[2]);
-    debug(mS[3]);
+    debug(xF);
+    debug(yF);
+    debug(pos.x);
+    debug(pos.y);
 
     frontLeft.spin(forward, mS[0], percent);
     backLeft.spin(forward, mS[1], percent);
     frontRight.spin(forward, mS[2], percent);
     backRight.spin(forward, mS[3], percent);    //spin the motors at their calculated speeds.
     
-    if ((magnitude < 1.5) && (tComp < 2)) {
-      atPoint = true;
+    if ((sqrt((xE*xE) + (yE*yE)) < 1.2) && (tE < 2.2)) { //check if the robot is close to its goal. If so, end the loop.
+      atPoint = true;   
       stopAllDrive(hold);
     }
 

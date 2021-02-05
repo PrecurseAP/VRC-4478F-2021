@@ -107,7 +107,7 @@ void driveTheDamnRobot() {
       leftFlipOut.spin(reverse, 100, rpm);
       rightFlipOut.spin(reverse, 100, rpm); 
     } else if (!Controller1.ButtonR1.pressing()) {
-    leftFlipOut.stop(hold);
+      leftFlipOut.stop(hold);
       rightFlipOut.stop(hold);
     }     
     if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards

@@ -39,6 +39,6 @@ extern bool atPoint;
 extern float kPx, kPy, kPt;
 extern float kDx, kDy, kDt;
 
-extern void swerve(float, float, int);
+extern void moveToPoint(float, float, int, float, float, float);
 
 #endif //_ODOM_
