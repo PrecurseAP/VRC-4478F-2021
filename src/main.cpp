@@ -15,71 +15,73 @@ void pre_auton(void) {
 }
 
 void autonomous(void) {
-  thread ODOM = thread(tracking);
+  //the moveToPoint function accepts (x, y, angle, xMult, yMult, tMult)
+  //All of the arguments are measured in inches for distance, degrees for angles.
 
-  resetPos();
+  thread ODOM = thread(tracking); //start position tracking loop
 
-  //leftFlipOut.spin(forward, 100, percent);
-  //rightFlipOut.spin(forward, 100, percent);
+  resetPos(); //reset variables / initialize the values
 
-  //wait(800, msec);
+  moveToPoint(23, 6.7, 180, 7, 6, 1); //move in front of the middle home goal
 
-  //leftFlipOut.spin(reverse, 90, percent);
-  //rightFlipOut.spin(reverse, 90, percent);
-  //wait(400, msec);
-  //leftFlipOut.stop(hold);
-  //rightFlipOut.stop(hold);
-  moveToPoint(23, 6.7, 180, 7, 6, 1);
-  spinMotors(60, 60, 60, 60);
+  driveStraightNoTracking(60); //inch forward so the ball makes it
+
   wait(200, msec);
-  stopAllDrive(hold);
-  upperRollers.spin(forward, 100, percent);
-  bottomRollers.spin(forward, 100, percent);
-  wait(850, msec);
-  upperRollers.stop(hold);
-  bottomRollers.stop(hold);
   
-  leftFlipOut.spin(forward, 100, percent);
-  rightFlipOut.spin(forward, 100, percent);
-  moveToPoint(-20, 5, 226, 4, 4, 1);
-  //leftFlipOut.spin(forward, 100, percent);
-  //rightFlipOut.spin(forward, 100, percent);
-  spinMotors(27, 27, 27, 27);
+  stopAllDrive(hold); //stop drive to shoot
+  
+  spinRollers(100); //shoot the ball into the middle goal
+  
+  wait(850, msec);
+  
+  stopRollers(hold); //stop the rollers
+  
+  spinIntakes(100); //start intaking to flip them out and collect next balls
+
+  moveToPoint(-21, 5, 226, 4, 4, 1); //move in front of left home row goal
+
+  driveStraightNoTracking(27); //inch forward to collect ball and approach toward
+
   wait(700, msec);
-  upperRollers.spin(forward, 100, percent);
-  bottomRollers.spin(forward, 100, percent);  
+
+  spinRollers(100); //start shooting
 
   wait(300, msec);  
-  leftFlipOut.stop(hold);
-  rightFlipOut.stop(hold);
-  stopAllDrive(hold);
-  //leftFlipOut.spin(reverse, 60, percent);
-  //rightFlipOut.spin(reverse, 60, percent);
+  
+  stopIntakes(hold); //stop intakes to not empty tower
+  
+  stopAllDrive(hold); //stop drive to shoot
+
   wait(1100, msec);
-  spinMotors(-100, -100, -100, -100);
+  
+  stopRollers(hold);
+
+  driveStraightNoTracking(-100); //zoom backwards so next move doesnt collide with tower
+  
   wait(1100, msec);
-  stopAllDrive(hold);
-  upperRollers.stop();
-  bottomRollers.stop();
-  //leftFlipOut.stop(hold);
-  //rightFlipOut.stop(hold);
-  moveToPoint(63, 14, 134, 3, 3, 1);
-  leftFlipOut.spin(forward, 100, percent);
-  rightFlipOut.spin(forward, 100, percent);
-  spinMotors(30, 30, 30, 30);
+  
+  moveToPoint(64, 14, 135 , 3, 3, 1); //move in front of right home row tower
+  
+  spinIntakes(100); //start intaking
+  
+  driveStraightNoTracking(30); //inch forward to reacht he tower and collect ball
+  
   wait(300, msec);
-  upperRollers.spin(forward, 100, percent);
-  bottomRollers.spin(forward, 100, percent);
+  
+  spinRollers(100); //start shooting
+  
   wait(1100, msec);
-  stopAllDrive(hold);
-  wait(200, msec);
-  //upperRollers.spin(forward, 100, percent);
-  //bottomRollers.spin(forward, 100, percent);
+  
+  stopIntakes(hold); //stop intakes to not empty tower
+  
+  stopAllDrive(hold); //stop drive to shoot
+  //gimme three ball
 }
 
 void usercontrol(void) {
   ODOM.thread::interrupt();
-  
+  Controller1.ButtonX.pressed(resetGyro);
+  //user control 
   driveTheDamnRobot();
 }
 

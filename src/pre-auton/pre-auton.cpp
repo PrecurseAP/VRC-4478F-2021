@@ -44,9 +44,8 @@ void renderScreen() {
       Brain.Screen.drawRectangle(308, 158, 35, 35, color::white); break;
     case rightBlue:
       Brain.Screen.drawRectangle(308, 53, 35, 35, color::white); break;
-    default:
+    default: break;
       //do nothing if there is no chosen square
-    break;
   }
 
   Brain.Screen.setPenColor(color::red);

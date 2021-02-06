@@ -23,7 +23,40 @@ void stopAllDrive(brakeType bT) {
   frontRight.stop(bT);
 }
 
-void spinMotors(int fL, int fR, int bR, int bL) {
+void spinRollers(int spd) {
+  upperRollers.spin(forward, spd, percent);
+  bottomRollers.spin(forward, spd, percent);
+}
+
+void stopRollers(brakeType bt) {
+  upperRollers.stop(bt);
+  bottomRollers.stop(bt);
+}
+
+void spinIntakes(int spd) {
+  leftFlipOut.spin(forward, spd, percent);
+  rightFlipOut.spin(forward, spd, percent);
+}
+
+void spinIntakesRPM(directionType dt, int spd) {
+  leftFlipOut.spin(dt, spd, rpm);
+  rightFlipOut.spin(dt, spd, rpm);
+}
+
+
+void stopIntakes(brakeType bt) {
+  leftFlipOut.stop(bt);
+  rightFlipOut.stop(bt);
+}
+
+void driveStraightNoTracking(int spd) {
+  frontLeft.spin(forward, spd, percent);
+  frontRight.spin(forward, -spd, percent);
+  backRight.spin(forward, -spd, percent);
+  backLeft.spin(forward, spd, percent);
+}
+
+void spinWheelsNoTracking(int fL, int fR, int bR, int bL) {
   /**
    * Basic movement function to move all the drive motors at a certain speed. this is mainly used for imprecise forward, backward, left, and right movements.
    */
@@ -38,7 +71,9 @@ void resetGyro() {
    * Stops all drive motors then calibrates the gyro. I have to experiment with delays to make sure that the code only resumes when the gyro is done.
    */
   GYRO.calibrate();
-  wait(3500, msec);
+  while(!GYRO.isCalibrating()) {
+    wait(100, msec);
+  }
 }
 
 timer turningTimer;
@@ -62,13 +97,13 @@ void driveTheDamnRobot() {
 
     float joyX = logDrive(-Controller1.Axis4.position(percent));       // this is the left and right axis
     float joyY = logDrive(Controller1.Axis3.position(percent));      // this is the forward and backward axis
-    float joyZ = logDriveT(Controller1.Axis1.position(percent))/2;    // this here is the turning axis.
+    float joyZ = logDriveT(Controller1.Axis1.position(percent)/2);    // this here is the turning axis.
 
     float magnitude = sqrt((joyX*joyX) + (joyY*joyY)) / M_SQRT2; //this calculates the magnitude of the direction vector of the joystick. 
-    float theta = atan2f(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.
+    float angleTheta = atan2f(joyX, joyY) + (gyroAngle*(M_PI/180)); //this calculates the reference angle of the joystick coordinates offset by the gyro.
 
-    float x2 = magnitude * cos(theta);  //these two lines generate new robot centric values based on the magnitude of speed and the offset in angle.
-    float y2 = magnitude * sin(theta);
+    float x2 = magnitude * cos(angleTheta);  //these two lines generate new robot centric values based on the magnitude of speed and the offset in angle.
+    float y2 = magnitude * sin(angleTheta);
 
     mSpd[0] = x2 - y2 + joyZ;
     mSpd[1] = x2 + y2 + joyZ;
@@ -92,32 +127,24 @@ void driveTheDamnRobot() {
     backLeft.spin(forward, mSpd[1], percent);
     frontRight.spin(forward, mSpd[2], percent);
     backRight.spin(forward, mSpd[3], percent);    //spin the motors at their calculated speeds.
-    //bear in mind that this new driving function is in a testing state and there is no automatic angle correction or roller/intake movement. There is only translational movement.
    
     if(Controller1.ButtonR1.pressing()) {     //brings ball straight up and into tower
-      leftFlipOut.spin(forward, 200, rpm);
-      rightFlipOut.spin(forward, 200, rpm); 
+      spinIntakesRPM(forward, 200);
     } else {
-      leftFlipOut.stop(hold);
-      rightFlipOut.stop(hold);
+      stopIntakes(hold);
     }
     if(Controller1.ButtonR2.pressing()) { //bring balls up, does not shoot them out
-      leftFlipOut.spin(reverse, 100, rpm);
-      rightFlipOut.spin(reverse, 100, rpm); 
+      spinIntakesRPM(reverse, 100);
     } else if (!Controller1.ButtonR1.pressing()) {
-      leftFlipOut.stop(hold);
-      rightFlipOut.stop(hold);
+      stopIntakes(hold);
     }     
     if(Controller1.ButtonL1.pressing()) { //brings ball to hoarder cell, by spinning the roller above it backwards
-      bottomRollers.spin(forward, 100, percent);
-      upperRollers.spin(forward, 100, percent);
+      spinRollers(100);
     }
     if (Controller1.ButtonL2.pressing()) { 
-      bottomRollers.spin(reverse, 100, percent);
-      upperRollers.spin(reverse, 100, percent);
+      spinRollers(-100);
     } else if (!Controller1.ButtonL1.pressing()) {
-      bottomRollers.stop(hold);
-      upperRollers.stop(hold);
+      stopRollers(hold);
     }
     
     wait(10, msec); 
