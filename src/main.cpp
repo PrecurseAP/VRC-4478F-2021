@@ -19,9 +19,9 @@ void autonomous(void) {
   //All of the arguments are measured in inches for distance, degrees for angles.
 
   thread ODOM = thread(tracking); //start position tracking loop
-
+  
   resetPos(); //reset variables / initialize the values
-
+/**
   moveToPoint(23, 6.7, 180, 7, 6, 1); //move in front of the middle home goal
 
   driveStraightNoTracking(60); //inch forward so the ball makes it
@@ -75,7 +75,94 @@ void autonomous(void) {
   stopIntakes(hold); //stop intakes to not empty tower
   
   stopAllDrive(hold); //stop drive to shoot
-  //gimme three ball
+**/
+  spinIntakes(100);
+  wait(1000, msec);
+  spinIntakes(-50);
+  wait(600, msec);
+  stopIntakes(hold);
+  moveToPoint(0, 14, -135, 3, 5, 1);
+  driveStraightNoTracking(30);
+  wait(1000, msec);
+  stopAllDrive(hold);
+  spinRollers(100);
+  wait(1100, msec);
+  stopRollers(hold);
+  moveToPoint(0, 22.5, -90, 3, 5, 1);
+  spinIntakes(100);
+  driveStraightNoTracking(30);
+  spinRollers(100);
+  wait(475, msec);
+  stopAllDrive(hold);
+  wait(1200, msec);
+  stopIntakes(hold);
+  stopRollers(hold);
+  moveToPoint(39.8, 41.5, 0, 3, 3, 1);
+  driveStraightNoTracking(20);
+  wait(1100, msec);
+  driveStraightNoTracking(-30);
+  wait(900, msec);
+  stopAllDrive(hold);
+  spinIntakes(-50);
+  wait(700, msec);
+  stopIntakes(hold);
+  /*driveStraightNoTracking22(30);
+  wait(350, msec);*/
+  moveToPoint(rX+4.5, rY, -3, 4, 3, 1);
+  driveStraightNoTracking(30);
+  wait(1500, msec);
+  stopAllDrive(hold);
+  spinRollers(100);
+  wait(1000, msec);
+  stopRollers(hold);
+  moveToPoint(67, 40, 0, 3, 3, 1);
+  /*moveToPoint(78, 81, -5, 3, 3, 1);
+  spinIntakes(100);
+  spinRollers(50);
+  wait(500, msec);*/
+  driveStraightNoTracking(30);
+  wait(900, msec);
+  //stopAllDrive(hold);
+  spinIntakes(75);
+  spinRollers(60);
+  wait(1200, msec);
+  stopRollers(hold);
+  stopIntakes(hold);
+  stopAllDrive(hold);
+  spinIntakes(-50);
+  wait(500, msec);
+  stopIntakes(hold);
+  moveToPoint(86, 114, 45, 3, 3, 1);
+  driveStraightNoTracking(40);
+  wait(1100, msec);
+  spinRollers(100);
+  wait(1500, msec);
+  driveStraightNoTracking(-50);
+  wait(1200, msec);
+  spinIntakes(50);
+  wait(500, msec);
+  stopIntakes(hold);
+  stopRollers(hold);
+  moveToPoint(rX, rY, 90, 3, 3, 1);
+  driveStraightNoTracking22(-30);
+  wait(2500, msec);
+  stopAllDrive(hold);
+  resetPos();
+  moveToPoint(27, 0, 0, 3, 3, 1);
+  driveStraightNoTracking(40);
+  spinIntakes(100);
+  spinRollers(50);
+  wait(2700, msec);
+  stopAllDrive(hold);
+  stopRollers(hold);
+  spinIntakes(-50);
+  wait(500, msec);
+  moveToPoint(63, 0, 0, 3, 3, 1);
+  driveStraightNoTracking(30);
+  wait(2000, msec);
+  spinRollers(100);
+
+  //gimme four ball
 }
 
 void usercontrol(void) {

@@ -55,6 +55,12 @@ void driveStraightNoTracking(int spd) {
   backRight.spin(forward, -spd, percent);
   backLeft.spin(forward, spd, percent);
 }
+void driveStraightNoTracking22(int spd) {
+  frontLeft.spin(forward, spd, percent);
+  frontRight.spin(forward, spd, percent);
+  backRight.spin(forward, -spd, percent);
+  backLeft.spin(forward, -spd, percent);
+}
 
 void spinWheelsNoTracking(int fL, int fR, int bR, int bL) {
   /**

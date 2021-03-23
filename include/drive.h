@@ -15,7 +15,7 @@ extern void spinIntakes(int);
 extern void spinIntakesRPM(directionType, int);
 extern void stopIntakes(brakeType);
 extern void driveStraightNoTracking(int);
-
+extern void driveStraightNoTracking22(int);
 extern float normalizer;
 extern float mSpd[4];
 extern double maxAxis, maxOutput;

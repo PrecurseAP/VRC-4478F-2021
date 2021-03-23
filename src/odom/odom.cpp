@@ -12,7 +12,7 @@ float wheelCirc = 2.75 * M_PI; //circumference of a 2.75" omni wheel, the ones w
 
 float centerToLeft = 6.0; 
 float centerToRight = 6.0; //all units in inches
-float centerToBack = 4.75;
+float centerToBack = 5.25;
 
 float deltaLeft, deltaRight, deltaBack;
 
@@ -163,7 +163,7 @@ void moveToPoint(float x, float y, int finalAngle = 0, float xMult = 1, float yM
     frontRight.spin(forward, mS[2], percent);
     backRight.spin(forward, mS[3], percent);    //spin the motors at their calculated speeds.
     
-    if ((sqrt((xE*xE) + (yE*yE)) < 1) && (fabs(tE) < 2)) { //check if the robot is close to its goal. If so, end the loop.
+    if ((sqrt((xE*xE) + (yE*yE)) < .3) && (fabs(tE) < .7)) { //check if the robot is close to its goal. If so, end the loop.
       atPoint = true;   
       stopAllDrive(hold);
     }
