@@ -97,3 +97,37 @@ int tracking() {
   }
   return 69420; //return int because threads require an int return
 }
+
+void moveToPoint(float gx, float gy, float theta) {
+  atPoint = false;
+  float s1_angle;
+
+  //stage 1: turn towards point
+  //this switch statement finds the angle of the goal point to the vertical from 0 - 360 degrees
+  float dx = gx - pos.x;
+  float dy = gy - pos.y;
+
+  switch((int)sign(dx)) {
+    case 1:
+      switch((int)sign(dy)) {
+        case 1: //quad 1
+          s1_angle = atan2(dx, dy);
+        break;
+        case -1: //quad 2
+          s1_angle = M_PI - atan2(dx, dy);
+        break;
+      }
+    break;
+    case -1:
+      switch((int)sign(dy)) {
+        case 1: //quad 4
+          s1_angle = (2 * M_PI) - atan2(dx, dy);
+        break;
+        case -1: //quad 3
+          s1_angle = M_PI + atan2(dx, dy);
+        break;
+      }
+    break;
+  }
+  s1_angle *= (180/M_PI);
+}

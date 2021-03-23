@@ -22,7 +22,7 @@
 
 template <class U>
 U logDrive(U s) {
-  return pow(fabs(s), 2) / (sign(s)*100);
+  return pow(fabs((float)s), 2) / (sign(s)*100);
 }
 
 template <class T>
