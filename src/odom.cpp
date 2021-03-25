@@ -3,6 +3,7 @@
 #include "vex.h"
 #include "custommath.h"
 #include <vex_timer.h>
+#include "drive.h"
 
 thread ODOM;
 
@@ -112,30 +113,43 @@ void moveToPoint(float gx, float gy, float theta) {
     case 1:
       switch((int)sign(dy)) {
         case 1: //quad 1
-          s1_angle = atan(dx/dy);
-        break;
+          s1_angle = atan(dx/dy); break;
         case -1: //quad 2
-          s1_angle = M_PI + atan(dx/dy);
-        break;
+          s1_angle = M_PI + atan(dx/dy); break;
       }
     break;
     case -1:
       switch((int)sign(dy)) {
         case 1: //quad 4
-          s1_angle = (2 * M_PI) + atan(dx/dy);
-        break;
+          s1_angle = (2 * M_PI) + atan(dx/dy); break;
         case -1: //quad 3
-          s1_angle = M_PI + atan(dx/dy);
-        break;
+          s1_angle = M_PI + atan(dx/dy); break;
       }
     break;
   }
   s1_angle *= (180/M_PI);
 
-  float angleError = s1_angle - (pos.thetaDeg % 360);
+  float temp = fmod(pos.thetaDeg, (float)360);
 
+  float angleError = s1_angle - ( (sign(pos.thetaDeg) == 1) ? (temp) : (temp + 360) );
+  float integral = 0;
+  
   while(fabs(angleError) > .5) {
-    angleError = pos.thetaDeg - s1_angle;
-    if (fabs(angleError))
-  }
+    updatePositionVars();
+    float angleError = s1_angle - ( (sign(pos.thetaDeg) == 1) ? (temp) : (temp + 360) );
+    if (fabs(angleError) < 5) {
+      integral += angleError;
+    } else { integral = 0; }
+
+    float mspd = (angleError * 2) + (integral / 100000);
+
+    mLB.spin(forward, -mspd, percent);
+    mLT.spin(forward, mspd, percent);
+    mRT.spin(forward, mspd, percent);
+    mRB.spin(forward, -mspd, percent);
+
+    wait(5, msec);
+  } stopAllDrive(hold);
+  
+  wait(100, msec);
 }
