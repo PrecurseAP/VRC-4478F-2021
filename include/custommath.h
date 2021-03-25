@@ -60,4 +60,7 @@ float dasin(T INPUT) { return asin(INPUT)*radToDeg; }
 template <class T>
 float datan(T INPUT) { return atan(INPUT)*radToDeg; }
 
+template <class T>
+T dForm(T i1, T i2) { return sqrt((i1*i1) + (i2*i2)); }
+
 #endif //__AIDENMATH__

@@ -99,6 +99,7 @@ int tracking() {
 }
 
 void moveToPoint(float gx, float gy, float theta) {
+  updatePositionVars();
   atPoint = false;
   float s1_angle;
 
@@ -111,23 +112,30 @@ void moveToPoint(float gx, float gy, float theta) {
     case 1:
       switch((int)sign(dy)) {
         case 1: //quad 1
-          s1_angle = atan2(dx, dy);
+          s1_angle = atan(dx/dy);
         break;
         case -1: //quad 2
-          s1_angle = M_PI - atan2(dx, dy);
+          s1_angle = M_PI + atan(dx/dy);
         break;
       }
     break;
     case -1:
       switch((int)sign(dy)) {
         case 1: //quad 4
-          s1_angle = (2 * M_PI) - atan2(dx, dy);
+          s1_angle = (2 * M_PI) + atan(dx/dy);
         break;
         case -1: //quad 3
-          s1_angle = M_PI + atan2(dx, dy);
+          s1_angle = M_PI + atan(dx/dy);
         break;
       }
     break;
   }
   s1_angle *= (180/M_PI);
+
+  float angleError = s1_angle - (pos.thetaDeg % 360);
+
+  while(fabs(angleError) > .5) {
+    angleError = pos.thetaDeg - s1_angle;
+    if (fabs(angleError))
+  }
 }
