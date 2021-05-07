@@ -7,10 +7,10 @@
 const float radToDeg = (180/M_PI);
 const float degToRad = (M_PI/180);
 
-//sign values 
+//returns the numerical sign of a number. positive -> 1, negative -> -1.
 template <class T>
 T sign(T val) {
-  return val > 0 ? (T)1 : (T)-1;
+  return val > 0 ? (T)1 : (T)-1; //look mom i can use the conditional operator!!!!!!!!!
 }
 
 template <class T>
@@ -60,7 +60,7 @@ float dasin(T INPUT) { return asin(INPUT)*radToDeg; }
 template <class T>
 float datan(T INPUT) { return atan(INPUT)*radToDeg; }
 
-template <class T>
+template <class T> //distance formula
 T dForm(T i1, T i2) { return sqrt((i1*i1) + (i2*i2)); }
 
 #endif //__AIDENMATH__

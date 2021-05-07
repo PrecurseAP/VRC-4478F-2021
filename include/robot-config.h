@@ -13,8 +13,8 @@ extern motor rightIntake;
 extern motor mainRoll;
 extern motor finalRoll;
 extern rotation rightEncoder;
-extern rotation backEncoder;
 extern rotation leftEncoder;
+extern inertial GYRO;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

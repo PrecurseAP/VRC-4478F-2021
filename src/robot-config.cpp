@@ -18,8 +18,8 @@ motor rightIntake = motor(PORT5, ratio6_1, false);
 motor mainRoll = motor(PORT6, ratio6_1, false);
 motor finalRoll = motor(PORT11, ratio6_1, true);
 rotation rightEncoder = rotation(PORT7, true);
-rotation backEncoder = rotation(PORT8, false);
 rotation leftEncoder = rotation(PORT9, false);
+inertial GYRO = inertial(PORT8);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
