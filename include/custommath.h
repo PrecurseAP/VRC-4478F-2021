@@ -16,7 +16,7 @@ T sign(T val) {
 template <class T>
 T MAX(T INPUT, T INPUT2, T INPUT3 = INT_MIN, T INPUT4 = INT_MIN) {
   T _temp = INPUT > INPUT2 ? INPUT : INPUT2; 
-  T _temp2 = INPUT3 > INPUT4 ? INPUT3 : INPUT4;
+  T _temp2 = INPUT3 > INPUT4 ? INPUT3 : INPUT4; //good lord
   return _temp > _temp2 ? _temp : _temp2;
 }
 

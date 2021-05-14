@@ -42,162 +42,96 @@ void pre_auton(void) {
   //ahh oops
 }
 
-void turnToAngle(float theta, float constant = 3.0) {
-  /*
-  ** theta is the angle to which the robot will turn (absolute, 0 -> 360 degrees)
-  ** constant is a value that increases or decreases the speed of the turn. larger values are unstable, smaller ones make it slooow
-  */
-  bool complete = false;
-
-  while(!complete) { //control loop
-
-    //wrap angle error around so that the robot will take the shortest path (not turning 330 degrees right to get to 30 degrees left)
-    float angleError = theta - GYRO.heading(degrees);
-    if (angleError > 180) {
-      angleError = angleError - 360;
-    } else if (angleError < -180) {
-      angleError = 360 + angleError;
-    }
-
-    //calculate the universal motor speed
-    //we use the square root of the error because that ensures that the robot slow down before it reaches its goal,
-    //preventing it from overshooting and getting caught in a terrible loop
-    float mspd = constant * sign(angleError) * sqrt(fabs(angleError));
-
-    //spin the motors, mLB and mRB are reversed to compensate for motor gearing and orientation
-    mLB.spin(forward, -mspd, percent);
-    mLT.spin(forward, mspd, percent);
-    mRT.spin(forward, mspd, percent);
-    mRB.spin(forward, -mspd, percent);
-
-    //end the control loop when we get near our goal. (error is tiny, .6 degrees works)
-    if (fabs(angleError) < .6) {
-      complete = true;
-      stopAllDrive(hold);
-      wait(200, msec);
-    }
-  }
-}
-
-const float wheelC = 2.75 * M_PI; //oooo spooky tracking wheel circumference
-
-void moveStraight(float d, float c = 1.0) {
-  /*
-  ** d is the distance, in inches, to travel straight forward (or backward if negative)
-  ** c is a constant that scales the speed of travel. higher means faster, lower means slower. default value is 1.
-  */
-
-  //reset encoder positions.
-  leftEncoder.setPosition(0, degrees);
-  rightEncoder.setPosition(0, degrees);
-  
-  //convert d into encoder rotations in degrees
-  float d2 = (d / wheelC) * 360;
-
-  float currLeft = 0;
-  float currRight = 0;
-
-  bool complete = false;
-
-  while (!complete) { //control loop
-
-    /* unused, could be used for future pid purposes
-    float prevLeft = currLeft;
-    float prevRight = currRight;
-    */
-    
-    //store current encoder values
-    currLeft = leftEncoder.position(degrees);
-    currRight = rightEncoder.position(degrees);
-
-    //calculate the "tilt" of the bot. This is a value representing how much the robot has changed its orientation.
-    float tilt = currLeft - currRight;
-
-    //calculate the distance to the goal, while factoring in the tilt so that the robot compensates.
-    float rightError = d2 - currRight + tilt;
-    float leftError = d2 - currLeft - tilt;
-
-    //calculate the speeds at which each side of the robot should travel. c is a scalar and 12 is an arbitrary constant
-    //if i dont divide the speed by some constant then the robot goes WAY too fast. (error is in degrees, gets to hundreds)
-    float rightSpeed = c * rightError / 12;
-    float leftSpeed = c * leftError / 12;
-
-    initDebug();
-    debug(rightError);
-    debug(leftError);
-    debug(tilt);
-    debug("\n");
-
-    //spin motors at their calculated speeds. Left side is scaled slightly.
-    //the left scaling is annoying, our robot has a mechanical problem that makes it hard to drive straight over long distances
-    //not enough time to fix it, we dont even know whats causing it. optimally i wouldnt need to scale the speeds like that.
-    mLB.spin(forward, -leftSpeed*1.03, percent);
-    mLT.spin(forward, leftSpeed*1.03, percent);
-    mRT.spin(forward, -rightSpeed, percent);
-    mRB.spin(forward, rightSpeed, percent);
-
-    //end the control loop when we get close enough to our goal
-    //i still need to tune these error values, we want as little error as possible while still getting to our goal fast enough.
-    if ((tilt < 4) && ((fabs(rightError) + fabs(leftError))/2) < 9) {
-      complete = true;
-      stopAllDrive(hold);
-      wait(200, msec);
-    }
-  }
-}
-
-void autonomous(void) { //when you dont comment any of your goddamn code
-  /*GYRO.calibrate();
+void autonomous(void) { //when you dont comment any of your goddamn code BUT I DID
+  GYRO.calibrate(); //calibrate gyro first (we could put this in pre-auton)
   wait(3000, msec);
-
+  
+  //first action; move forward and grab the ball in front of us
   spinIntakes(100);
-  moveStraight(47);
+  moveStraight(27, 70);
   stopIntakes(hold);
+
+  //second action; turn towards corner toward, travel to it, shoot a ball into it
   turnToAngle(135);
-  moveStraight(49);
+  moveStraight(29, 65);
   spinRollers(100);
   wait(1000, msec);
   stopRollers(hold);
-  moveStraight(-43);
+
+  //third action; move backwards, turn to face the left side of the field
+  moveStraight(-41, 50);
   turnToAngle(270);
+
+  //fourth acton; drive forward while sucking in the ball in front of us, then stop in front of middle home tower
   spinRollers(100);
   spinIntakes(100);
   wait(400, msec);
   stopRollers(hold);
-  moveStraight(55);
+  moveStraight(25, 55, .75);
   stopIntakes(hold);
+
+  //fifth action; turn toward the home tower, move to it, deposit a ball into it
   mainRoll.spin(forward, 10, percent);
   turnToAngle(180);
   stopRollers(hold);
-  wait(300, msec);
-  moveStraight(41.7);
+  wait(400, msec);
+  moveStraight(27, 70);
   spinRollers(100);
-  wait(1200, msec);
+  wait(900, msec);
   stopRollers(hold);
-  turnToAngle(270);
+
+  //sixth action; move backward, turn to the left again, then grab the ball sitting against the left wall
+  moveStraight(-13, 40);
+  turnToAngle(269);
   spinIntakes(100);
-  mainRoll.spin(forward, 10, percent);
-  moveStraight(66);
+  //mainRoll.spin(forward, 10, percent);
+  moveStraight(57, 55);
   stopIntakes(hold);
-  stopRollers(hold);
+
+  //seventh action; move backward, turn to face home corner tower, move to it, deposit ball
+  moveStraight(-22, 55);
   turnToAngle(225);
-  moveStraight(21);
-  mainRoll.spin(forward, 75, percent);
-  spinIntakes(100);
-  wait(2500, msec);
-  stopIntakes(hold);
+  moveStraight(28.5, 55);
   spinRollers(100);
-  wait(750, msec);
-  stopRollers(hold);*/
+  wait(900, msec);
+  stopRollers(hold);
+
+  //eigth action; travel backwards, turn to middle ball, go forward to grab it
+  moveStraight(-9, 40);
+  turnToAngle(0);
+  spinIntakes(90);
+  moveStraight(50, 55);
+  stopIntakes(hold);
+  
+  //ninth action; turn to face toward, move forward, deposit, then move backwards
+  turnToAngle(270);
+  moveStraight(6, 35);
+  spinRollers(100);
+  wait(900, msec);
+  stopRollers(hold);
+  moveStraight(-16, 50);
+
+  //tenth action; turn to face far ball, move to grab, turn to tower
+  turnToAngle(0);
+  spinIntakes(90);
+  moveStraight(48, 60);
+  stopIntakes(hold);
+  turnToAngle(310);
+  
+  //eleventh action; drive into far corner tower, deposit ball, back up, turn to middle
+  moveStraight(20, 45);
+  //spinIntakes(80);
+  spinRollers(100);
+  wait(900, msec);
+  //stopIntakes(hold);
+  stopRollers(hold);
+  moveStraight(-12, 55);
+  turnToAngle(135);
+
 }
 
 void usercontrol(void) {
-  /*GYRO.calibrate();
-  wait(2500, msec);
-  //moveStraight(24, .7);
-  turnToAngle(180);*/
-  int RS = 0;
-  int LS = 0;
+  int RS = 0, LS = 0;
 
   //idk if this is necessary i just want to make sure the motors are trying their hardest :)))
   mLB.setMaxTorque(100, percent);
@@ -263,7 +197,7 @@ int main() {
 
   // Prevent main from exiting with an infinite loop.
   while (true) {
-    wait(100, msec);
+    wait(100, msec);//gamingk
   }
 }
 //baheglo
