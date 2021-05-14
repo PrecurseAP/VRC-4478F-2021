@@ -75,6 +75,7 @@ void moveStraight(float d, float maxSpeed /*= 100.0*/, float c /*= 1.0*/) {
   /*
   ** d is the distance, in inches, to travel straight forward (or backward if negative)
   ** c is a constant that scales the speed of travel. higher means faster, lower means slower. default value is 1.
+  ** maxSpeed is the maximum speed at which the robot is allowed to travel during the movement
   */
 
   //reset encoder positions.

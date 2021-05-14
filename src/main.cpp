@@ -4,6 +4,8 @@
 #include "custommath.h"
 #include <iostream>
 
+using namespace vex;
+
 //LOOK AT ME I CAN USE TEMPLATES
 //debug function prints crap to the screen
 template <class T>
@@ -32,14 +34,17 @@ void driveForwardNoPID(int s) {
   mRB.spin(forward, s, percent);
 }
 
-using namespace vex;
-
 // A global instance of competition
 competition Competition;
 
 void pre_auton(void) {
   vexcodeInit();
   //ahh oops
+  //idk if this is necessary i just want to make sure the motors are trying their hardest :)))
+  mLB.setMaxTorque(100, percent);
+  mRB.setMaxTorque(100, percent);
+  mLT.setMaxTorque(100, percent);
+  mRT.setMaxTorque(100, percent);
 }
 
 void autonomous(void) { //when you dont comment any of your goddamn code BUT I DID
@@ -84,7 +89,6 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   moveStraight(-13, 40);
   turnToAngle(269);
   spinIntakes(100);
-  //mainRoll.spin(forward, 10, percent);
   moveStraight(57, 55);
   stopIntakes(hold);
 
@@ -120,24 +124,15 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   
   //eleventh action; drive into far corner tower, deposit ball, back up, turn to middle
   moveStraight(20, 45);
-  //spinIntakes(80);
   spinRollers(100);
   wait(900, msec);
-  //stopIntakes(hold);
   stopRollers(hold);
   moveStraight(-12, 55);
   turnToAngle(135);
-
 }
 
 void usercontrol(void) {
   int RS = 0, LS = 0;
-
-  //idk if this is necessary i just want to make sure the motors are trying their hardest :)))
-  mLB.setMaxTorque(100, percent);
-  mRB.setMaxTorque(100, percent);
-  mLT.setMaxTorque(100, percent);
-  mRT.setMaxTorque(100, percent);
 
   while (1) { //drive FOREVER
 
