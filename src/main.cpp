@@ -53,18 +53,18 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   
   //first action; move forward and grab the ball in front of us
   spinIntakes(100);
-  moveStraight(27, 70);
+  moveStraight(26.5, 70);
   stopIntakes(hold);
 
   //second action; turn towards corner toward, travel to it, shoot a ball into it
   turnToAngle(135);
-  moveStraight(29, 65);
+  moveStraight(29, 60, .9);
   spinRollers(100);
   wait(1000, msec);
   stopRollers(hold);
 
   //third action; move backwards, turn to face the left side of the field
-  moveStraight(-41, 50);
+  moveStraight(-42.5, 50);
   turnToAngle(270);
 
   //fourth acton; drive forward while sucking in the ball in front of us, then stop in front of middle home tower
@@ -72,7 +72,7 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   spinIntakes(100);
   wait(400, msec);
   stopRollers(hold);
-  moveStraight(25, 55, .75);
+  moveStraight(25, 50, .75);
   stopIntakes(hold);
 
   //fifth action; turn toward the home tower, move to it, deposit a ball into it
@@ -80,40 +80,43 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   turnToAngle(180);
   stopRollers(hold);
   wait(400, msec);
-  moveStraight(27, 70);
+  moveStraight(27.5, 70);
   spinRollers(100);
   wait(900, msec);
   stopRollers(hold);
 
   //sixth action; move backward, turn to the left again, then grab the ball sitting against the left wall
-  moveStraight(-13, 40);
+  moveStraight(-13.5, 40);
   turnToAngle(269);
   spinIntakes(100);
-  moveStraight(57, 55);
+  mainRoll.spin(forward, 5, percent);
+  moveStraight(58, 55);
+  wait(100, msec);
   stopIntakes(hold);
+  mainRoll.stop(hold);
 
   //seventh action; move backward, turn to face home corner tower, move to it, deposit ball
-  moveStraight(-22, 55);
+  moveStraight(-23, 55);
   turnToAngle(225);
-  moveStraight(28.5, 55);
+  moveStraight(29.5, 55);
   spinRollers(100);
-  wait(900, msec);
+  wait(750, msec);
   stopRollers(hold);
 
   //eigth action; travel backwards, turn to middle ball, go forward to grab it
-  moveStraight(-9, 40);
+  moveStraight(-10.5, 40);
   turnToAngle(0);
   spinIntakes(90);
-  moveStraight(50, 55);
+  moveStraight(47, 55);
   stopIntakes(hold);
   
   //ninth action; turn to face toward, move forward, deposit, then move backwards
   turnToAngle(270);
-  moveStraight(6, 35);
+  moveStraight(7, 35);
   spinRollers(100);
   wait(900, msec);
   stopRollers(hold);
-  moveStraight(-16, 50);
+  moveStraight(-15, 50);
 
   //tenth action; turn to face far ball, move to grab, turn to tower
   turnToAngle(0);
@@ -122,13 +125,30 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   stopIntakes(hold);
   turnToAngle(310);
   
-  //eleventh action; drive into far corner tower, deposit ball, back up, turn to middle
+  //eleventh action; drive into far corner tower, deposit ball, back up, turn to face backwards
   moveStraight(20, 45);
   spinRollers(100);
   wait(900, msec);
   stopRollers(hold);
   moveStraight(-12, 55);
-  turnToAngle(135);
+  turnToAngle(180);
+  spinIntakes(100);
+  spinRollers(100);
+  wait(250, msec);
+  stopIntakes(hold);
+  stopRollers(hold);
+
+  //twelvth action; move towards center tower, descore a ball, then score the ball!
+  moveStraight(47, 65);
+  turnToAngle(90);
+  spinIntakes(-100);
+  moveStraight(395, 70);
+  driveForwardNoPID(60);
+  stopAllDrive(hold);
+  stopIntakes(hold);
+  spinRollers(100);
+  wait(1200, msec);
+  stopRollers(hold);
 }
 
 void usercontrol(void) {
