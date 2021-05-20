@@ -64,7 +64,7 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   stopRollers(hold);
 
   //third action; move backwards, turn to face the left side of the field
-  moveStraight(-42.5, 50);
+  moveStraight(-42, 50);
   turnToAngle(270);
 
   //fourth acton; drive forward while sucking in the ball in front of us, then stop in front of middle home tower
@@ -72,7 +72,7 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   spinIntakes(100);
   wait(400, msec);
   stopRollers(hold);
-  moveStraight(25, 50, .75);
+  moveStraight(25.5, 50, .75);
   stopIntakes(hold);
 
   //fifth action; turn toward the home tower, move to it, deposit a ball into it
@@ -82,37 +82,37 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   wait(400, msec);
   moveStraight(27.5, 70);
   spinRollers(100);
-  wait(900, msec);
+  wait(700, msec);
   stopRollers(hold);
 
   //sixth action; move backward, turn to the left again, then grab the ball sitting against the left wall
-  moveStraight(-13.5, 40);
+  moveStraight(-13, 40);
   turnToAngle(269);
   spinIntakes(100);
   mainRoll.spin(forward, 5, percent);
-  moveStraight(58, 55);
+  moveStraight(58.5, 55);
   wait(100, msec);
   stopIntakes(hold);
   mainRoll.stop(hold);
 
   //seventh action; move backward, turn to face home corner tower, move to it, deposit ball
-  moveStraight(-23, 55);
+  moveStraight(-22.5, 55);
   turnToAngle(225);
-  moveStraight(29.5, 55);
+  moveStraight(31, 55);
   spinRollers(100);
   wait(750, msec);
   stopRollers(hold);
 
   //eigth action; travel backwards, turn to middle ball, go forward to grab it
-  moveStraight(-10.5, 40);
+  moveStraight(-10, 40);
   turnToAngle(0);
   spinIntakes(90);
-  moveStraight(47, 55);
+  moveStraight(47.3, 55);
   stopIntakes(hold);
   
   //ninth action; turn to face toward, move forward, deposit, then move backwards
   turnToAngle(270);
-  moveStraight(7, 35);
+  moveStraight(6, 35);
   spinRollers(100);
   wait(900, msec);
   stopRollers(hold);
@@ -123,7 +123,7 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   spinIntakes(90);
   moveStraight(48, 60);
   stopIntakes(hold);
-  turnToAngle(310);
+  turnToAngle(303);
   
   //eleventh action; drive into far corner tower, deposit ball, back up, turn to face backwards
   moveStraight(20, 45);
@@ -142,7 +142,7 @@ void autonomous(void) { //when you dont comment any of your goddamn code BUT I D
   moveStraight(47, 65);
   turnToAngle(90);
   spinIntakes(-100);
-  moveStraight(395, 70);
+  moveStraight(39.5, 70);
   driveForwardNoPID(60);
   stopAllDrive(hold);
   stopIntakes(hold);
@@ -159,8 +159,8 @@ void usercontrol(void) {
     //logarithmic drive functions woooooo
     //this just gets the drive speeds, we have tank drive
     //i call it stank drive eheh
-    RS = logDrive(Controller1.Axis2.position(percent));
-    LS = logDrive(Controller1.Axis3.position(percent));
+    RS = Controller1.Axis2.position(percent);
+    LS = Controller1.Axis3.position(percent);
     
     //go robot, go!! go shoot balls i guess
     mLB.spin(forward, -LS, percent);

@@ -113,6 +113,7 @@ void moveStraight(float d, float maxSpeed /*= 100.0*/, float c /*= 1.0*/) {
     float rightSpeed = c * rightError / 8;
     float leftSpeed = c * leftError / 8;
 
+    //caps the maximum speed of the motors
     float max_ = MAX(fabs(rightSpeed), fabs(leftSpeed));
     if (max_ > maxSpeed) {
       rightSpeed *= (maxSpeed / max_);
@@ -122,9 +123,7 @@ void moveStraight(float d, float maxSpeed /*= 100.0*/, float c /*= 1.0*/) {
     leftSpeed *= sign(d);
     rightSpeed *= sign(d);
 
-    //spin motors at their calculated speeds. Right side is scaled slightly.
-    //the right scaling is annoying, our robot has a mechanical problem that makes it hard to drive straight over long distances
-    //not enough time to fix it, we dont even know whats causing it. optimally i wouldnt need to scale the speeds like that.
+    //spin motors at their calculated speeds.
     mLB.spin(forward, -leftSpeed, percent);
     mLT.spin(forward, leftSpeed, percent);
     mRT.spin(forward, -rightSpeed, percent);
