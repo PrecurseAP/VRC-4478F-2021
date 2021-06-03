@@ -8,18 +8,14 @@ using code = vision::code;
 brain  Brain;
 
 // VEXcode device constructors
-motor mLT = motor(PORT10, ratio18_1, false);
-motor mLB = motor(PORT2, ratio18_1, false);
-motor mRT = motor(PORT3, ratio18_1, false);
-motor mRB = motor(PORT4, ratio18_1, false);
-controller Controller1 = controller(primary);
-motor leftIntake = motor(PORT20, ratio6_1, false);
-motor rightIntake = motor(PORT5, ratio6_1, false);
-motor mainRoll = motor(PORT6, ratio6_1, false);
-motor finalRoll = motor(PORT11, ratio6_1, true);
-rotation rightEncoder = rotation(PORT7, true);
-rotation leftEncoder = rotation(PORT9, false);
-inertial GYRO = inertial(PORT8);
+controller Controller = controller(primary);
+motor mLFront = motor(PORT1, ratio18_1, false);
+motor mRFront = motor(PORT2, ratio18_1, false);
+motor mLBack = motor(PORT3, ratio18_1, false);
+motor mRBack = motor(PORT4, ratio18_1, false);
+rotation twLeft = rotation(PORT5, false);
+rotation twRight = rotation(PORT6, false);
+
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
