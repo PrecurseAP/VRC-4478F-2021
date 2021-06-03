@@ -4,16 +4,17 @@
 
 #include "math.h"
 #include <tuple>
+#include "util.h"
 
 namespace pathing {
-  extern struct point {
+  extern struct Point {
     float x;
     float y;
     bool end;
-    point(float, float, bool);
+    Point(float, float, bool);
   };
   extern class Path;
-  extern void generateCubicBezier(Path*, point, point, point, point, int);
+  extern void generateCubicBezier(Path*, Point, Point, Point, Point, int);
 }
 
 #endif

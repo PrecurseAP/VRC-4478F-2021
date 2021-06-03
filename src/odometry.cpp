@@ -11,7 +11,7 @@ bool odom::kill = false;
 odom::Position pose = {0.0, 0.0, 0.0};
 
 float odom::angleWrap(float val) {
-  while(val < -_2pi) {
+  while(val < 0) {
     val += _2pi;
   }
   while(val >= _2pi) {
