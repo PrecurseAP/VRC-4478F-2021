@@ -1,16 +1,19 @@
 #include "vex.h"
-
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// Motor1               motor         1               
-// Rotation2            rotation      2               
-// ---- END VEXCODE CONFIGURED DEVICES ----
+#include "util.h"
+#include "pathing.h"
+#include "odometry.h"
+#include "ppc.h"
 
 using namespace vex;
 
 competition Competition;
+
+pathing::Point p1 = pathing::Point( 0 , 0 );
+pathing::Point p2 = pathing::Point( 5 , 0 );
+pathing::Point p3 = pathing::Point( 5 , 5 );
+pathing::Point p4 = pathing::Point( 0 , 5 );
+
+pathing::Path mainPath(p1, p2, p3, p4, 20); 
 
 void pre_auton(void) {
   vexcodeInit();

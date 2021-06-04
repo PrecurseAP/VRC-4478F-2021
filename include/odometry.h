@@ -7,11 +7,12 @@ namespace odom {
   extern const float chassisWidth;
   extern const float _2pi;
   extern bool kill;
-  extern struct Position {
+  struct Position {
     float x;
     float y;
     float theta; 
   };
+  extern Position pose;
   extern int trackingLoop(Position*); 
   extern float angleWrap(float);
 }
