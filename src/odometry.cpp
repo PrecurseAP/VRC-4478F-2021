@@ -6,6 +6,7 @@ using namespace odom;
 const float odom::wheelCirc = 2.75 * M_PI;
 const float odom::chassisWidth = 1;//fsp[adjf[asdpijf[apsdjf[apisdjf[aisdwnrpbgpuiebjjjeklklwescdrtfvgybuhn please change later
 const float odom::_2pi = M_PI * 2;
+
 bool odom::kill = false;
 
 odom::Position odom::pose = {0.0, 0.0, 0.0};
@@ -60,7 +61,7 @@ int odom::trackingLoop(Position* container) {
     //store values for next iteration
 
     container->x += (dX * cos(container->theta)) + (dY * sin(container->theta));
-    container->y += (dY * cos(container->theta)) + (dX * sin(container->theta));
+    container->y += (dY * cos(container->theta)) - (dX * sin(container->theta));
     container->theta = odom::angleWrap(container->theta + dTheta);
     //calculate and store the new absolute pose of the robot
   }

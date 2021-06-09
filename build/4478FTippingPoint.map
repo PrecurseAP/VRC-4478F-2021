@@ -29,7 +29,7 @@ C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_compe
 C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_triport.cpp.obj)
                               C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_brain.cpp.obj) (vex::triport::~triport())
 C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_color.cpp.obj)
-                              C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_brain.cpp.obj) (vex::color::operator unsigned long() const)
+                              build/src/drawing.o (vex::color::~color())
 C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_timer.cpp.obj)
                               C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(vex_brain.cpp.obj) (vex::timer::~timer())
 C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5\libv5rt.a(v5_apiuser.c.obj)
@@ -67,20 +67,25 @@ __sbss_end          0x4               C:\Program Files (x86)\VEX Robotics\VEXcod
 Discarded input sections
 
  .text          0x00000000        0x0 build/src/ppc.o
+ .text._Z17calcAngleErrorRadff
+                0x00000000       0x68 build/src/ppc.o
+ .ARM.exidx.text._Z17calcAngleErrorRadff
+                0x00000000        0x8 build/src/ppc.o
  .text._ZN3ppc4loopEPN7pathing4PathE
-                0x00000000       0x88 build/src/ppc.o
+                0x00000000      0x2c0 build/src/ppc.o
  .ARM.exidx.text._ZN3ppc4loopEPN7pathing4PathE
                 0x00000000        0x8 build/src/ppc.o
  .data._ZN3ppc9lookaheadE
                 0x00000000        0x4 build/src/ppc.o
  .data._ZN3ppc11lookaheadKFE
                 0x00000000        0x4 build/src/ppc.o
+ .data.kTurn    0x00000000        0x4 build/src/ppc.o
  .comment       0x00000000       0x2e build/src/ppc.o
  .note.GNU-stack
                 0x00000000        0x0 build/src/ppc.o
  .ARM.attributes
                 0x00000000       0x3a build/src/ppc.o
- .llvm_addrsig  0x00000000        0x0 build/src/ppc.o
+ .llvm_addrsig  0x00000000        0x4 build/src/ppc.o
  .text          0x00000000        0x0 build/src/main.o
  .text._Z9pre_autonv
                 0x00000000        0x4 build/src/main.o
@@ -117,6 +122,28 @@ Discarded input sections
  .ARM.exidx.text._ZN7pathing4Path15getPointAtIndexEi
                 0x00000000        0x8 build/src/pathing.o
  .llvm_addrsig  0x00000000        0x0 build/src/pathing.o
+ .text          0x00000000        0x0 build/src/drawing.o
+ .text._ZN7drawing8drawGoalEiiN3vex5colorE
+                0x00000000       0x94 build/src/drawing.o
+ .ARM.exidx.text._ZN7drawing8drawGoalEiiN3vex5colorE
+                0x00000000        0x8 build/src/drawing.o
+ .text._ZN7drawing12renderScreenEv
+                0x00000000      0x61c build/src/drawing.o
+ .ARM.exidx.text._ZN7drawing12renderScreenEv
+                0x00000000        0x8 build/src/drawing.o
+ .text._ZN7drawing16touchScreenLogicEv
+                0x00000000       0xd8 build/src/drawing.o
+ .ARM.exidx.text._ZN7drawing16touchScreenLogicEv
+                0x00000000        0x8 build/src/drawing.o
+ .data.p        0x00000000        0xc build/src/drawing.o
+ .rodata.str1.1
+                0x00000000       0x38 build/src/drawing.o
+ .comment       0x00000000       0x2e build/src/drawing.o
+ .note.GNU-stack
+                0x00000000        0x0 build/src/drawing.o
+ .ARM.attributes
+                0x00000000       0x3a build/src/drawing.o
+ .llvm_addrsig  0x00000000        0x5 build/src/drawing.o
  .text          0x00000000        0x0 build/src/robot-config.o
  .data.RemoteControlCodeEnabled
                 0x00000000        0x1 build/src/robot-config.o
@@ -3442,6 +3469,7 @@ LOAD C:\Program Files (x86)\VEX Robotics\VEXcode Pro V5\sdk/vexv5/stdlib_0.lib
 LOAD build/src/ppc.o
 LOAD build/src/main.o
 LOAD build/src/pathing.o
+LOAD build/src/drawing.o
 LOAD build/src/robot-config.o
 LOAD build/src/odometry.o
 START GROUP

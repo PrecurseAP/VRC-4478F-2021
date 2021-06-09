@@ -1,6 +1,7 @@
 #include "pathing.h"
 //holy shit writing this code is like traversing the ninth circle of hell
 using namespace pathing;
+
 pathing::Point::Point(float X, float Y, int IND, bool END) {
   x = X;
   y = Y;
@@ -71,6 +72,7 @@ void pathing::Path::setPointAtIndex(int index, Point val) {
 }
 
 pathing::Point pathing::Path::getPointAtIndex(int i) {
+  /** returns the value in array p at index i */
   return this->p[i];
 }
 
