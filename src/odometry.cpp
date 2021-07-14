@@ -1,17 +1,15 @@
 #include "odometry.h"
 #include "math.h"
 
-using namespace odom;
+const float wheelCirc = 2.75 * M_PI;
+const float chassisWidth = 1;//fsp[adjf[asdpijf[apsdjf[apisdjf[aisdwnrpbgpuiebjjjeklklwescdrtfvgybuhn please change later
+const float _2pi = M_PI * 2;
 
-const float odom::wheelCirc = 2.75 * M_PI;
-const float odom::chassisWidth = 1;//fsp[adjf[asdpijf[apsdjf[apisdjf[aisdwnrpbgpuiebjjjeklklwescdrtfvgybuhn please change later
-const float odom::_2pi = M_PI * 2;
+bool kill = false;
 
-bool odom::kill = false;
+Position pose = {0.0, 0.0, 0.0};
 
-odom::Position odom::pose = {0.0, 0.0, 0.0};
-
-float odom::angleWrap(float val) {
+float angleWrap(float val) {
   while(val < 0) {
     val += _2pi;
   }
@@ -21,10 +19,10 @@ float odom::angleWrap(float val) {
   return val;
 }
 
-int odom::trackingLoop(Position* container) {
+int trackingLoop(Position* container) {
   using namespace vex;
 
-  odom::kill = false;
+  kill = false;
 
   float prevL = 0;
   float prevR = 0;
@@ -62,7 +60,7 @@ int odom::trackingLoop(Position* container) {
 
     container->x += (dX * cos(container->theta)) + (dY * sin(container->theta));
     container->y += (dY * cos(container->theta)) - (dX * sin(container->theta));
-    container->theta = odom::angleWrap(container->theta + dTheta);
+    container->theta = angleWrap(container->theta + dTheta);
     //calculate and store the new absolute pose of the robot
   }
   return 1;

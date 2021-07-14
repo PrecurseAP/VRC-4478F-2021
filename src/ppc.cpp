@@ -3,13 +3,11 @@
 #include "ppc.h"
 #include "odometry.h"
 
-using namespace ppc;
+float asyncSpeedMod = 1; //global speed mod for async event listener
 
-float ppc::asyncSpeedMod = 1; //global speed mod for async event listener
-
-float ppc::lookahead = 18.0;
-float ppc::lookaheadKF = .5;
-float ppc::kTurn = 10;
+float lookahead = 18.0;
+float lookaheadKF = .5;
+float kTurn = 10;
 
 float calcAngleErrorRad(float a, float b) {
   /**
@@ -18,21 +16,21 @@ float calcAngleErrorRad(float a, float b) {
   * this is in radians
   */
   if ((b - a) > M_PI) {
-    return b - a - odom::_2pi;
+    return b - a - _2pi;
   } else if ((b - a) < -M_PI) {
-    return b - a + odom::_2pi;
+    return b - a + _2pi;
   } else {
     return b - a;
   }
 }
 
-void ppc::loop(pathing::Path* path) {
+void loop(Path* path) {
   bool done = false;
   while(!done) {
-    pathing::Point closest;
+    Point closest;
     float dClosest;
 
-    std::tie(closest, dClosest) = path->pathing::nearestPointAndDistance(pathing::Point(odom::pose.x, odom::pose.y));
+    std::tie(closest, dClosest) = path->nearestPointAndDistance(Point(pose.x, pose.y));
 
     if (closest.end == true) {
       done = dClosest < 2;
@@ -41,19 +39,19 @@ void ppc::loop(pathing::Path* path) {
     float newLookahead = lookahead - (dClosest * lookaheadKF);
     newLookahead = (newLookahead < 0) ? 1 : newLookahead;
 
-    pathing::Point target = path->getPointAtIndex(closest.ind);
+    Point target = path->getPointAtIndex(closest.ind);
 
-    float distanceToLookaheadPoint = sqrt(sq(target.x - odom::pose.x) + sq(target.y - odom::pose.y));
+    float distanceToLookaheadPoint = sqrt(sq(target.x - pose.x) + sq(target.y - pose.y));
 
     float forwardPower = distanceToLookaheadPoint * 10;
 
-    float targetBearing = atan2(target.x - odom::pose.x, target.y - odom::pose.y);
+    float targetBearing = atan2(target.x - pose.x, target.y - pose.y);
 
     while (targetBearing < 0) {
-      targetBearing += odom::_2pi;
+      targetBearing += _2pi;
     }
 
-    float currentBearing = atan2(sin(odom::pose.theta), cos(odom::pose.theta));
+    float currentBearing = atan2(sin(pose.theta), cos(pose.theta));
 
     float angleError = calcAngleErrorRad(currentBearing, targetBearing) * kTurn;
 

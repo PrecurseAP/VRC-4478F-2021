@@ -3,22 +3,25 @@
 #include "pathing.h"
 #include "odometry.h"
 #include "ppc.h"
+#include "ui.h"
 
 using namespace vex;
 
 competition Competition;
 
-pathing::Point p1 = pathing::Point( 0 , 0 );
-pathing::Point p2 = pathing::Point( 5 , 0 );
-pathing::Point p3 = pathing::Point( 5 , 5 );
-pathing::Point p4 = pathing::Point( 0 , 5 );
+Point p1 = Point( 0 , 0 );
+Point p2 = Point( 5 , 0 );
+Point p3 = Point( 5 , 5 );
+Point p4 = Point( 0 , 5 );
 
-pathing::Path mainPath(p1, p2, p3, p4, 20); 
+Path mainPath(p1, p2, p3, p4, 20); 
 
 //this is where you would initialize events
 
 void pre_auton(void) {
   vexcodeInit();
+  renderScreen(); //draw the field on the screen once.
+  Brain.Screen.pressed(touchScreenLogic); //callback so that the drawing and logic code is only executed when the screen is touched. (this saves tons of resources as opposed to a loop)
 }
 
 void autonomous(void) {

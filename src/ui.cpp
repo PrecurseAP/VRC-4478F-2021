@@ -1,11 +1,9 @@
 #include "vex.h"
-#include "drawing.h"
+#include "ui.h"
 
-using namespace drawing;
+preautonStats p;
 
-drawing::preautonStats p;
-
-void drawing::drawGoal(int x, int y, color ballColor) {
+void drawGoal(int x, int y, color ballColor) {
   /* this draws a black circle filled with a colored ball in the middle, looks exactly like a goal from top down */
   /* give color::transparent for ballC to make a goal with no ball */
   Brain.Screen.drawCircle(x, y, 9, color::transparent);
@@ -14,7 +12,7 @@ void drawing::drawGoal(int x, int y, color ballColor) {
   Brain.Screen.drawCircle(x, y, 6, ballColor);
 }
 
-void drawing::renderScreen() {
+void renderScreen() {
   //for reference the screen is 480 x 272 pixels
   Brain.Screen.clearScreen();
   Brain.Screen.setPenColor("#777777"); //change border color of squares to a slightly darker gray, separates tiles
@@ -67,17 +65,17 @@ void drawing::renderScreen() {
 
   Brain.Screen.setPenColor("#222222"); //set color to a very dark gray, pretty much black
 
-  drawing::drawGoal(144, 29, color::blue);              //                
-  drawing::drawGoal(238, 29, color::red);               //draw top three goals
-  drawing::drawGoal(331, 29, color::red);               //
+  drawGoal(144, 29, color::blue);              //                
+  drawGoal(238, 29, color::red);               //draw top three goals
+  drawGoal(331, 29, color::red);               //
 
-  drawing::drawGoal(144, 123, color::blue);             // 
-  drawing::drawGoal(238, 123, color::transparent);      //draw middle three goals
-  drawing::drawGoal(331, 123, color::red);              //
+  drawGoal(144, 123, color::blue);             // 
+  drawGoal(238, 123, color::transparent);      //draw middle three goals
+  drawGoal(331, 123, color::red);              //
 
-  drawing::drawGoal(144, 216, color::blue);             // 
-  drawing::drawGoal(238, 216, color::blue);             //draw bottom three goals
-  drawing::drawGoal(331, 216, color::red);              //
+  drawGoal(144, 216, color::blue);             // 
+  drawGoal(238, 216, color::blue);             //draw bottom three goals
+  drawGoal(331, 216, color::red);              //
 
   Brain.Screen.drawCircle(155, 40, 6, color::red);
   Brain.Screen.drawCircle(320, 40, 6, color::blue);
@@ -104,7 +102,7 @@ void drawing::renderScreen() {
   Brain.Screen.printAt(405, 234, false, "Confirm");    //
 }
 
-void drawing::touchScreenLogic() {
+void touchScreenLogic() {
   p.tx = Brain.Screen.xPosition();  // grab coordinates of the touch
   p.ty = Brain.Screen.yPosition();  //
 
@@ -133,5 +131,5 @@ void drawing::touchScreenLogic() {
   else if (((p.tx <= 80) || (p.tx >= 400)) && (p.touchedSquare != none)) {
     p.autSel = p.autSel ? false : true;
   }
-  Render: drawing::renderScreen();
+  Render: renderScreen();
 }

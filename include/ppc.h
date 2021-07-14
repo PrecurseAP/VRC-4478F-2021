@@ -6,11 +6,11 @@
 #include "pathing.h"
 #include "vex.h"
 
-namespace ppc {
-  extern void loop(pathing::Path*);
-  extern float lookahead;
-  extern float lookaheadKF;
-  extern float calcAngleError(float, float);
-}
+
+extern void loop(Path*);
+extern float lookahead;
+extern float lookaheadKF;
+extern float calcAngleError(float, float);
+
 
 #endif
