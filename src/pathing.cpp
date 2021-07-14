@@ -7,6 +7,7 @@ pathing::Point::Point(float X, float Y, int IND, bool END) {
   y = Y;
   ind = IND;
   end = END;
+  e = Event(empty, 0, 0, false);
 }
 pathing::Point::Point(float X, float Y, int IND) {
   x = X;
@@ -26,12 +27,32 @@ pathing::Point::Point(float X, float Y) {
   y = Y;
   ind = 0;
   end = false;
+  //4478F: To Pay Respects
 }
 pathing::Point::Point(void) {
   x = 0;
   y = 0;
   ind = 0;
   end = false;
+}
+
+pathing::Event::Event(eventType eT, int a, int b, bool seq) {
+  type = eT;
+  v1 = a;
+  v2 = b;
+  sequential = seq;
+}
+pathing::Event::Event(eventType eT, int a, bool seq) {
+  type = eT;
+  v1 = a;
+  v2 = 0;
+  sequential = seq;
+}
+pathing::Event::Event(eventType eT, bool seq) {
+  type = eT;
+  v1 = 0;
+  v2 = 0;
+  sequential = seq;
 }
 
 pathing::Path::Path(Point a, Point b, Point c, Point d, int res) {
@@ -71,6 +92,11 @@ void pathing::Path::setPointAtIndex(int index, Point val) {
   this->p[index] = val;
 }
 
+void pathing::Path::setEventAtIndex(int index, Event val) {
+  /** allows access to private p[] variable to add points*/
+  this->p[index].e = val;
+}
+
 pathing::Point pathing::Path::getPointAtIndex(int i) {
   /** returns the value in array p at index i */
   return this->p[i];
@@ -93,5 +119,15 @@ void pathing::generateCubicBezier(Path* path, Point a, Point b, Point c, Point d
               + ( cb(t) * d.y);
 
     path->setPointAtIndex(i, Point(p_x, p_y, i, t == 1));
+    path->setEventAtIndex(i, Event(empty, false));
   } 
+}
+
+int pathing::eventListener(Path*) {
+  //run in thread, needs to be async
+  bool done = false;
+  while(!done) {
+    //code
+  }
+  return 0;
 }

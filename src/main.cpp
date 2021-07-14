@@ -15,6 +15,8 @@ pathing::Point p4 = pathing::Point( 0 , 5 );
 
 pathing::Path mainPath(p1, p2, p3, p4, 20); 
 
+//this is where you would initialize events
+
 void pre_auton(void) {
   vexcodeInit();
 }

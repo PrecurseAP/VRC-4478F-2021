@@ -7,14 +7,28 @@
 #include "util.h"
 
 namespace pathing {
+  enum eventType {
+    accelerate, intakes, lift, escape, empty  
+  };
+  struct Event {
+    eventType type;
+    int v1;
+    int v2;
+    bool sequential;
+    Event(eventType, int, int, bool);
+    Event(eventType, int, bool);
+    Event(eventType, bool);
+  };
   struct Point {
     float x;
     float y;
     int ind;
     bool end;
+    Event e;
+    //dont tell me what to do
     Point(void);
     Point(float, float);
-    Point(float, float, int);
+    Point(float, float, int); 
     Point(float, float, bool);
     Point(float, float, int, bool);
   };
@@ -29,6 +43,8 @@ namespace pathing {
       Point getPointAtIndex(int);
   };
   extern void generateCubicBezier(Path*, Point, Point, Point, Point, int);
+
+  extern int eventListener(Path*);
 }
 
 #endif

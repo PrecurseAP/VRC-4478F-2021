@@ -6,7 +6,7 @@ namespace odom {
   extern const float wheelCirc;
   extern const float chassisWidth;
   extern const float _2pi;
-  extern bool kill;
+  extern bool kill; //die
   struct Position {
     float x;
     float y;

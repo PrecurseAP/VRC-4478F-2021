@@ -5,9 +5,11 @@
 
 using namespace ppc;
 
+float ppc::asyncSpeedMod = 1; //global speed mod for async event listener
+
 float ppc::lookahead = 18.0;
 float ppc::lookaheadKF = .5;
-float kTurn = 10;
+float ppc::kTurn = 10;
 
 float calcAngleErrorRad(float a, float b) {
   /**
@@ -30,7 +32,7 @@ void ppc::loop(pathing::Path* path) {
     pathing::Point closest;
     float dClosest;
 
-    std::tie(closest, dClosest) = path->nearestPointAndDistance(pathing::Point(odom::pose.x, odom::pose.y));
+    std::tie(closest, dClosest) = path->pathing::nearestPointAndDistance(pathing::Point(odom::pose.x, odom::pose.y));
 
     if (closest.end == true) {
       done = dClosest < 2;
