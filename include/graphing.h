@@ -3,7 +3,7 @@
 
 #include "vex.h"
 
-extern int makeGraph(int*);
-
+extern int makeGraph();
+extern float graphVariable;
 
 #endif

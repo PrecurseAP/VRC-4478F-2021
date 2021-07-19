@@ -4,8 +4,12 @@
 #include "odometry.h"
 #include "ppc.h"
 #include "ui.h"
+#include "graphing.h"
+#include "vector"
 
 using namespace vex;
+
+//REMINDER THAT YOU CANNOT USE ARGUMENTS WITHIN A THREAD
 
 competition Competition;
 
@@ -20,6 +24,18 @@ Path mainPath(p1, p2, p3, p4, 20);
 
 void pre_auton(void) {
   vexcodeInit();
+
+  float x = 0.0;
+  float temp = 0;
+
+  thread graphThread = thread(makeGraph);
+  
+  while(1) {
+    temp+=0.1;
+    graphVariable = sin(temp);
+    wait(200, msec);
+  }
+
   renderScreen(); //draw the field on the screen once.
   Brain.Screen.pressed(touchScreenLogic); //callback so that the drawing and logic code is only executed when the screen is touched. (this saves tons of resources as opposed to a loop)
 }

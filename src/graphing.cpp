@@ -2,13 +2,15 @@
 #include "vector"
 #include "cmath"
 
-int startGraph(float* input, int period) {
-  
+float graphVariable = 0;
+
+int makeGraph() {
+    
   using namespace std;
 
-  int graphBottomBorder = 240;
+  int graphBottomBorder = 225;
   int graphLeftBorder = 15;
-  int graphTopBorder = 5;
+  int graphTopBorder = 25;
   int graphRightBorder = 475;
 
   bool canceled = false;
@@ -16,26 +18,26 @@ int startGraph(float* input, int period) {
 
   Brain.Screen.clearScreen();
 
-  float least = *input;
-  float greatest = *input;
+  float least = graphVariable;
+  float greatest = graphVariable;
 
   while(!canceled) {
 
-    graphData.push_back(*input);
+    graphData.push_back(graphVariable);
 
-    if (*input < least) { least = *input; }
-    if (*input > greatest) { greatest = *input; }
+    if (graphVariable < least) { least = graphVariable; }
+    if (graphVariable > greatest) { greatest = graphVariable; }
 
     Brain.Screen.setPenColor("#DDDDDD");
     Brain.Screen.drawLine(graphLeftBorder, graphTopBorder, graphLeftBorder, graphBottomBorder); //draw y axis of graph
     Brain.Screen.drawLine(graphLeftBorder, graphBottomBorder, graphRightBorder, graphBottomBorder); //draw x axis of graph
-
-    Brain.Screen.setPenColor("11CC11");
-    for(int i = 1, prevX = 0, prevY = 0; i < graphData.size(); i++) {
+    Brain.Screen.setPenColor("#11CC11");
+    
+    for(int i = 1, prevX = graphLeftBorder, prevY = graphBottomBorder; i < graphData.size(); i++) {
       
-      int pointX = i * ( round(graphRightBorder-graphLeftBorder) / graphData.size() );
-      int pointY = (graphData.at(i) * ((graphBottomBorder-graphTopBorder) / (greatest-least))) - least;
-
+      int pointX = i * round((graphRightBorder-graphLeftBorder) / graphData.size()) + graphLeftBorder;
+      int pointY = 272 - ((graphData.at(i) - least) * ((graphBottomBorder-graphTopBorder) / (greatest-least)));
+      //pointY = 50;
       Brain.Screen.drawLine(prevX, prevY, pointX, pointY);
 
       prevX = pointX;
@@ -43,11 +45,10 @@ int startGraph(float* input, int period) {
 
     }
 
-    wait(period, msec);
+    wait(200, msec);
 
     Brain.Screen.clearScreen();
   
   }
-
-  return 69420;
+  return 1;
 }
