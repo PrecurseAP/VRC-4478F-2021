@@ -6,7 +6,7 @@
 /*    Description:  Default header for V5 projects                            */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-//robot big bals too massive,
+//
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

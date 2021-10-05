@@ -1,43 +1,26 @@
 #include "vex.h"
-#include "util.h"
-#include "pathing.h"
-#include "odometry.h"
-#include "ppc.h"
-#include "ui.h"
-#include "graphing.h"
-#include "vector"
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// mLUpper              motor         12              
+// mLLower              motor         11              
+// mRUpper              motor         20              
+// mRLower              motor         19              
+// GPS5                 gps           5               
+// mConveyor            motor         18              
+// mTray                motor         1               
+// mArm                 motor         13              
+// ---- END VEXCODE CONFIGURED DEVICES ----
 
 using namespace vex;
 
-//REMINDER THAT YOU CANNOT USE ARGUMENTS WITHIN A THREAD
-
 competition Competition;
 
-Point p1 = Point( 0 , 0 );
-Point p2 = Point( 5 , 0 );
-Point p3 = Point( 5 , 5 );
-Point p4 = Point( 0 , 5 );
-
-Path mainPath(p1, p2, p3, p4, 20); 
-
-//this is where you would initialize events
-
-void pre_auton(void) {
+void pre_auton() {
   vexcodeInit();
 
-  float x = 0.0;
-  float temp = 0;
-
-  thread graphThread = thread(makeGraph);
-  
-  while(1) {
-    temp+=0.1;
-    graphVariable = sin(temp);
-    wait(200, msec);
-  }
-
-  renderScreen(); //draw the field on the screen once.
-  Brain.Screen.pressed(touchScreenLogic); //callback so that the drawing and logic code is only executed when the screen is touched. (this saves tons of resources as opposed to a loop)
 }
 
 void autonomous(void) {
@@ -45,7 +28,52 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
-  while (1) {
+  while(1) {
+
+    int LSpeed = Controller1.Axis3.position(percent);
+    int RSpeed = Controller1.Axis2.position(percent);
+
+    mLUpper.spin(forward, LSpeed, percent);
+    mLLower.spin(forward, LSpeed, percent);
+    mRUpper.spin(forward, RSpeed, percent);
+    mRLower.spin(forward, RSpeed, percent);
+
+    if (LSpeed == 0){
+      mLLower.stop(hold);
+      mLUpper.stop(hold);
+    }
+    if(RSpeed == 0){
+      mRLower.stop(hold);
+      mRUpper.stop(hold);
+    }
+
+    //ring conveyor
+    if (Controller1.ButtonL1.pressing()) {
+      mConveyor.spin(forward, 100, percent);
+    } else if (Controller1.ButtonL2.pressing()){
+      mConveyor.spin(reverse, 100, percent);
+    } else {
+      mConveyor.stop(hold);
+    }
+
+    //arm
+    if (Controller1.ButtonR1.pressing()) {
+      mArm.spin(forward, 100, percent);
+    } else if (Controller1.ButtonR2.pressing()) {
+      mArm.spin(reverse, 100, percent);
+    } else {
+      mArm.stop(hold);
+    }
+
+    //MOGO Tray
+    if(Controller1.ButtonUp.pressing()){
+      mTray.spin(forward, 100, percent);
+    } else if (Controller1.ButtonDown.pressing()){
+      mTray.spin(reverse, 100, percent);
+    } else {
+      mTray.stop(hold);
+    }
+
     wait(20, msec);
   }
 }
@@ -56,7 +84,7 @@ int main() {
 
   pre_auton();
 
-  while (true) {
+  while(true) {
     wait(100, msec);
   }
 }

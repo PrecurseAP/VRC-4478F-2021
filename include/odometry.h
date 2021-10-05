@@ -1,18 +1,17 @@
 #ifndef __ODOMETRY
-#define ODOMETRY
-#include "vex.h"
+#define __ODOMETRY
 
 extern const float wheelCirc;
 extern const float chassisWidth;
 extern const float _2pi;
 extern bool kill; // die
-struct Position {
+struct Robot {
   float x;
   float y;
   float theta;
 };
-extern Position pose;
-extern int trackingLoop(Position *);
+extern Robot robot;
+extern int tracking();
 extern float angleWrap(float);
 
 #endif
