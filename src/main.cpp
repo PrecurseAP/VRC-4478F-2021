@@ -1,4 +1,6 @@
 #include "vex.h"
+#define TOGGLED_ON true
+#define TOGGLED_OFF false
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
@@ -8,15 +10,33 @@
 // mLLower              motor         11              
 // mRUpper              motor         20              
 // mRLower              motor         19              
-// GPS5                 gps           5               
+// GPS                  gps           5               
 // mConveyor            motor         18              
 // mTray                motor         1               
 // mArm                 motor         13              
+// clawPiston           digital_out   A               
+// GYRO                 inertial      7               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 using namespace vex;
 
+template <typename T> 
+int sgn(T val) { //SIGNUM
+    return (T(0) < val) - (val < T(0));
+}
+
+int logDrive(int s) {
+  return (s*s) / 100 * sgn(s);
+}
+
 competition Competition;
+
+bool clawState = TOGGLED_OFF;
+
+void clawToggle() {
+  clawPiston.set(!clawState);
+  clawState = !clawState;
+}
 
 void pre_auton() {
   vexcodeInit();
@@ -28,10 +48,11 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
+  Controller1.ButtonA.pressed(clawToggle);
   while(1) {
 
-    int LSpeed = Controller1.Axis3.position(percent);
-    int RSpeed = Controller1.Axis2.position(percent);
+    int LSpeed = logDrive(Controller1.Axis3.position(percent));
+    int RSpeed = logDrive(Controller1.Axis2.position(percent));
 
     mLUpper.spin(forward, LSpeed, percent);
     mLLower.spin(forward, LSpeed, percent);
@@ -73,7 +94,6 @@ void usercontrol(void) {
     } else {
       mTray.stop(hold);
     }
-
     wait(20, msec);
   }
 }
