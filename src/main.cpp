@@ -10,7 +10,7 @@
 // mLLower              motor         11              
 // mRUpper              motor         20              
 // mRLower              motor         19              
-// GPS                  gps           5               
+// GPS                  gps           16              
 // mConveyor            motor         18              
 // mTray                motor         1               
 // mArm                 motor         13              
@@ -40,7 +40,11 @@ void clawToggle() {
 
 void pre_auton() {
   vexcodeInit();
-
+  GPS.startCalibration();
+  while(GPS.isCalibrating()) {
+    wait(100, msec);
+  }
+  turnMoveToPoint(50, 50, 0);
 }
 
 void autonomous(void) {

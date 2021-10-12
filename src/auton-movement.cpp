@@ -4,6 +4,11 @@
 #include <vector>
 #include "math.h"
 
+template <typename T>
+T angleWrap(T _theta) {
+  return fmod(_theta, 360);
+}
+
 void moveRightSide(int speed) {
   mRUpper.spin(forward, speed, percent);
   mRLower.spin(forward, speed, percent);
@@ -13,7 +18,7 @@ void moveLeftSide(int speed) {
   mLLower.spin(forward, speed, percent);
 }
 
-void TurnMoveToPoint(float gx, float gy, float gt, int maxSpeed) {
+void TurnMoveToPoint(float gx, float gy, int maxSpeed) {
   bool done = false;
   float integral = 0;
 
@@ -25,9 +30,9 @@ void TurnMoveToPoint(float gx, float gy, float gt, int maxSpeed) {
 
   //begin turing loop
   while(!done) {
-    float ct = GPS.heading(degrees);
+    float ct = (M_PI/180) * angleWrap(450 - GPS.heading(degrees));
 
-    float tDiff = gt - ct;
+    float tDiff = (180/M_PI)*atan2( gy, gx ) - (180/M_PI)*ct;
 
     //erase oldest error value and insert the newest one
     prevValues.erase(prevValues.begin());
@@ -51,7 +56,7 @@ void TurnMoveToPoint(float gx, float gy, float gt, int maxSpeed) {
     }
 
     //spin motors at PI value
-    moveRightSide(tDiff*1.1 + .001*integral);
+    moveRightSide(-tDiff*1.1 + -.001*integral);
     moveLeftSide(tDiff*1.1 + .001*integral);
 
     wait(20, msec);
@@ -69,14 +74,14 @@ void TurnMoveToPoint(float gx, float gy, float gt, int maxSpeed) {
 
     float cx = GPS.xPosition(inches);
     float cy = GPS.yPosition(inches);
-    float ct = GYRO.heading(degrees);
+    float ct = (M_PI/180) * angleWrap(450 - GYRO.heading(degrees));
 
-    float distanceToGoal = sqrt( (gx-cx)*(gx-cx) + (gy-cy)*(gy-cy) );
+    float distanceToGoal = hypot(gx-cx, gy-cy);//sqrt( (gx-cx)*(gx-cx) + (gy-cy)*(gy-cy) );
 
     prevValues.erase(prevValues.begin());
     prevValues.push_back(distanceToGoal);
 
-    float angleToGoal = atan2( (gy-cy) , (gx-cx) );
+    float angleToGoal = (180/M_PI)*atan2( gy, gx ) - (180/M_PI)*ct;
 
     if (fabs(distanceToGoal) < 15) {
       integral += distanceToGoal;
