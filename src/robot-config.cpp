@@ -13,12 +13,13 @@ motor mLUpper = motor(PORT12, ratio18_1, false);
 motor mLLower = motor(PORT11, ratio18_1, true);
 motor mRUpper = motor(PORT20, ratio18_1, true);
 motor mRLower = motor(PORT19, ratio18_1, false);
-gps GPS = gps(PORT16, 0.00, 0.00, mm, 180);
+gps GPS = gps(PORT16, 120.65, 63.50, mm, 90);
 motor mConveyor = motor(PORT18, ratio18_1, true);
-motor mTray = motor(PORT1, ratio36_1, false);
+motor mLTray = motor(PORT1, ratio36_1, true);
 motor mArm = motor(PORT13, ratio18_1, false);
 digital_out clawPiston = digital_out(Brain.ThreeWirePort.A);
-inertial GYRO = inertial(PORT7);
+inertial GYRO = inertial(PORT17);
+motor mRTray = motor(PORT14, ratio36_1, false);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

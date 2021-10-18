@@ -10,10 +10,11 @@ extern motor mRUpper;
 extern motor mRLower;
 extern gps GPS;
 extern motor mConveyor;
-extern motor mTray;
+extern motor mLTray;
 extern motor mArm;
 extern digital_out clawPiston;
 extern inertial GYRO;
+extern motor mRTray;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

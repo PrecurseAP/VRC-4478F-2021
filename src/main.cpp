@@ -1,4 +1,5 @@
 #include "vex.h"
+#include "odometry.h"
 #define TOGGLED_ON true
 #define TOGGLED_OFF false
 
@@ -12,10 +13,11 @@
 // mRLower              motor         19              
 // GPS                  gps           16              
 // mConveyor            motor         18              
-// mTray                motor         1               
+// mLTray               motor         1               
 // mArm                 motor         13              
 // clawPiston           digital_out   A               
-// GYRO                 inertial      7               
+// GYRO                 inertial      17              
+// mRTray               motor         14              
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 using namespace vex;
@@ -40,11 +42,14 @@ void clawToggle() {
 
 void pre_auton() {
   vexcodeInit();
-  GPS.startCalibration();
-  while(GPS.isCalibrating()) {
+  //GPS.startCalibration();
+  GYRO.startCalibration();
+  while(GPS.isCalibrating() || GYRO.isCalibrating()) {
     wait(100, msec);
   }
-  turnMoveToPoint(50, 50, 0);
+  wait(3000, msec);
+  //turnMoveToPoint(0, 0, 0);
+  spotTurn(180, 100);
 }
 
 void autonomous(void) {
@@ -53,7 +58,7 @@ void autonomous(void) {
 
 void usercontrol(void) {
   Controller1.ButtonA.pressed(clawToggle);
-  while(1) {
+  /*while(1) {
 
     int LSpeed = logDrive(Controller1.Axis3.position(percent));
     int RSpeed = logDrive(Controller1.Axis2.position(percent));
@@ -74,9 +79,9 @@ void usercontrol(void) {
 
     //ring conveyor
     if (Controller1.ButtonL1.pressing()) {
-      mConveyor.spin(forward, 100, percent);
+      mConveyor.spin(forward, 180, rpm);
     } else if (Controller1.ButtonL2.pressing()){
-      mConveyor.spin(reverse, 100, percent);
+      mConveyor.spin(reverse, 180, rpm);
     } else {
       mConveyor.stop(hold);
     }
@@ -92,14 +97,17 @@ void usercontrol(void) {
 
     //MOGO Tray
     if(Controller1.ButtonUp.pressing()){
-      mTray.spin(forward, 100, percent);
+      mLTray.spin(forward, 100, percent);
+      mRTray.spin(forward, 100, percent);
     } else if (Controller1.ButtonDown.pressing()){
-      mTray.spin(reverse, 100, percent);
+      mLTray.spin(reverse, 100, percent);
+      mRTray.spin(reverse, 100, percent);
     } else {
-      mTray.stop(hold);
+      mLTray.stop(hold);
+      mRTray.stop(hold);
     }
     wait(20, msec);
-  }
+  }*/
 }
 
 int main() {
