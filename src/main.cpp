@@ -60,6 +60,7 @@ void autonomous(void) {
 
 void usercontrol(void) {
   Controller1.ButtonA.pressed(clawToggle);
+  bool LockDrive=false;
   while(1) {
 
     int LSpeed = logDrive(Controller1.Axis3.position(percent));
@@ -70,15 +71,35 @@ void usercontrol(void) {
     mRUpper.spin(forward, RSpeed, percent);
     mRLower.spin(forward, RSpeed, percent);
 
-    /*
-    if (LSpeed == 0){
+    
+    if ((LSpeed == 0)&&(LockDrive)){
       mLLower.stop(hold);
       mLUpper.stop(hold);
     }
-    if(RSpeed == 0){
+    else if (LSpeed == 0){
+      mLLower.stop(coast);
+      mLUpper.stop(coast);
+    }
+
+    if((RSpeed == 0)&&(LockDrive)){
       mRLower.stop(hold);
       mRUpper.stop(hold);
-    }*/
+    }
+    else if (RSpeed == 0){
+      mRLower.stop(coast);
+      mRUpper.stop(coast);
+    }
+
+
+    //DriveLock
+    if(Controller1.ButtonX.pressing())
+    {
+      LockDrive=true;
+    }
+    else if(Controller1.ButtonY.pressing())
+    {
+      LockDrive = false;
+    }
 
     //ring conveyor
     if (Controller1.ButtonL1.pressing()) {
