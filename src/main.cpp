@@ -15,7 +15,7 @@
 // mConveyor            motor         18              
 // mLTray               motor         1               
 // mArm                 motor         13              
-// clawPiston           digital_out   A               
+// clawPiston           digital_out   F               
 // GYRO                 inertial      17              
 // mRTray               motor         14              
 // ---- END VEXCODE CONFIGURED DEVICES ----
@@ -43,13 +43,15 @@ void clawToggle() {
 void pre_auton() {
   vexcodeInit();
   //GPS.startCalibration();
-  GYRO.startCalibration();
+  /*GYRO.startCalibration();
   while(GPS.isCalibrating() || GYRO.isCalibrating()) {
     wait(100, msec);
   }
-  wait(3000, msec);
-  //turnMoveToPoint(0, 0, 0);
-  spotTurn(180, 100);
+  wait(2500, msec);
+  
+  //moveForward(24, 50);
+  spotTurn(180, 50);
+  //move(720, 50);*/
 }
 
 void autonomous(void) {
@@ -58,7 +60,7 @@ void autonomous(void) {
 
 void usercontrol(void) {
   Controller1.ButtonA.pressed(clawToggle);
-  /*while(1) {
+  while(1) {
 
     int LSpeed = logDrive(Controller1.Axis3.position(percent));
     int RSpeed = logDrive(Controller1.Axis2.position(percent));
@@ -68,6 +70,7 @@ void usercontrol(void) {
     mRUpper.spin(forward, RSpeed, percent);
     mRLower.spin(forward, RSpeed, percent);
 
+    /*
     if (LSpeed == 0){
       mLLower.stop(hold);
       mLUpper.stop(hold);
@@ -75,7 +78,7 @@ void usercontrol(void) {
     if(RSpeed == 0){
       mRLower.stop(hold);
       mRUpper.stop(hold);
-    }
+    }*/
 
     //ring conveyor
     if (Controller1.ButtonL1.pressing()) {
@@ -107,7 +110,7 @@ void usercontrol(void) {
       mRTray.stop(hold);
     }
     wait(20, msec);
-  }*/
+  }
 }
 
 int main() {

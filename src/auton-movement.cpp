@@ -1,3 +1,4 @@
+
 //contains code that moves the robot during autonomous
 #include "vex.h"
 #include "odometry.h"
@@ -99,7 +100,7 @@ void spotTurn(float theta, int maxSpeed) {
     float currentAngle = GYRO.heading(degrees);
     
     float angleError = theta - currentAngle;
-std::cout << currentAngle << std::endl;
+    //std::cout << currentAngle << std::endl;
     if (angleError > 180) {
       angleError = angleError - 360;
     } else if (angleError < -180) {
@@ -124,7 +125,10 @@ std::cout << currentAngle << std::endl;
     mLLower.spin(forward, angleError + .00001*integral, percent);
     mRUpper.spin(forward, -angleError - .00001*integral, percent);
     mRLower.spin(forward, -angleError - .00001*integral, percent);
+    std::cout << total/prevValues.size() << std::endl;
 
+    //MAKE IT SO THAT THE 5 GREATEST ERROR VALUES ARE LESS THAN 1, THEN IT STOPS!!!!!
+    //THIS DOESNT WORK!!!!
     if (fabs((total/prevValues.size())) < 1) {
       done = true;
       stopAllDrive(hold);
@@ -133,6 +137,64 @@ std::cout << currentAngle << std::endl;
 
     wait(20, msec);
 
+  }
+}
+
+void moveForward(float d, int maxSpeed) {
+  bool done = false;
+  float integral = 0;
+  float startAngle = GYRO.heading(degrees);
+  std::vector<float> prevValues;
+  repeat(50) {
+    prevValues.push_back(999);
+  }
+
+  float startX = GPS.xPosition(inches);
+  float startY = GPS.yPosition(inches);
+
+    std::cout << startX << std::endl;
+    std::cout << startY << std::endl;
+
+  while(!done) {
+    float currentX = GPS.xPosition(inches);
+    float currentY = GPS.yPosition(inches);
+    float currentAngle = GYRO.heading(degrees);
+
+    float angleError = startAngle - currentAngle;
+
+    float disError = d - hypot(currentX - startX, currentY - startY);
+    std::cout << disError << std::endl;
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(disError);
+
+    if (fabs(disError) < 15) {
+      integral += disError;
+    } else {
+      integral = 0;
+    }
+    
+    float total = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      total += prevValues[i];
+    }
+
+    /*if ((fabs(disError)*2) > maxSpeed) {
+      disError = maxSpeed * ((disError < 1) ? -1 : 1);
+    }*/
+
+    mLUpper.spin(forward, -(2*disError + .000001*integral + angleError), percent);
+    mLLower.spin(forward, -(2*disError + .000001*integral + angleError), percent);
+    mRUpper.spin(forward, -(2*disError + .000001*integral + angleError), percent);
+    mRLower.spin(forward, -(2*disError + .000001*integral + angleError), percent);
+
+    if (fabs((total/prevValues.size())) < 1) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
   }
 }
 
@@ -237,4 +299,63 @@ void turnMoveToPoint(float gx, float gy, int maxSpeed) {
     moveRightSide(distanceToGoal*1.1 + integral*0.0001 - 0*angleToGoal);
     wait(20, msec);
   }*/
+}
+
+void move(float d, int maxSpeed) {
+  bool done = false;
+  float integral = 0;
+  float startAngle = GYRO.heading(degrees);
+  std::vector<float> prevValues;
+  repeat(50) {
+    prevValues.push_back(999);
+  }
+  mLLower.setPosition(0, degrees);
+  mRLower.setPosition(0, degrees);
+  while(!done) {
+    int currentLeft = mLLower.position(degrees);
+    int currentRight = mRLower.position(degrees);
+    
+    float angleError = startAngle - GYRO.heading(degrees);
+    int leftError = (d - currentLeft)/360 * 4 * M_PI;
+    int rightError = (d - currentRight)/360 * 4 * M_PI;
+
+    if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(currentLeft);
+
+    if (fabs(angleError) < 15) {
+      integral += angleError;
+    } else {
+      integral = 0;
+    }
+    float total = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      total += prevValues[i];
+    }
+
+    if ((fabs(leftError)*2) > maxSpeed) {
+      leftError = maxSpeed * ((leftError < 1) ? -1 : 1);
+    }
+    if ((fabs(rightError)*2) > maxSpeed) {
+      rightError = maxSpeed * ((rightError < 1) ? -1 : 1);
+    }
+
+    mLUpper.spin(forward, 2*leftError + .00001*integral + angleError, percent);
+    mLLower.spin(forward, 2*leftError + .00001*integral + angleError, percent);
+    mRUpper.spin(forward, -2*rightError - .00001*integral - angleError, percent);
+    mRLower.spin(forward, -2*rightError - .00001*integral - angleError, percent);
+    
+    if (fabs((total/prevValues.size())) < 1) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+    wait(20, msec);
+  }
 }

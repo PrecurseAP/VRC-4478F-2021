@@ -16,8 +16,8 @@ motor mRLower = motor(PORT19, ratio18_1, false);
 gps GPS = gps(PORT16, 120.65, 63.50, mm, 90);
 motor mConveyor = motor(PORT18, ratio18_1, true);
 motor mLTray = motor(PORT1, ratio36_1, true);
-motor mArm = motor(PORT13, ratio18_1, false);
-digital_out clawPiston = digital_out(Brain.ThreeWirePort.A);
+motor mArm = motor(PORT13, ratio36_1, false);
+digital_out clawPiston = digital_out(Brain.ThreeWirePort.F);
 inertial GYRO = inertial(PORT17);
 motor mRTray = motor(PORT14, ratio36_1, false);
 
