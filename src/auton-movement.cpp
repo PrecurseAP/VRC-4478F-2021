@@ -6,7 +6,6 @@
 #include "math.h"
 #include <string>
 #include <iostream>
-using std::string;
 
 int graphBottomBorder =  225;
 int graphTopBorder = 25;
@@ -68,6 +67,39 @@ class Graph {
     }
 };
 
+void raiseLift(bool wait = true) {
+  mArm.spinToPosition(1150, degrees, wait);
+}
+
+void lowerLift(bool wait = true) {
+  mArm.spinToPosition(0, degrees, wait);
+}
+
+void spinConveyor() {
+  mConveyor.spin(forward, 180, rpm);
+}
+
+void lowerTilter(bool wait = true) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(-580, degrees, false);
+  mRTray.spinToPosition(-580, degrees, wait);
+}
+
+void raiseTilterWithGoal(bool wait = true) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(-320, degrees, false);
+  mRTray.spinToPosition(-320, degrees, wait);
+}
+
+void raiseTilter(bool wait = true) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(0, degrees, false);
+  mRTray.spinToPosition(0, degrees, wait);
+}
+
 template <typename T>
 T angleWrap(T _theta) {
   return fmod(_theta, 360);
@@ -88,11 +120,12 @@ void stopAllDrive(brakeType bt) {
   mLLower.stop(bt);
 }
 
+//use this and the move function
 void spotTurn(float theta, int maxSpeed) {
   bool done = false;
   float integral = 0;
   std::vector<float> prevValues;
-  repeat(50) {
+  repeat(35) {
     prevValues.push_back(999);
   }
 
@@ -124,28 +157,25 @@ void spotTurn(float theta, int maxSpeed) {
       }
     }
 
-    mLUpper.spin(forward, angleError + .00001*integral, percent);
-    mLLower.spin(forward, angleError + .00001*integral, percent);
-    mRUpper.spin(forward, -angleError - .00001*integral, percent);
-    mRLower.spin(forward, -angleError - .00001*integral, percent);
+    mLUpper.spin(forward, angleError + .00005*integral, percent);
+    mLLower.spin(forward, angleError + .00005*integral, percent);
+    mRUpper.spin(forward, -angleError - .00005*integral, percent);
+    mRLower.spin(forward, -angleError - .00005*integral, percent);
     std::cout << greatest << std::endl;
-
-    //MAKE IT SO THAT THE 5 GREATEST ERROR VALUES ARE LESS THAN 1, THEN IT STOPS!!!!!
-    //THIS DOESNT WORK!!!!
     
     
-    
-    /*if (greatest < 1) {
+    if (greatest < 3) {
       done = true;
       stopAllDrive(hold);
       break;
-    }*/
+    }
 
     wait(20, msec);
 
   }
 }
 
+//no worky
 void moveForward(float d, int maxSpeed) {
   bool done = false;
   float integral = 0;
@@ -187,9 +217,9 @@ void moveForward(float d, int maxSpeed) {
       }
     }
 
-    /*if ((fabs(disError)*2) > maxSpeed) {
+    if ((fabs(disError)*2) > maxSpeed) {
       disError = maxSpeed * ((disError < 1) ? -1 : 1);
-    }*/
+    }
 
     mLUpper.spin(forward, -(2*disError + .000001*integral + angleError), percent);
     mLLower.spin(forward, -(2*disError + .000001*integral + angleError), percent);
@@ -205,7 +235,6 @@ void moveForward(float d, int maxSpeed) {
     wait(20, msec);
   }
 }
-
 
 //doesnt work
 void turnMoveToPoint(float gx, float gy, int maxSpeed) {
@@ -313,7 +342,8 @@ void turnMoveToPoint(float gx, float gy, int maxSpeed) {
 
 void move(float d, int maxSpeed) {
   bool done = false;
-  float integral = 0;
+  float leftIntegral = 0;
+  float rightIntegral = 0;
   float startAngle = GYRO.heading(degrees);
   std::vector<float> prevValues;
   repeat(50) {
@@ -322,26 +352,34 @@ void move(float d, int maxSpeed) {
   mLLower.setPosition(0, degrees);
   mRLower.setPosition(0, degrees);
   while(!done) {
-    int currentLeft = mLLower.position(degrees);
-    int currentRight = mRLower.position(degrees);
+    float currentLeft = (mLLower.position(degrees)/360) * 4 * M_PI;
+    float currentRight = (mRLower.position(degrees)/360) * 4 * M_PI;
     
     float angleError = startAngle - GYRO.heading(degrees);
-    int leftError = (d - currentLeft)/360 * 4 * M_PI;
-    int rightError = (d - currentRight)/360 * 4 * M_PI;
+    float leftError = d - currentLeft;
+    float rightError = d - currentRight;
+    std::cout << "leftError: " << leftError << std::endl;
+    std::cout << "rightError: " << rightError << std::endl;
 
     if (angleError > 180) {
       angleError = angleError - 360;
     } else if (angleError < -180) {
       angleError = 360 + angleError;
     }
-
+    std::cout << "angleError: " << angleError << std::endl << std::endl;
     prevValues.erase(prevValues.begin());
-    prevValues.push_back(currentLeft);
+    prevValues.push_back(leftError);
 
-    if (fabs(angleError) < 15) {
-      integral += angleError;
+    if (fabs(leftError) < 12) {
+      leftIntegral += leftError;
     } else {
-      integral = 0;
+      leftIntegral = 0;
+    }
+
+    if (fabs(rightError) < 12) {
+      rightIntegral += rightError;
+    } else {
+      rightIntegral = 0;
     }
     
     float greatest = 0;
@@ -352,19 +390,20 @@ void move(float d, int maxSpeed) {
       }
     }
 
+/*
     if ((fabs(leftError)*2) > maxSpeed) {
       leftError = maxSpeed * ((leftError < 1) ? -1 : 1);
     }
     if ((fabs(rightError)*2) > maxSpeed) {
       rightError = maxSpeed * ((rightError < 1) ? -1 : 1);
-    }
+    }*/
 
-    mLUpper.spin(forward, 2*leftError + .00001*integral + angleError, percent);
-    mLLower.spin(forward, 2*leftError + .00001*integral + angleError, percent);
-    mRUpper.spin(forward, -2*rightError - .00001*integral - angleError, percent);
-    mRLower.spin(forward, -2*rightError - .00001*integral - angleError, percent);
+    mLUpper.spin(forward, 3.5*leftError + .0001*leftIntegral + 1.5*angleError, percent);
+    mLLower.spin(forward, 3.5*leftError + .0001*leftIntegral + 1.5*angleError, percent);
+    mRUpper.spin(forward, 3.5*rightError + .0001*rightIntegral - 1.5*angleError, percent);
+    mRLower.spin(forward, 3.5*rightError + .0001*rightIntegral - 1.5*angleError, percent);
     
-    if (greatest < 1) {
+    if (greatest+angleError+rightError < 5) {
       done = true;
       stopAllDrive(hold);
       break;

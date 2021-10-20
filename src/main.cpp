@@ -55,10 +55,46 @@ void pre_auton() {
 }
 
 void autonomous(void) {
+  GYRO.startCalibration();
+  while(GPS.isCalibrating() || GYRO.isCalibrating()) {
+    wait(100, msec);
+  }
+  wait(2500, msec);
+
+  lowerTilter(false);
+
+  move(42, 90);
+
+  raiseTilterWithGoal(false);
+  wait(250, msec);
+  move(-33, 100);
+  
+  lowerTilter(true);
+
+  move(-10, 100);
+
+  spotTurn(45, 100);
+
+  move(24, 80);
+
+  raiseTilterWithGoal(false);
+  wait(500, msec);
+  spinConveyor();
+
+  wait(1000, msec);
+  mConveyor.stop(coast);
+
+  move(-12, 100);
+
+  lowerTilter(false);
+  wait(500, msec);
+  //move
+
 
 }
 
 void usercontrol(void) {
+  
   Controller1.ButtonA.pressed(clawToggle);
   bool LockDrive=false;
   while(1) {
