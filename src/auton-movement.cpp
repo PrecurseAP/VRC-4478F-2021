@@ -115,25 +115,31 @@ void spotTurn(float theta, int maxSpeed) {
     } else {
       integral = 0;
     }
-    float total = 0;
+    
+    float greatest = 0;
 
     for (float i = 0; i < prevValues.size(); i++) {
-      total += prevValues[i];
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
     }
 
     mLUpper.spin(forward, angleError + .00001*integral, percent);
     mLLower.spin(forward, angleError + .00001*integral, percent);
     mRUpper.spin(forward, -angleError - .00001*integral, percent);
     mRLower.spin(forward, -angleError - .00001*integral, percent);
-    std::cout << total/prevValues.size() << std::endl;
+    std::cout << greatest << std::endl;
 
     //MAKE IT SO THAT THE 5 GREATEST ERROR VALUES ARE LESS THAN 1, THEN IT STOPS!!!!!
     //THIS DOESNT WORK!!!!
-    if (fabs((total/prevValues.size())) < 1) {
+    
+    
+    
+    /*if (greatest < 1) {
       done = true;
       stopAllDrive(hold);
       break;
-    }
+    }*/
 
     wait(20, msec);
 
@@ -173,10 +179,12 @@ void moveForward(float d, int maxSpeed) {
       integral = 0;
     }
     
-    float total = 0;
+    float greatest = 0;
 
     for (float i = 0; i < prevValues.size(); i++) {
-      total += prevValues[i];
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
     }
 
     /*if ((fabs(disError)*2) > maxSpeed) {
@@ -188,7 +196,7 @@ void moveForward(float d, int maxSpeed) {
     mRUpper.spin(forward, -(2*disError + .000001*integral + angleError), percent);
     mRLower.spin(forward, -(2*disError + .000001*integral + angleError), percent);
 
-    if (fabs((total/prevValues.size())) < 1) {
+    if ((greatest+angleError) < 2) {
       done = true;
       stopAllDrive(hold);
       break;
@@ -198,6 +206,8 @@ void moveForward(float d, int maxSpeed) {
   }
 }
 
+
+//doesnt work
 void turnMoveToPoint(float gx, float gy, int maxSpeed) {
   bool done = false;
   float integral = 0;
@@ -333,10 +343,13 @@ void move(float d, int maxSpeed) {
     } else {
       integral = 0;
     }
-    float total = 0;
+    
+    float greatest = 0;
 
     for (float i = 0; i < prevValues.size(); i++) {
-      total += prevValues[i];
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
     }
 
     if ((fabs(leftError)*2) > maxSpeed) {
@@ -351,7 +364,7 @@ void move(float d, int maxSpeed) {
     mRUpper.spin(forward, -2*rightError - .00001*integral - angleError, percent);
     mRLower.spin(forward, -2*rightError - .00001*integral - angleError, percent);
     
-    if (fabs((total/prevValues.size())) < 1) {
+    if (greatest < 1) {
       done = true;
       stopAllDrive(hold);
       break;
