@@ -76,7 +76,7 @@ void autonomous(void) {
   spotTurn(280, 100);
 
   //lowerTilter(false);
-  lowerTilterWithValue(false, -500);
+  lowerTilterWithValue(false, -540);
   wait(800, msec);
   move(16, 100);
 
