@@ -82,8 +82,14 @@ void spinConveyor() {
 void lowerTilter(bool wait = true) {
   mLTray.setVelocity(100, percent);
   mRTray.setVelocity(100, percent);
-  mLTray.spinToPosition(-580, degrees, false);
-  mRTray.spinToPosition(-580, degrees, wait);
+  mLTray.spinToPosition(-540, degrees, false);
+  mRTray.spinToPosition(-540, degrees, wait);
+}
+void lowerTilterWithValue(bool wait = true, int val = -540) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(val, degrees, false);
+  mRTray.spinToPosition(val, degrees, wait);
 }
 
 void raiseTilterWithGoal(bool wait = true) {
@@ -125,7 +131,7 @@ void spotTurn(float theta, int maxSpeed) {
   bool done = false;
   float integral = 0;
   std::vector<float> prevValues;
-  repeat(35) {
+  repeat(15) {
     prevValues.push_back(999);
   }
 
@@ -157,14 +163,14 @@ void spotTurn(float theta, int maxSpeed) {
       }
     }
 
-    mLUpper.spin(forward, angleError + .00005*integral, percent);
-    mLLower.spin(forward, angleError + .00005*integral, percent);
-    mRUpper.spin(forward, -angleError - .00005*integral, percent);
-    mRLower.spin(forward, -angleError - .00005*integral, percent);
-    std::cout << greatest << std::endl;
+    mLUpper.spin(forward, .9*angleError + .006*integral, percent);
+    mLLower.spin(forward, .9*angleError + .006*integral, percent);
+    mRUpper.spin(forward, .9*-angleError - .006*integral, percent);
+    mRLower.spin(forward, .9*-angleError - .006*integral, percent);
+    std::cout << .007*integral << std::endl;
     
     
-    if (greatest < 3) {
+    if (greatest < 5) {
       done = true;
       stopAllDrive(hold);
       break;
@@ -346,7 +352,7 @@ void move(float d, int maxSpeed) {
   float rightIntegral = 0;
   float startAngle = GYRO.heading(degrees);
   std::vector<float> prevValues;
-  repeat(50) {
+  repeat(20) {
     prevValues.push_back(999);
   }
   mLLower.setPosition(0, degrees);
@@ -358,25 +364,25 @@ void move(float d, int maxSpeed) {
     float angleError = startAngle - GYRO.heading(degrees);
     float leftError = d - currentLeft;
     float rightError = d - currentRight;
-    std::cout << "leftError: " << leftError << std::endl;
-    std::cout << "rightError: " << rightError << std::endl;
+    //std::cout << "leftError: " << leftError << std::endl;
+    //std::cout << "rightError: " << rightError << std::endl;
 
     if (angleError > 180) {
       angleError = angleError - 360;
     } else if (angleError < -180) {
       angleError = 360 + angleError;
     }
-    std::cout << "angleError: " << angleError << std::endl << std::endl;
+    //std::cout << "angleError: " << angleError << std::endl << std::endl;
     prevValues.erase(prevValues.begin());
     prevValues.push_back(leftError);
 
-    if (fabs(leftError) < 12) {
+    if (fabs(leftError) < 13) {
       leftIntegral += leftError;
     } else {
       leftIntegral = 0;
     }
 
-    if (fabs(rightError) < 12) {
+    if (fabs(rightError) < 13) {
       rightIntegral += rightError;
     } else {
       rightIntegral = 0;
@@ -390,20 +396,20 @@ void move(float d, int maxSpeed) {
       }
     }
 
-/*
-    if ((fabs(leftError)*2) > maxSpeed) {
+
+    /*if ((fabs(leftError)*4) > maxSpeed) {
       leftError = maxSpeed * ((leftError < 1) ? -1 : 1);
     }
-    if ((fabs(rightError)*2) > maxSpeed) {
+    if ((fabs(rightError)*4) > maxSpeed) {
       rightError = maxSpeed * ((rightError < 1) ? -1 : 1);
     }*/
 
-    mLUpper.spin(forward, 3.5*leftError + .0001*leftIntegral + 1.5*angleError, percent);
-    mLLower.spin(forward, 3.5*leftError + .0001*leftIntegral + 1.5*angleError, percent);
-    mRUpper.spin(forward, 3.5*rightError + .0001*rightIntegral - 1.5*angleError, percent);
-    mRLower.spin(forward, 3.5*rightError + .0001*rightIntegral - 1.5*angleError, percent);
-    
-    if (greatest+angleError+rightError < 5) {
+    mLUpper.spin(forward, 4.4*leftError + .008*leftIntegral + 0*angleError, percent);
+    mLLower.spin(forward, 4.4*leftError + .008*leftIntegral + 0*angleError, percent);
+    mRUpper.spin(forward, 4.4*rightError + .008*rightIntegral - 0*angleError, percent);
+    mRLower.spin(forward, 4.4*rightError + .008*rightIntegral - 0*angleError, percent);
+    std::cout << .008 * leftIntegral << std::endl;
+    if ((greatest < 2.5) && (rightError < 2.5) /*&& (angleError < 5)*/) {
       done = true;
       stopAllDrive(hold);
       break;

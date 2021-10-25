@@ -11,4 +11,5 @@ extern void raiseLift(bool);
 extern void lowerLift(bool);
 extern void raiseTilterWithGoal(bool);
 extern void spinConveyor(void);
+extern void lowerTilterWithValue(bool, int);
 #endif

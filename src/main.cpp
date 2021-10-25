@@ -43,54 +43,82 @@ void clawToggle() {
 void pre_auton() {
   vexcodeInit();
   //GPS.startCalibration();
-  /*GYRO.startCalibration();
+  GYRO.startCalibration();
   while(GPS.isCalibrating() || GYRO.isCalibrating()) {
     wait(100, msec);
   }
   wait(2500, msec);
   
   //moveForward(24, 50);
-  spotTurn(180, 50);
+  //spotTurn(180, 50);
   //move(720, 50);*/
 }
 
 void autonomous(void) {
-  GYRO.startCalibration();
-  while(GPS.isCalibrating() || GYRO.isCalibrating()) {
-    wait(100, msec);
-  }
-  wait(2500, msec);
+  mArm.setPosition(0, degrees);
+  mLTray.setPosition(0, degrees);
+  mRTray.setPosition(0, degrees);
+  //left side code with awp
+  spotTurn(9.5, 100);
 
+  move(-49, 100); 
+
+  clawToggle();
+  wait(300, msec);
+
+  move(35, 100);
+
+  clawToggle();
+  wait(300, msec);
+
+  move(7, 100);
+
+  spotTurn(280, 100);
+
+  //lowerTilter(false);
+  lowerTilterWithValue(false, -500);
+  wait(800, msec);
+  move(16, 100);
+
+  raiseTilterWithGoal(false);
+
+  move(-18, 100);  
+  spinConveyor();
+  wait(900, msec);
+  mConveyor.stop(coast);
+
+
+  //finished right side code (with awp)
+  /*
   lowerTilter(false);
 
-  move(42, 90);
+  move(46, 100);
 
   raiseTilterWithGoal(false);
   wait(250, msec);
-  move(-33, 100);
+  move(-20, 100);
   
+  spotTurn(180, 100);
+
+  move(27, 100);
+
   lowerTilter(true);
 
-  move(-10, 100);
+  move(-12, 100);
 
-  spotTurn(45, 100);
+  spotTurn(90, 100);
 
-  move(24, 80);
+  move(18, 80);
 
   raiseTilterWithGoal(false);
   wait(500, msec);
   spinConveyor();
-
-  wait(1000, msec);
+  move(-18, 100);
+  wait(500, msec);
   mConveyor.stop(coast);
 
-  move(-12, 100);
-
   lowerTilter(false);
-  wait(500, msec);
-  //move
-
-
+  */
 }
 
 void usercontrol(void) {
