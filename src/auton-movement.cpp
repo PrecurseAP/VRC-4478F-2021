@@ -131,7 +131,7 @@ void spotTurn(float theta, int maxSpeed) {
   bool done = false;
   float integral = 0;
   std::vector<float> prevValues;
-  repeat(15) {
+  repeat(30) {
     prevValues.push_back(999);
   }
 
