@@ -2,7 +2,7 @@
 #include "odometry.h"
 #define TOGGLED_ON true
 #define TOGGLED_OFF false
-
+#include <string>
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -22,7 +22,30 @@
 
 using namespace vex;
 
+int autonSelection = 0;
+
+enum autonPath {
+  rightAWP = 0,
+  leftAWP = 1,
+  rightNoAWP = 2,
+  leftNoAWP = 3
+};
+
+std::string autonSelections[4] = { "Right Side With AWP", "Left Side With AWP", 
+                                "Right Side Without AWP", "Left Side Without AWP"};
+
+void cycleAuton() {
+  if (autonSelection+1 == 4) {
+    autonSelection = 0;
+  } else {
+    autonSelection++;
+  }
+}
+
 void renderScreen() {
+  cycleAuton();
+  Brain.Screen.print(autonSelection);
+
   /*
   //for reference the screen is 480 x 272 pixels
   Brain.Screen.clearScreen();
@@ -134,6 +157,8 @@ void clawToggle() {
 
 void pre_auton() {
   vexcodeInit();
+  Brain.Screen.print(autonSelection);
+  Brain.Screen.pressed(renderScreen);
   //GPS.startCalibration();
   GYRO.startCalibration();
   while(GPS.isCalibrating() || GYRO.isCalibrating()) {
@@ -141,9 +166,6 @@ void pre_auton() {
   }
   wait(2500, msec);
   
-  //moveForward(24, 50);
-  //spotTurn(180, 50);
-  //move(720, 50);*/
 }
 
 void autonomous(void) {
@@ -151,125 +173,129 @@ void autonomous(void) {
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
 
-  //left side auton with 2 neutrals
+  switch(autonSelection) {
+    case rightAWP:
+      raiseLift(false);
 
-  spotTurn(17, 100);
+      lowerTilter(false);
 
-  lowerTilter(false);
+      move(46, 100);
+      lowerLift(false);
 
-  move(49, 100); 
+      raiseTilterWithGoal(false);
+      wait(250, msec);
+      move(-20, 100);
 
-  raiseTilterWithGoal(false);
-  wait(250, msec);
-  spinConveyor();
-  move(-10, 100);
-  mConveyor.stop(coast);
+      spotTurn(180, 100);
 
-  spotTurn(252, 100);
+      move(27, 100);
 
-  move(-35, 100);
+      lowerTilter(true);
 
-  clawToggle();
-  wait(300, msec);
+      move(-12, 100);
 
-  move(45, 100);
+      spotTurn(90, 100);
 
-  spotTurn(0, 100);
+      move(16.5, 80);
 
-  move(-32, 100);
+      raiseTilterWithGoal(false);
+      wait(500, msec);
+      spinConveyor();
+      move(-24, 100);
+      mConveyor.stop(coast);
 
+      lowerTilter(false);
+      break;
 
+    case leftAWP: 
+      raiseLift(false);
+      spotTurn(9.5, 100);
+      lowerLift(false);
+      move(-49, 100); 
+      mArm.stop(hold);
 
-//////////////////
-  //right side auton with 2 neutral goals
-  /*
-  lowerTilter(false);
+      clawToggle();
+      wait(300, msec);
 
-  move(44, 100);
+      move(35, 100);
 
-  raiseTilterWithGoal(false);
-  wait(250, msec);
-  spinConveyor();
-  move(-30, 100);
-  mConveyor.stop(coast);
+      clawToggle();
+      wait(300, msec);
 
-  spotTurn(130, 100);
+      move(12, 100);
 
-  move(-38, 100);
+      spotTurn(276, 100);
 
-  clawToggle();
-  wait(300, msec);
+      //lowerTilter(false);
+      lowerTilterWithValue(false, -495);
+      wait(800, msec);
+      move(16, 100);
 
-  move(63, 100);
+      raiseTilterWithGoal(false);
 
-  lowerTilter(false);*/
-  /////////////
+      move(-18, 100);  
+      spinConveyor();
+      wait(900, msec);
+      mConveyor.stop(coast);
+      break;
 
-  /////////////
-  //left side code with awp 
-  /*
-  spotTurn(9.5, 100);
+    case rightNoAWP:
+      raiseLift(false);
+      lowerTilter(false);
 
-  move(-49, 100); 
+      move(44, 100);
+      lowerLift(false);
+      raiseTilterWithGoal(false);
+      wait(250, msec);
+      spinConveyor();
+      move(-30, 100);
+      mConveyor.stop(coast);
 
-  clawToggle();
-  wait(300, msec);
+      spotTurn(130, 100);
 
-  move(35, 100);
+      move(-38, 100);
 
-  clawToggle();
-  wait(300, msec);
+      clawToggle();
+      wait(300, msec);
 
-  move(7, 100);
+      move(63, 100);
 
-  spotTurn(280, 100);
+      lowerTilter(false);
+      break;
 
-  //lowerTilter(false);
-  lowerTilterWithValue(false, -540);
-  wait(800, msec);
-  move(16, 100);
+    case leftNoAWP:
+      spotTurn(17, 100);
 
-  raiseTilterWithGoal(false);
+      lowerTilter(false);
 
-  move(-18, 100);  
-  spinConveyor();
-  wait(900, msec);
-  mConveyor.stop(coast);*/
+      raiseLift(false);
+      move(49, 100); 
+      lowerLift(false);
 
-  ////////////
+      raiseTilterWithGoal(false);
+      wait(250, msec);
+      spinConveyor();
+      move(-10, 100);
+      mConveyor.stop(coast);
 
+      spotTurn(250, 100);
 
-  //finished right side code (with awp)
-  /*
-  lowerTilter(false);
+      move(-35, 100);
 
-  move(46, 100);
+      clawToggle();
+      wait(300, msec);
 
-  raiseTilterWithGoal(false);
-  wait(250, msec);
-  move(-20, 100);
+      move(45, 100);
+
+      spotTurn(0, 100);
+
+      move(-32, 100);
+      break;
+      
+      default:
+        break;
   
-  spotTurn(180, 100);
-
-  move(27, 100);
-
-  lowerTilter(true);
-
-  move(-12, 100);
-
-  spotTurn(90, 100);
-
-  move(18, 80);
-
-  raiseTilterWithGoal(false);
-  wait(500, msec);
-  spinConveyor();
-  move(-18, 100);
-  wait(500, msec);
-  mConveyor.stop(coast);
-
-  lowerTilter(false);
-  */
+  }
 }
 
 void usercontrol(void) {

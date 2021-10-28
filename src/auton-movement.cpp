@@ -68,11 +68,11 @@ class Graph {
 };
 
 void raiseLift(bool wait = true) {
-  mArm.spinToPosition(1150, degrees, wait);
+  mArm.spinToPosition(250, degrees, wait);
 }
 
 void lowerLift(bool wait = true) {
-  mArm.spinToPosition(0, degrees, wait);
+  mArm.spinToPosition(-70, degrees, wait);
 }
 
 void spinConveyor() {
@@ -95,8 +95,8 @@ void lowerTilterWithValue(bool wait = true, int val = -540) {
 void raiseTilterWithGoal(bool wait = true) {
   mLTray.setVelocity(100, percent);
   mRTray.setVelocity(100, percent);
-  mLTray.spinToPosition(-320, degrees, false);
-  mRTray.spinToPosition(-320, degrees, wait);
+  mLTray.spinToPosition(-280, degrees, false);
+  mRTray.spinToPosition(-280, degrees, wait);
 }
 
 void raiseTilter(bool wait = true) {
@@ -131,7 +131,7 @@ void spotTurn(float theta, int maxSpeed) {
   bool done = false;
   float integral = 0;
   std::vector<float> prevValues;
-  repeat(30) {
+  repeat(25) {
     prevValues.push_back(999);
   }
 
@@ -163,10 +163,10 @@ void spotTurn(float theta, int maxSpeed) {
       }
     }
 
-    mLUpper.spin(forward, .9*angleError + .006*integral, percent);
-    mLLower.spin(forward, .9*angleError + .006*integral, percent);
-    mRUpper.spin(forward, .9*-angleError - .006*integral, percent);
-    mRLower.spin(forward, .9*-angleError - .006*integral, percent);
+    mLUpper.spin(forward, .92*angleError + .006*integral, percent);
+    mLLower.spin(forward, .92*angleError + .006*integral, percent);
+    mRUpper.spin(forward, .92*-angleError - .006*integral, percent);
+    mRLower.spin(forward, .92*-angleError - .006*integral, percent);
     std::cout << .007*integral << std::endl;
     
     
@@ -358,8 +358,8 @@ void move(float d, int maxSpeed) {
   mLLower.setPosition(0, degrees);
   mRLower.setPosition(0, degrees);
   while(!done) {
-    float currentLeft = (mLLower.position(degrees)/360) * 4 * M_PI;
-    float currentRight = (mRLower.position(degrees)/360) * 4 * M_PI;
+    float currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
+    float currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
     
     float angleError = startAngle - GYRO.heading(degrees);
     float leftError = d - currentLeft;
