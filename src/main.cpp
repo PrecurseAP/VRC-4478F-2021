@@ -32,7 +32,7 @@ enum autonPath {
 };
 
 std::string autonSelections[4] = { "Right Side With AWP", "Left Side With AWP", 
-                                "Right Side Without AWP", "Left Side Without AWP"};
+                                "Right Side Without AWP", "Left Side Without AWP" };
 
 void cycleAuton() {
   if (autonSelection+1 == 4) {
@@ -145,6 +145,9 @@ int sgn(T val) { //SIGNUM
 int logDrive(int s) {
   return (s*s) / 100 * sgn(s);
 }
+int logDriveVolt(int s) {
+  return (s*s) / 12 * sgn(s);
+}
 
 competition Competition;
 
@@ -179,29 +182,29 @@ void autonomous(void) {
 
       lowerTilter(false);
 
-      move(46, 100);
+      move(46, 100, 8, 2500);
       lowerLift(false);
 
       raiseTilterWithGoal(false);
       wait(250, msec);
-      move(-20, 100);
+      move(-20, 100, 12, 1400);
 
-      spotTurn(180, 100);
+      spotTurn(180, 100, 12, 2000);
 
-      move(27, 100);
+      move(27, 100, 13, 1500);
 
       lowerTilter(true);
 
-      move(-12, 100);
+      move(-12, 100, 15, 800);
 
-      spotTurn(90, 100);
+      spotTurn(90, 100, 12, 1500);
 
-      move(16.5, 80);
+      move(15, 100, 15, 1000);
 
       raiseTilterWithGoal(false);
       wait(500, msec);
       spinConveyor();
-      move(-24, 100);
+      move(-23, 100, 14, 1500);
       mConveyor.stop(coast);
 
       lowerTilter(false);
@@ -209,31 +212,31 @@ void autonomous(void) {
 
     case leftAWP: 
       raiseLift(false);
-      spotTurn(9.5, 100);
+      spotTurn(9.5, 100, 7, 700);
       lowerLift(false);
-      move(-49, 100); 
+      move(-49, 100, 8, 2500); 
       mArm.stop(hold);
 
       clawToggle();
       wait(300, msec);
 
-      move(35, 100);
+      move(35, 100, 16, 2000);
 
       clawToggle();
       wait(300, msec);
 
-      move(12, 100);
+      move(12, 100, 14, 900);
 
-      spotTurn(276, 100);
+      spotTurn(276, 100, 13, 1250);
 
       //lowerTilter(false);
-      lowerTilterWithValue(false, -495);
-      wait(800, msec);
-      move(16, 100);
+      
+      move(-5, 100, 10, 600);
+      lowerTilterWithValue(true, -550);
+      move(12.5, 100, 12, 900);
+      lowerTilterWithValue(true, -260);
 
-      raiseTilterWithGoal(false);
-
-      move(-18, 100);  
+      //move(-18, 100);  
       spinConveyor();
       wait(900, msec);
       mConveyor.stop(coast);
@@ -243,57 +246,60 @@ void autonomous(void) {
       raiseLift(false);
       lowerTilter(false);
 
-      move(44, 100);
+      move(44, 100, 8, 2000);
       lowerLift(false);
       raiseTilterWithGoal(false);
       wait(250, msec);
-      spinConveyor();
-      move(-30, 100);
-      mConveyor.stop(coast);
+      //spinConveyor();
+      move(-30, 100, 12, 1500);
+      //mConveyor.stop(coast);
 
-      spotTurn(130, 100);
+      spotTurn(130, 100, 12, 1500);
 
-      move(-38, 100);
+      move(-38, 100, 12, 1500);
 
       clawToggle();
       wait(300, msec);
 
-      move(63, 100);
+      move(63, 100, 10, 5000);
 
       lowerTilter(false);
       break;
 
     case leftNoAWP:
-      spotTurn(17, 100);
-
-      lowerTilter(false);
-
       raiseLift(false);
-      move(49, 100); 
+      spotTurn(9.5, 100, 12, 800);
       lowerLift(false);
+      //lowerTilter(false);
+
+
+      move(-49, 100, 8, 2500); 
+
+      //raiseTilterWithGoal(false);
+      clawToggle();
+      wait(250, msec);
+      //spinConveyor();
+      move(10, 100, 12, 900);
+      //mConveyor.stop(coast);
+
+      spotTurn(250, 100, 12, 1500);
+      lowerTilter(false);
+      wait(500, msec);
+      move(-20, 100, 12, 1200);
 
       raiseTilterWithGoal(false);
-      wait(250, msec);
-      spinConveyor();
-      move(-10, 100);
-      mConveyor.stop(coast);
-
-      spotTurn(250, 100);
-
-      move(-35, 100);
-
-      clawToggle();
       wait(300, msec);
 
-      move(45, 100);
+      move(45, 100, 10, 2000);
 
-      spotTurn(0, 100);
+      spotTurn(0, 100, 12, 1200);
 
-      move(-32, 100);
+      move(20, 100, 12, 1000);
+      
       break;
       
-      default:
-        break;
+    default:
+      break;
   
   }
 }
@@ -304,8 +310,8 @@ void usercontrol(void) {
   bool LockDrive=false;
   while(1) {
 
-    int LSpeed = logDrive(Controller1.Axis3.position(percent));
-    int RSpeed = logDrive(Controller1.Axis2.position(percent));
+    int LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(12/100));
+    int RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(12/100));
 
     mLUpper.spin(forward, LSpeed, percent);
     mLLower.spin(forward, LSpeed, percent);
