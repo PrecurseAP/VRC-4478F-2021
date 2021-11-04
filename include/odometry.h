@@ -12,4 +12,7 @@ extern void lowerLift(bool);
 extern void raiseTilterWithGoal(bool);
 extern void spinConveyor(void);
 extern void lowerTilterWithValue(bool, int);
+extern void spotTurnWithTilterGoal(float, int, int, int);
+extern void spotTurnWithClawGoal(float, int, int, int);
+extern void spotTurnWith2Goals(float, int, int, int);
 #endif

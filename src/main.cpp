@@ -175,27 +175,30 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-
+  autonSelection=leftNoAWP;
+  //move(-25, 100, 12, 3000);
+  //wait(1000, msec);
+  
   switch(autonSelection) {
     case rightAWP:
       raiseLift(false);
 
       lowerTilter(false);
 
-      move(46, 100, 8, 2500);
+      move(43, 100, 5, 2500);
       lowerLift(false);
 
       raiseTilterWithGoal(false);
       wait(250, msec);
       move(-20, 100, 12, 1400);
 
-      spotTurn(180, 100, 12, 2000);
+      spotTurnWithTilterGoal(180, 100, 8, 1700);
 
-      move(27, 100, 13, 1500);
+      move(22, 100, 13, 1500);
 
       lowerTilter(true);
 
-      move(-12, 100, 15, 800);
+      move(-10, 100, 10, 1500);
 
       spotTurn(90, 100, 12, 1500);
 
@@ -246,56 +249,60 @@ void autonomous(void) {
       raiseLift(false);
       lowerTilter(false);
 
-      move(44, 100, 8, 2000);
+      move(43, 100, 5, 2000);
       lowerLift(false);
       raiseTilterWithGoal(false);
       wait(250, msec);
       //spinConveyor();
-      move(-30, 100, 12, 1500);
+      move(-27, 100, 12, 1500);
       //mConveyor.stop(coast);
 
-      spotTurn(130, 100, 12, 1500);
+      spotTurnWithTilterGoal(131, 100, 15, 2000);
 
-      move(-38, 100, 12, 1500);
+      move(-39.5, 100, 12, 1500);
 
       clawToggle();
       wait(300, msec);
 
-      move(63, 100, 10, 5000);
+      spotTurnWith2Goals(133, 100, 12, 2000);
+      move(56, 100, 10, 2800);
 
       lowerTilter(false);
       break;
 
     case leftNoAWP:
-      raiseLift(false);
-      spotTurn(9.5, 100, 12, 800);
+      raiseLift(true);
+      //spotTurn(9.5, 100, 12, 800);
       lowerLift(false);
-      //lowerTilter(false);
-
-
-      move(-49, 100, 8, 2500); 
-
-      //raiseTilterWithGoal(false);
-      clawToggle();
-      wait(250, msec);
-      //spinConveyor();
-      move(10, 100, 12, 900);
-      //mConveyor.stop(coast);
-
-      spotTurn(250, 100, 12, 1500);
       lowerTilter(false);
-      wait(500, msec);
-      move(-20, 100, 12, 1200);
+
+
+      move(49, 100, 4, 2500); 
 
       raiseTilterWithGoal(false);
+      //clawToggle();
+      wait(250, msec);
+
+      //spinConveyor();
+      move(-24, 100, 13, 1400);
+      //raiseLift(true);
+      //mConveyor.stop(coast);
+
+      spotTurn(228, 100, 14, 3000);
+      lowerTilter(false);
+      wait(500, msec);
+      move(-45, 100, 8, 1600);
+      raiseTilter(false);
+      //raiseTilterWithGoal(false);
+      clawToggle();
       wait(300, msec);
 
-      move(45, 100, 10, 2000);
+      //move(28, 100, 10, 1400);
 
-      spotTurn(0, 100, 12, 1200);
+      spotTurn(213, 100, 12, 1500);
 
-      move(20, 100, 12, 1000);
-      
+      move(65, 100, 12, 2000);
+
       break;
       
     default:

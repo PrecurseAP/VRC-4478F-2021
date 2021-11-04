@@ -68,7 +68,7 @@ class Graph {
 };
 
 void raiseLift(bool wait = true) {
-  mArm.spinToPosition(250, degrees, wait);
+  mArm.spinToPosition(150, degrees, wait);
 }
 
 void lowerLift(bool wait = true) {
@@ -132,9 +132,231 @@ void spotTurn(float theta, int maxSpeed, int vecCount, int timeLimit) {
   bool done = false;
   float integral = 0;
 
-  float kP = 1.00;
-  float kI = 0;
-  float kD = .69;
+  float kP = 0.77;
+  float kI = 0.0014;
+  float kD = .19;
+
+  std::vector<float> prevValues;
+  repeat(vecCount) {
+    prevValues.push_back(999);
+  }
+
+  int prevTime = 0;
+  float prevError = 0;
+
+  while (!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+
+    prevTime = currentTime;
+
+    float currentAngle = GYRO.heading(degrees);
+    
+    float angleError = theta - currentAngle;
+    //std::cout << currentAngle << std::endl;
+    if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }
+
+    float derivative = (angleError - prevError) / delta_time;
+
+    prevError = angleError;
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(angleError);
+
+    if (fabs(angleError) < 15) {
+      integral += angleError * delta_time;
+    } else {
+      integral = 0;
+    }
+    
+    float greatest = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
+    }
+
+    float driveSpeed = kP*angleError + kI*integral + kD*derivative;
+
+    mLUpper.spin(forward, driveSpeed, percent);
+    mLLower.spin(forward, driveSpeed, percent);
+    mRUpper.spin(forward, -driveSpeed, percent);
+    mRLower.spin(forward, -driveSpeed, percent);
+    //std::cout << .007*integral << std::endl;
+    
+    
+    if ((greatest < 5) || (Brain.timer(msec)-startTime > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
+
+  }
+}
+
+void spotTurnWithTilterGoal(float theta, int maxSpeed, int vecCount, int timeLimit) {
+  int startTime = Brain.timer(msec);
+  bool done = false;
+  float integral = 0;
+
+  float kP = 0.71;
+  float kI = 0.0006;
+  float kD = .65;
+
+  std::vector<float> prevValues;
+  repeat(vecCount) {
+    prevValues.push_back(999);
+  }
+
+  int prevTime = 0;
+  float prevError = 0;
+
+  while (!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+
+    prevTime = currentTime;
+
+    float currentAngle = GYRO.heading(degrees);
+    
+    float angleError = theta - currentAngle;
+    std::cout << currentAngle << std::endl;
+    if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }
+
+    float derivative = (angleError - prevError) / delta_time;
+
+    prevError = angleError;
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(angleError);
+
+    if (fabs(angleError) < 15) {
+      integral += angleError * delta_time;
+    } else {
+      integral = 0;
+    }
+    
+    float greatest = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
+    }
+
+    float driveSpeed = kP*angleError + kI*integral + kD*derivative;
+
+    mLUpper.spin(forward, driveSpeed, percent);
+    mLLower.spin(forward, driveSpeed, percent);
+    mRUpper.spin(forward, -driveSpeed, percent);
+    mRLower.spin(forward, -driveSpeed, percent);
+    //std::cout << .007*integral << std::endl;
+    
+    
+    if ((greatest < 5) || (Brain.timer(msec)-startTime > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
+
+  }
+}
+
+void spotTurnWithClawGoal(float theta, int maxSpeed, int vecCount, int timeLimit) {
+  int startTime = Brain.timer(msec);
+  bool done = false;
+  float integral = 0;
+
+  float kP = 0.71;
+  float kI = 0.0008;
+  float kD = .55;
+
+  std::vector<float> prevValues;
+  repeat(vecCount) {
+    prevValues.push_back(999);
+  }
+
+  int prevTime = 0;
+  float prevError = 0;
+
+  while (!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+
+    prevTime = currentTime;
+
+    float currentAngle = GYRO.heading(degrees);
+    
+    float angleError = theta - currentAngle;
+    //std::cout << currentAngle << std::endl;
+    if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }
+
+    float derivative = (angleError - prevError) / delta_time;
+
+    prevError = angleError;
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(angleError);
+
+    if (fabs(angleError) < 15) {
+      integral += angleError * delta_time;
+    } else {
+      integral = 0;
+    }
+    
+    float greatest = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
+    }
+
+    float driveSpeed = kP*angleError + kI*integral + kD*derivative;
+
+    mLUpper.spin(forward, driveSpeed, percent);
+    mLLower.spin(forward, driveSpeed, percent);
+    mRUpper.spin(forward, -driveSpeed, percent);
+    mRLower.spin(forward, -driveSpeed, percent);
+    //std::cout << .007*integral << std::endl;
+    
+    
+    if ((greatest < 5) || (Brain.timer(msec)-startTime > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
+
+  }
+}
+
+void spotTurnWith2Goals(float theta, int maxSpeed, int vecCount, int timeLimit) {
+  int startTime = Brain.timer(msec);
+  bool done = false;
+  float integral = 0;
+
+  float kP = 0.651;
+  float kI = 0.00101;
+  float kD = .41;
 
   std::vector<float> prevValues;
   repeat(vecCount) {
@@ -369,9 +591,9 @@ void turnMoveToPoint(float gx, float gy, int maxSpeed) {
 void move(float d, int maxSpeed, int vecCount, int timeLimit) {
   int start_time = Brain.timer(msec);
 
-  float kP = 4.00;
-  float kI = .002;
-  float kD = 2.69;
+  float kP = 4.60;
+  float kI = .001;
+  float kD = 2.4;
 
   bool done = false;
 
@@ -440,15 +662,15 @@ void move(float d, int maxSpeed, int vecCount, int timeLimit) {
       }
     }
 
-    /*if ((fabs(leftError)*4) > maxSpeed) {
-      leftError = maxSpeed * ((leftError < 1) ? -1 : 1);
-    }
-    if ((fabs(rightError)*4) > maxSpeed) {
-      rightError = maxSpeed * ((rightError < 1) ? -1 : 1);
-    }*/
-
     float leftSpeed = kP*leftError + kI*leftIntegral + kD*leftDerivative;
     float rightSpeed = kP*rightError + kI*rightIntegral + kD*rightDerivative;
+
+    if ((fabs(leftSpeed)) > maxSpeed) {
+      leftSpeed = maxSpeed * ((leftSpeed < 1) ? -1 : 1);
+    }
+    if ((fabs(rightError)) > maxSpeed) {
+      rightSpeed = maxSpeed * ((rightSpeed < 1) ? -1 : 1);
+    }
 
     mLUpper.spin(forward, leftSpeed, percent);
     mLLower.spin(forward, leftSpeed, percent);
