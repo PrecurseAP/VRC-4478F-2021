@@ -3,6 +3,7 @@
 #define TOGGLED_ON true
 #define TOGGLED_OFF false
 #include <string>
+#include <iostream>
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -141,11 +142,12 @@ template <typename T>
 int sgn(T val) { //SIGNUM
     return (T(0) < val) - (val < T(0));
 }
-
-int logDrive(int s) {
+template <typename U>
+U logDrive(U s) {
   return (s*s) / 100 * sgn(s);
 }
-int logDriveVolt(int s) {
+template <typename S>
+S logDriveVolt(S s) {
   return (s*s) / 12 * sgn(s);
 }
 
@@ -175,7 +177,7 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  autonSelection=leftNoAWP;
+  autonSelection=leftAWP;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
@@ -214,34 +216,37 @@ void autonomous(void) {
       break;
 
     case leftAWP: 
-      raiseLift(false);
-      spotTurn(9.5, 100, 7, 700);
+      raiseLift(true);
+      //spotTurn(9.5, 100, 7, 700);
       lowerLift(false);
-      move(-49, 100, 8, 2500); 
+      
+      move(-49, 100, 7, 1900); 
       mArm.stop(hold);
 
       clawToggle();
       wait(300, msec);
 
-      move(35, 100, 16, 2000);
+      move(30, 100, 16, 2000);
 
       clawToggle();
       wait(300, msec);
 
-      move(12, 100, 14, 900);
+      //spotTurn(6, 100, 10, 1400);
 
-      spotTurn(276, 100, 13, 1250);
+      moveSlow(16, 100, 15, 1500);
+
+      spotTurn(267, 100, 13, 1250);
 
       //lowerTilter(false);
       
-      move(-5, 100, 10, 600);
+      moveSlow(-6, 100, 6, 900);
       lowerTilterWithValue(true, -550);
-      move(12.5, 100, 12, 900);
-      lowerTilterWithValue(true, -260);
+      moveSlow(12, 100, 6, 1200);
+      lowerTilterWithValue(true, -270);
 
-      //move(-18, 100);  
-      spinConveyor();
-      wait(900, msec);
+      moveSlow(-5, 100, 10, 1000);  
+      spinConveyor();                                       //HIIIIIIII AIDEEEEEN!!!!!!!!!!!!!!!
+      wait(900, msec);                                      //from connor (!)
       mConveyor.stop(coast);
       break;
 
@@ -257,9 +262,9 @@ void autonomous(void) {
       move(-27, 100, 12, 1500);
       //mConveyor.stop(coast);
 
-      spotTurnWithTilterGoal(131, 100, 15, 2000);
+      spotTurnWithTilterGoal(133, 100, 15, 2500);
 
-      move(-39.5, 100, 12, 1500);
+      move(-38, 100, 12, 1500);
 
       clawToggle();
       wait(300, msec);
@@ -271,27 +276,27 @@ void autonomous(void) {
       break;
 
     case leftNoAWP:
-      raiseLift(true);
+      raiseLift(false);
       //spotTurn(9.5, 100, 12, 800);
-      lowerLift(false);
+      //lowerLift(false);
       lowerTilter(false);
 
 
-      move(49, 100, 4, 2500); 
-
+      move(49, 100, 4, 2500);  
+      lowerLift(false);
       raiseTilterWithGoal(false);
       //clawToggle();
       wait(250, msec);
 
       //spinConveyor();
-      move(-24, 100, 13, 1400);
+      move(-21, 100, 13, 1400);
       //raiseLift(true);
       //mConveyor.stop(coast);
 
-      spotTurn(228, 100, 14, 3000);
+      spotTurnWithNoAngleWrap(226, 100, 18, 3500);
       lowerTilter(false);
       wait(500, msec);
-      move(-45, 100, 8, 1600);
+      move(-40, 100, 8, 1600);
       raiseTilter(false);
       //raiseTilterWithGoal(false);
       clawToggle();
@@ -299,7 +304,7 @@ void autonomous(void) {
 
       //move(28, 100, 10, 1400);
 
-      spotTurn(213, 100, 12, 1500);
+      //spotTurn(213, 100, 12, 1500);
 
       move(65, 100, 12, 2000);
 
@@ -317,13 +322,15 @@ void usercontrol(void) {
   bool LockDrive=false;
   while(1) {
 
-    int LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(12/100));
-    int RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(12/100));
+    float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));
+    float RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(float)(12.0/100.0));
 
-    mLUpper.spin(forward, LSpeed, percent);
-    mLLower.spin(forward, LSpeed, percent);
-    mRUpper.spin(forward, RSpeed, percent);
-    mRLower.spin(forward, RSpeed, percent);
+    std::cout << LSpeed << std::endl;
+
+    mLUpper.spin(forward, LSpeed, volt);
+    mLLower.spin(forward, LSpeed, volt);
+    mRUpper.spin(forward, RSpeed, volt);
+    mRLower.spin(forward, RSpeed, volt);
 
     
     if ((LSpeed == 0)&&(LockDrive)){

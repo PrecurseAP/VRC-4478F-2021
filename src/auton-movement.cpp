@@ -68,7 +68,8 @@ class Graph {
 };
 
 void raiseLift(bool wait = true) {
-  mArm.spinToPosition(150, degrees, wait);
+  mArm.setVelocity(100, percent);
+  mArm.spinToPosition(40, degrees, wait);
 }
 
 void lowerLift(bool wait = true) {
@@ -200,6 +201,82 @@ void spotTurn(float theta, int maxSpeed, int vecCount, int timeLimit) {
 
   }
 }
+
+void spotTurnWithNoAngleWrap(float theta, int maxSpeed, int vecCount, int timeLimit) {
+  int startTime = Brain.timer(msec);
+  bool done = false;
+  float integral = 0;
+
+  float kP = -0.77;
+  float kI = -0.0014;
+  float kD = -.19;
+
+  std::vector<float> prevValues;
+  repeat(vecCount) {
+    prevValues.push_back(999);
+  }
+
+  int prevTime = 0;
+  float prevError = 0;
+
+  while (!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+
+    prevTime = currentTime;
+
+    float currentAngle = GYRO.heading(degrees);
+    
+    float angleError = currentAngle-theta;
+
+    std::cout << angleError << std::endl;
+    /*if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }*/
+
+    float derivative = (angleError - prevError) / delta_time;
+
+    prevError = angleError;
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(angleError);
+
+    if (fabs(angleError) < 15) {
+      integral += angleError * delta_time;
+    } else {
+      integral = 0;
+    }
+    
+    float greatest = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
+    }
+
+    float driveSpeed = kP*angleError + kI*integral + kD*derivative;
+
+    mLUpper.spin(forward, driveSpeed, percent);
+    mLLower.spin(forward, driveSpeed, percent);
+    mRUpper.spin(forward, -driveSpeed, percent);
+    mRLower.spin(forward, -driveSpeed, percent);
+    //std::cout << .007*integral << std::endl;
+    
+    
+    if ((greatest < 5) || (Brain.timer(msec)-startTime > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
+
+  }
+}
+
 
 void spotTurnWithTilterGoal(float theta, int maxSpeed, int vecCount, int timeLimit) {
   int startTime = Brain.timer(msec);
@@ -643,6 +720,103 @@ void move(float d, int maxSpeed, int vecCount, int timeLimit) {
     }
 
     if (fabs(rightError) < 13) {
+      rightIntegral += rightError * delta_time;
+    } else {
+      rightIntegral = 0;
+    }
+    
+    float greatestLeft = 0;
+    float greatestRight = 0;
+
+    for (float i = 0; i < prevLeftValues.size(); i++) {
+      if (fabs(prevLeftValues[i]) > greatestLeft) {
+        greatestLeft = fabs(prevLeftValues[i]); 
+      }
+    }
+    for (float i = 0; i < prevRightValues.size(); i++) {
+      if (fabs(prevRightValues[i]) > greatestRight) {
+        greatestRight = fabs(prevRightValues[i]); 
+      }
+    }
+
+    float leftSpeed = kP*leftError + kI*leftIntegral + kD*leftDerivative;
+    float rightSpeed = kP*rightError + kI*rightIntegral + kD*rightDerivative;
+
+    if ((fabs(leftSpeed)) > maxSpeed) {
+      leftSpeed = maxSpeed * ((leftSpeed < 1) ? -1 : 1);
+    }
+    if ((fabs(rightError)) > maxSpeed) {
+      rightSpeed = maxSpeed * ((rightSpeed < 1) ? -1 : 1);
+    }
+
+    mLUpper.spin(forward, leftSpeed, percent);
+    mLLower.spin(forward, leftSpeed, percent);
+    mRUpper.spin(forward, rightSpeed, percent);
+    mRLower.spin(forward, rightSpeed, percent);
+    
+    if (((greatestLeft < 2) && (greatestRight < 2)) || (Brain.timer(msec)-start_time > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+    wait(20, msec);
+  }
+}
+void moveSlow(float d, int maxSpeed, int vecCount, int timeLimit) {
+  int start_time = Brain.timer(msec);
+
+  float kP = 5.2;
+  float kI = 0.00001;
+  float kD = 3.2;
+
+  bool done = false;
+
+  float leftIntegral = 0;
+  float rightIntegral = 0;
+
+  std::vector<float> prevLeftValues;
+  std::vector<float> prevRightValues;
+  repeat(vecCount) {
+    prevLeftValues.push_back(999);
+    prevRightValues.push_back(999);
+  }
+
+  mLLower.setPosition(0, degrees);
+  mRLower.setPosition(0, degrees);
+
+  int prevTime = 0;
+  float prevLeftError = 0;
+  float prevRightError = 0;
+
+  while(!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+    prevTime = currentTime;
+
+    float currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
+    float currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
+
+    float leftError = d - currentLeft;
+    float rightError = d - currentRight;
+
+    float leftDerivative = (leftError - prevLeftError) / delta_time;
+    float rightDerivative = (rightError - prevRightError) / delta_time;
+
+    prevLeftError = leftError;
+    prevRightError = rightError;
+
+    prevLeftValues.erase(prevLeftValues.begin());
+    prevRightValues.erase(prevRightValues.begin());
+    prevLeftValues.push_back(leftError);
+    prevRightValues.push_back(leftError);
+
+    if (fabs(leftError) < 6) {
+      leftIntegral += leftError * delta_time;
+    } else {
+      leftIntegral = 0;
+    }
+
+    if (fabs(rightError) < 6) {
       rightIntegral += rightError * delta_time;
     } else {
       rightIntegral = 0;

@@ -15,4 +15,6 @@ extern void lowerTilterWithValue(bool, int);
 extern void spotTurnWithTilterGoal(float, int, int, int);
 extern void spotTurnWithClawGoal(float, int, int, int);
 extern void spotTurnWith2Goals(float, int, int, int);
+extern void spotTurnWithNoAngleWrap(float, int, int, int);
+extern void moveSlow(float, int, int, int);
 #endif
