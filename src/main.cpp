@@ -29,14 +29,16 @@ enum autonPath {
   rightAWP = 0,
   leftAWP = 1,
   rightNoAWP = 2,
-  leftNoAWP = 3
+  leftNoAWP = 3,
+  fullAWP = 4
 };
 
-std::string autonSelections[4] = { "Right Side With AWP", "Left Side With AWP", 
-                                "Right Side Without AWP", "Left Side Without AWP" };
+std::string autonSelections[5] = { "Right Side With AWP", "Left Side With AWP", 
+                                "Right Side Without AWP", "Left Side Without AWP",
+                                "fullAWP" };
 
 void cycleAuton() {
-  if (autonSelection+1 == 4) {
+  if (autonSelection+1 == 5) {
     autonSelection = 0;
   } else {
     autonSelection++;
@@ -177,7 +179,7 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  autonSelection=leftAWP;
+  //autonSelection=leftAWP;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
@@ -309,7 +311,10 @@ void autonomous(void) {
       move(65, 100, 12, 2000);
 
       break;
+    case fullAWP:
+      move(-43, 100, 1, 2200);
       
+      break;
     default:
       break;
   
@@ -325,7 +330,7 @@ void usercontrol(void) {
     float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));
     float RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(float)(12.0/100.0));
 
-    std::cout << LSpeed << std::endl;
+    //std::cout << LSpeed << std::endl;
 
     mLUpper.spin(forward, LSpeed, volt);
     mLLower.spin(forward, LSpeed, volt);

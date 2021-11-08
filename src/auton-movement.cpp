@@ -762,6 +762,7 @@ void move(float d, int maxSpeed, int vecCount, int timeLimit) {
     wait(20, msec);
   }
 }
+
 void moveSlow(float d, int maxSpeed, int vecCount, int timeLimit) {
   int start_time = Brain.timer(msec);
 
