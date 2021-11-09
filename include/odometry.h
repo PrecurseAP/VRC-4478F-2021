@@ -17,4 +17,5 @@ extern void spotTurnWithClawGoal(float, int, int, int);
 extern void spotTurnWith2Goals(float, int, int, int);
 extern void spotTurnWithNoAngleWrap(float, int, int, int);
 extern void moveSlow(float, int, int, int);
+extern void lowerTilterSlow(bool);
 #endif

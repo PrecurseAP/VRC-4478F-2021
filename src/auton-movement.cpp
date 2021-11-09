@@ -86,6 +86,12 @@ void lowerTilter(bool wait = true) {
   mLTray.spinToPosition(-540, degrees, false);
   mRTray.spinToPosition(-540, degrees, wait);
 }
+void lowerTilterSlow(bool wait = true) {
+  mLTray.setVelocity(40, percent);
+  mRTray.setVelocity(40, percent);
+  mLTray.spinToPosition(-540, degrees, false);
+  mRTray.spinToPosition(-540, degrees, wait);
+}
 void lowerTilterWithValue(bool wait = true, int val = -540) {
   mLTray.setVelocity(100, percent);
   mRTray.setVelocity(100, percent);

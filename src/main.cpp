@@ -179,7 +179,7 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  //autonSelection=leftAWP;
+  autonSelection=fullAWP;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
@@ -312,8 +312,43 @@ void autonomous(void) {
 
       break;
     case fullAWP:
-      move(-43, 100, 1, 2200);
+      raiseLift(true);
+      lowerLift(false);
+      move(-45, 100, 1, 2200);
+      clawToggle();
+      wait(250, msec);
+
+      raiseLift(false);
+
+      move(28, 100, 5, 1600);
+
+      spotTurnWithClawGoal(270, 100, 8, 1400);
+
+      move(-5, 100, 5, 800);
+
+      lowerTilter(true);
+
+      move(11, 100, 4, 1000);
+
+      raiseTilterWithGoal(true);
+
+      spinConveyor();
+      wait(300, msec);
+      mConveyor.stop(hold);
+      lowerTilterSlow(false);
+      move(-98, 100, 5, 3300);
       
+      raiseTilter(false);
+      clawToggle();
+      spotTurn(316, 100, 6, 1400);
+
+      move(18, 100, 5, 1500);
+      
+      spinConveyor();
+      wait(700, msec);
+      mConveyor.stop(coast);
+
+
       break;
     default:
       break;
