@@ -18,4 +18,6 @@ extern void spotTurnWith2Goals(float, int, int, int);
 extern void spotTurnWithNoAngleWrap(float, int, int, int);
 extern void moveSlow(float, int, int, int);
 extern void lowerTilterSlow(bool);
+extern void turnToPoint(float, float, int, int);
+extern void raiseLiftFully(bool);
 #endif

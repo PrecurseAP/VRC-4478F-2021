@@ -30,12 +30,13 @@ enum autonPath {
   leftAWP = 1,
   rightNoAWP = 2,
   leftNoAWP = 3,
-  fullAWP = 4
+  fullAWP = 4,
+  testing = 5
 };
 
-std::string autonSelections[5] = { "Right Side With AWP", "Left Side With AWP", 
+std::string autonSelections[6] = { "Right Side With AWP", "Left Side With AWP", 
                                 "Right Side Without AWP", "Left Side Without AWP",
-                                "fullAWP" };
+                                "fullAWP", "testing" };
 
 void cycleAuton() {
   if (autonSelection+1 == 5) {
@@ -166,7 +167,7 @@ void pre_auton() {
   vexcodeInit();
   Brain.Screen.print(autonSelection);
   Brain.Screen.pressed(renderScreen);
-  //GPS.startCalibration();
+  GPS.startCalibration();
   GYRO.startCalibration();
   while(GPS.isCalibrating() || GYRO.isCalibrating()) {
     wait(100, msec);
@@ -179,7 +180,7 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  autonSelection=fullAWP;
+  autonSelection=testing;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
@@ -347,6 +348,61 @@ void autonomous(void) {
       spinConveyor();
       wait(700, msec);
       mConveyor.stop(coast);
+
+
+      break;
+    case testing:
+      clawToggle();
+      wait(250, msec);
+      raiseLiftFully(true);
+
+      spotTurnWithClawGoal(96, 100, 45, 5000);
+      lowerLift(false);
+      lowerTilter(false);
+      move(85, 100, 20, 3500);
+      raiseTilterWithGoal(true);
+      spotTurnWith2Goals(0, 100, 20, 3000);
+      lowerTilter(true);
+      move(-27, 100, 20, 2000);
+      raiseTilter(false);
+      raiseLiftFully(true);
+      spotTurn(270, 100, 20, 3000);
+      moveSlow(-5.5, 100, 20, 1500);
+      clawToggle();
+      wait(1000, msec);
+      moveSlow(3, 100, 20, 1500);
+      spotTurn(176, 100, 20, 3000);
+      lowerLift(false);
+      move(40, 100, 20, 3000);
+      spotTurn(239, 100, 20, 3000); //turn to blue goal
+      move(-13, 100, 20, 3000);
+      clawToggle();
+      wait(300, msec);
+      moveSlow(10, 100, 20, 3000);
+      spotTurnWithClawGoal(269, 100, 20, 3000);
+      lowerTilter(false);
+      wait(300, msec);
+      move(46, 100, 20, 3000);
+      raiseTilterWithGoal(true); //lift right yellow moog
+      move(33, 100, 20, 3000);
+      spotTurnWith2Goals(180, 100, 20, 3500);
+      lowerTilter(true);
+      move(-29, 100, 20, 3000);
+      raiseLiftFully(true);
+      spotTurn(90, 100, 20, 3000);
+      moveSlow(6, 100, 20, 3000);
+      clawToggle();
+      wait(300, msec);
+      move(39, 100, 20, 3000);
+      lowerLift(false);
+      raiseTilterWithGoal(true);
+      spotTurnWithTilterGoal(129, 100, 20, 3000);
+      move(55, 100, 20, 3000);
+      clawToggle();
+      wait(300, msec);
+      spotTurnWith2Goals(90, 100, 20, 3000);
+      move(65, 100, 20, 3000);
+
 
 
       break;

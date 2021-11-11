@@ -71,9 +71,13 @@ void raiseLift(bool wait = true) {
   mArm.setVelocity(100, percent);
   mArm.spinToPosition(40, degrees, wait);
 }
+void raiseLiftFully(bool wait = true) {
+  mArm.setVelocity(100, percent);
+  mArm.spinToPosition(665, degrees, wait);
+}
 
 void lowerLift(bool wait = true) {
-  mArm.spinToPosition(-70, degrees, wait);
+  mArm.spinToPosition(-40, degrees, wait);
 }
 
 void spinConveyor() {
@@ -567,110 +571,6 @@ void moveForward(float d, int maxSpeed) {
   }
 }
 
-//doesnt work
-void turnMoveToPoint(float gx, float gy, int maxSpeed) {
-  bool done = false;
-  float integral = 0;
-
-  //initialize the vector containing last 30 error values
-  std::vector<float> prevValues;
-  repeat(30) {
-    prevValues.push_back(999);
-  }
-  float tDiff;
-  //Graph g = Graph(&tDiff);
-  //begin turning loop
-  while(!done/* && !Controller1.ButtonY.pressing()*/) {
-    float cx = GPS.xPosition(inches);
-    float cy = GPS.yPosition(inches);
-    float ct = GYRO.heading(degrees) + 180;
-
-    tDiff = angleWrap((180/M_PI)*atan2( gy-cy, gx-cx ) - ct);
-    Brain.Screen.clearScreen();
-    Brain.Screen.setCursor(0,0);
-    Brain.Screen.print(tDiff);
-    std::cout << tDiff << std::endl;
-    if (tDiff > 180) {
-      tDiff = tDiff - 360;
-    } else if (tDiff < -180) {
-      tDiff = 360 + tDiff;
-    }
-    //g.updateData(tDiff);
-    //erase oldest error value and insert the newest one
-    prevValues.erase(prevValues.begin());
-    prevValues.push_back(tDiff);
-
-    if (fabs(tDiff) < 15) {
-      integral += tDiff;
-    } else {
-      integral = 0;
-    }
-    float total = 0;
-
-    for (float i = 0; i < prevValues.size(); i++) {
-      total += prevValues[i];
-    }
-
-    //spin motors at PI value
-    moveRightSide(-tDiff*5/* - .001*integral*/);
-    moveLeftSide(tDiff*.5 /*+ .001*integral*/);
-
-    //check if the average error over 600 ms is below 1 degree, if yes then stop loop
-    if (fabs((total/prevValues.size())) < 1) {
-      done = true;
-      stopAllDrive(hold);
-      break;
-    }
-
-    wait(20, msec);
-  }
-
-  prevValues.clear();
-  /*
-  repeat(30) {
-    prevValues.push_back(999);
-  }
-
-  integral = 0;
-  stopAllDrive(coast);
-  g.drawGraph();
-  //done = false;
-  while(!done) {
-
-    float cx = GPS.xPosition(inches);
-    float cy = GPS.yPosition(inches);
-    float ct = (M_PI/180) * angleWrap(450 - GYRO.heading(degrees));
-
-    float distanceToGoal = hypot(gx-cx, gy-cy);//sqrt( (gx-cx)*(gx-cx) + (gy-cy)*(gy-cy) );
-
-    prevValues.erase(prevValues.begin());
-    prevValues.push_back(distanceToGoal);
-
-    float angleToGoal = (180/M_PI)*atan2( gy-cy, gx-cx ) - (180/M_PI)*ct;
-
-    if (fabs(distanceToGoal) < 15) {
-      integral += distanceToGoal;
-    } else {
-      integral = 0;
-    }
-
-    float total = 0;
-
-    for (float i = 0; i < prevValues.size(); i++) {
-      total += prevValues[i];
-    }
-
-    if (fabs((total/prevValues.size())) < 1) {
-      done = true;
-      break;
-    }
-
-    moveLeftSide(distanceToGoal*1.1 + integral*0.0001 + 0*angleToGoal);
-    moveRightSide(distanceToGoal*1.1 + integral*0.0001 - 0*angleToGoal);
-    wait(20, msec);
-  }*/
-}
-
 void move(float d, int maxSpeed, int vecCount, int timeLimit) {
   int start_time = Brain.timer(msec);
 
@@ -864,5 +764,84 @@ void moveSlow(float d, int maxSpeed, int vecCount, int timeLimit) {
       break;
     }
     wait(20, msec);
+  }
+}
+
+void turnToPoint(float x, float y, int vecCount, int timeLimit) {
+  int startTime = Brain.timer(msec);
+  bool done = false;
+  float integral = 0;
+
+  float kP = .5;
+  float kI = 0.0012;
+  float kD = 0.16;
+
+  std::vector<float> prevValues;
+  repeat(vecCount) {
+    prevValues.push_back(999);
+  }
+
+  int prevTime = 0;
+  float prevError = 0;
+
+  while (!done) {
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+
+    float currY = GPS.yPosition(inches);
+    float currX = GPS.xPosition(inches);
+    /*std::cout << currY << std::endl;
+    std::cout << currX << std::endl << std::endl;*/
+
+    prevTime = currentTime;
+
+    float angleError = round((180/M_PI)*atan2(y-currY, x-currX) - GPS.heading(degrees));
+    //std::cout << currentAngle << std::endl;
+    if (angleError > 180) {
+      angleError = angleError - 360;
+    } else if (angleError < -180) {
+      angleError = 360 + angleError;
+    }
+    std::cout << angleError << std::endl;
+    std::cout << GPS.heading(degrees) << std::endl << std::endl;
+
+    float derivative = (angleError - prevError) / delta_time;
+
+    prevError = angleError;
+
+    prevValues.erase(prevValues.begin());
+    prevValues.push_back(angleError);
+
+    if (fabs(angleError) < 5) {
+      integral += angleError * delta_time;
+    } else {
+      integral = 0;
+    }
+    
+    float greatest = 0;
+
+    for (float i = 0; i < prevValues.size(); i++) {
+      if (fabs(prevValues[i]) > greatest) {
+        greatest = fabs(prevValues[i]); 
+      }
+    }
+
+    float driveSpeed = kP*angleError + kI*integral + kD*derivative;
+
+    mLUpper.spin(forward, driveSpeed, percent);
+    mLLower.spin(forward, driveSpeed, percent);
+    mRUpper.spin(forward, -driveSpeed, percent);
+    mRLower.spin(forward, -driveSpeed, percent);
+    //std::cout << .007*integral << std::endl;
+    
+    
+    if ((greatest < 3) || (Brain.timer(msec)-startTime > timeLimit)) {
+      done = true;
+      stopAllDrive(hold);
+      break;
+    }
+
+    wait(20, msec);
+
   }
 }
