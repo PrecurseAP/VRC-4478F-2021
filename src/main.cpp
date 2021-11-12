@@ -359,7 +359,7 @@ void autonomous(void) {
       spotTurnWithClawGoal(96, 100, 45, 5000);
       lowerLift(false);
       lowerTilter(false);
-      move(85, 100, 20, 3500);
+      move(86, 100, 20, 3500);
       raiseTilterWithGoal(true);
       spotTurnWith2Goals(0, 100, 20, 3000);
       lowerTilter(true);
@@ -374,34 +374,36 @@ void autonomous(void) {
       spotTurn(176, 100, 20, 3000);
       lowerLift(false);
       move(40, 100, 20, 3000);
-      spotTurn(239, 100, 20, 3000); //turn to blue goal
-      move(-13, 100, 20, 3000);
+      spotTurn(245, 100, 20, 3000); //turn to blue goal
+      moveSlow(-11.3, 100, 20, 3000);
       clawToggle();
       wait(300, msec);
-      moveSlow(10, 100, 20, 3000);
-      spotTurnWithClawGoal(269, 100, 20, 3000);
+      moveSlow(8, 100, 20, 3000);
+      spotTurnWithClawGoal(269, 100, 25, 4000);
       lowerTilter(false);
       wait(300, msec);
       move(46, 100, 20, 3000);
       raiseTilterWithGoal(true); //lift right yellow moog
-      move(33, 100, 20, 3000);
+      move(26, 100, 20, 3000);
       spotTurnWith2Goals(180, 100, 20, 3500);
       lowerTilter(true);
-      move(-29, 100, 20, 3000);
+      move(-27, 100, 20, 3000);
       raiseLiftFully(true);
-      spotTurn(90, 100, 20, 3000);
-      moveSlow(6, 100, 20, 3000);
+      spotTurnWithClawGoal(90, 100, 20, 3000);
+      moveSlow(-8.5, 100, 20, 3000);
       clawToggle();
       wait(300, msec);
-      move(39, 100, 20, 3000);
+      spotTurn(90, 100, 80, 6000);
+      //turnToPoint(0, 0, 30, 5000);
+      moveSlow(35, 100, 20, 3000);
       lowerLift(false);
       raiseTilterWithGoal(true);
       spotTurnWithTilterGoal(129, 100, 20, 3000);
-      move(55, 100, 20, 3000);
-      clawToggle();
+      move(40, 100, 20, 3000);
+     /* clawToggle();
       wait(300, msec);
       spotTurnWith2Goals(90, 100, 20, 3000);
-      move(65, 100, 20, 3000);
+      move(65, 100, 20, 3000);*/
 
 
 
