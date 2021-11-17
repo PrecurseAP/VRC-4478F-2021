@@ -1,5 +1,5 @@
-#ifndef __ODOMETRY
-#define __ODOMETRY
+#ifndef __AUTONMOVEMENT
+#define __AUTONMOVEMENT
 
 extern void turnMoveToPoint(float, float, int);
 extern void spotTurn(float, int, int, int);

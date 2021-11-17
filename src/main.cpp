@@ -1,9 +1,10 @@
 #include "vex.h"
-#include "odometry.h"
+#include "auton-movement.h"
 #define TOGGLED_ON true
 #define TOGGLED_OFF false
 #include <string>
 #include <iostream>
+#include "pure-pursuit.h"
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -39,106 +40,11 @@ std::string autonSelections[6] = { "Right Side With AWP", "Left Side With AWP",
                                 "fullAWP", "testing" };
 
 void cycleAuton() {
-  if (autonSelection+1 == 5) {
+  if (autonSelection+1 == 6) {
     autonSelection = 0;
   } else {
     autonSelection++;
   }
-}
-
-void renderScreen() {
-  cycleAuton();
-  Brain.Screen.print(autonSelection);
-
-  /*
-  //for reference the screen is 480 x 272 pixels
-  Brain.Screen.clearScreen();
-  Brain.Screen.setPenColor("#777777"); //change border color of squares to a slightly darker gray, separates tiles
-    
-  for (int ROW = 0; ROW < 6; ROW++) 
-    for (int COL = 0; COL < 6; COL++) 
-      Brain.Screen.drawRectangle( (COL * 35) + 133 , (ROW * 35) + 18 , 35 , 35 , "#888888");
-  //^^ The above nested loop generates the 6x6 grid of field tiles in gray
-
-  switch(p.touchedSquare) {
-    case leftRed:
-      Brain.Screen.drawRectangle(133, 53, 35, 35, color::white); break;
-    case rightRed:
-      Brain.Screen.drawRectangle(133, 158, 35, 35, color::white); break;                                                                        
-    case leftBlue:                                                          //logic to highlight the square that was pressed
-      Brain.Screen.drawRectangle(308, 158, 35, 35, color::white); break;
-    case rightBlue:
-      Brain.Screen.drawRectangle(308, 53, 35, 35, color::white); break;
-    default: break;
-      //do nothing if there is no chosen square
-  }
-
-  Brain.Screen.setPenColor(color::red);
-  Brain.Screen.drawRectangle(113, 20, 3, 205, color::red);   //draw leftmost red line
-
-  Brain.Screen.setPenColor(color::blue);
-  Brain.Screen.drawRectangle(363, 20, 3, 205, color::blue);  //draw rightmost blue line 
-
-  Brain.Screen.setPenColor(color::white); //change to white
-
-  Brain.Screen.drawRectangle(133, 120, 35, 2);               //draw two horizontal white lines on the left
-  Brain.Screen.drawRectangle(133, 124, 35, 2);               //
-                                                
-  Brain.Screen.drawRectangle(167, 18, 2, 209);               //draw vertical white line on the left
-
-  Brain.Screen.drawRectangle(235, 18, 2, 209);               //draw two vertical white lines in the center                                  
-  Brain.Screen.drawRectangle(239, 18, 2, 209);               //
-
-  Brain.Screen.drawRectangle(307, 18, 2, 209);               //draw vertical white line on the right
-
-  Brain.Screen.drawRectangle(308, 120, 34, 2);               //draw two horizontal white lines on the right                                                                                    
-  Brain.Screen.drawRectangle(308, 124, 34, 2);               //
-
-  Brain.Screen.setPenColor("#444444"); //change color to a dark gray
-
-  Brain.Screen.drawRectangle(133, 18, 209, 2); //
-  Brain.Screen.drawRectangle(133, 226, 209, 2);//     Draw field border walls in dark gray
-  Brain.Screen.drawRectangle(133, 18, 2, 209); //                                                
-  Brain.Screen.drawRectangle(341, 18, 2, 209); //
-
-  Brain.Screen.setPenColor("#222222"); //set color to a very dark gray, pretty much black
-
-  drawGoal(144, 29, color::blue);              //                
-  drawGoal(238, 29, color::red);               //draw top three goals
-  drawGoal(331, 29, color::red);               //
-
-  drawGoal(144, 123, color::blue);             // 
-  drawGoal(238, 123, color::transparent);      //draw middle three goals
-  drawGoal(331, 123, color::red);              //
-
-  drawGoal(144, 216, color::blue);             // 
-  drawGoal(238, 216, color::blue);             //draw bottom three goals
-  drawGoal(331, 216, color::red);              //
-
-  Brain.Screen.drawCircle(155, 40, 6, color::red);
-  Brain.Screen.drawCircle(320, 40, 6, color::blue);
-  Brain.Screen.drawCircle(320, 205, 6, color::blue);
-  Brain.Screen.drawCircle(155, 205, 6, color::red);
-  Brain.Screen.drawCircle(238, 70, 6, color::red);          //DRAW ALL THE DAMN BALLS )that arent in goals(
-  Brain.Screen.drawCircle(238, 175, 6, color::blue);
-  Brain.Screen.drawCircle(238, 107, 6, color::red);
-  Brain.Screen.drawCircle(238, 139, 6, color::blue);
-  Brain.Screen.drawCircle(222, 123, 6, color::blue);
-  Brain.Screen.drawCircle(254, 123, 6, color::red);
-
-  if (p.autSel == false) { 
-    Brain.Screen.drawRectangle(0, 0, 80, 272, "#007F00");       //Draw left and right confirmation buttons
-    Brain.Screen.drawRectangle(400, 0, 80, 272, "#007F00");
-  }
-  else {
-    Brain.Screen.drawRectangle(0, 0, 80, 272, "#00007F");       //Draw left and right unconfirmation buttons
-    Brain.Screen.drawRectangle(400, 0, 80, 272, "#00007F");
-  }
-  Brain.Screen.printAt(4, 17, false, "Confirm");       //
-  Brain.Screen.printAt(4, 234, false, "Confirm");      //     Draw confirm text on confirm buttons
-  Brain.Screen.printAt(405, 17, false, "Confirm");     //
-  Brain.Screen.printAt(405, 234, false, "Confirm");    //
-  */
 }
 
 template <typename T> 
@@ -166,7 +72,6 @@ void clawToggle() {
 void pre_auton() {
   vexcodeInit();
   Brain.Screen.print(autonSelection);
-  Brain.Screen.pressed(renderScreen);
   GPS.startCalibration();
   GYRO.startCalibration();
   while(GPS.isCalibrating() || GYRO.isCalibrating()) {
@@ -180,7 +85,7 @@ void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  autonSelection=testing;
+  //autonSelection=leftNoAWP;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
@@ -285,21 +190,21 @@ void autonomous(void) {
       lowerTilter(false);
 
 
-      move(49, 100, 4, 2500);  
+      move(46, 100, 4, 2500);  
       lowerLift(false);
       raiseTilterWithGoal(false);
       //clawToggle();
       wait(250, msec);
 
       //spinConveyor();
-      move(-21, 100, 13, 1400);
+      move(-14, 100, 13, 1400);
       //raiseLift(true);
       //mConveyor.stop(coast);
 
-      spotTurnWithNoAngleWrap(226, 100, 18, 3500);
+      spotTurnWithNoAngleWrap(236, 100, 18, 4000);
       lowerTilter(false);
       wait(500, msec);
-      move(-40, 100, 8, 1600);
+      move(-30, 100, 8, 1600);
       raiseTilter(false);
       //raiseTilterWithGoal(false);
       clawToggle();
@@ -307,9 +212,9 @@ void autonomous(void) {
 
       //move(28, 100, 10, 1400);
 
-      //spotTurn(213, 100, 12, 1500);
+      spotTurnWith2Goals(213, 100, 12, 1500);
 
-      move(65, 100, 12, 2000);
+      move(50, 100, 12, 2000);
 
       break;
     case fullAWP:
@@ -415,7 +320,11 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
+  //drawOnBrain(inject(path1, 10), color::white);   
+ drawOnBrain(path1,color::white, 4);
+  drawOnBrain(smoother(inject(path1, 15), .9, 1), color::red, 2);
   
+  wait(1000000, msec);
   Controller1.ButtonA.pressed(clawToggle);
   bool LockDrive=false;
   while(1) {

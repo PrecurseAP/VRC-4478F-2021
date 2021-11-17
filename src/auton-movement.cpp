@@ -1,7 +1,6 @@
-
 //contains code that moves the robot during autonomous
 #include "vex.h"
-#include "odometry.h"
+#include "auton-movement.h"
 #include <vector>
 #include "math.h"
 #include <string>
@@ -217,9 +216,9 @@ void spotTurnWithNoAngleWrap(float theta, int maxSpeed, int vecCount, int timeLi
   bool done = false;
   float integral = 0;
 
-  float kP = -0.77;
-  float kI = -0.0014;
-  float kD = -.19;
+  float kP = -0.71;
+  float kI = -0.0006;
+  float kD = -.65;
 
   std::vector<float> prevValues;
   repeat(vecCount) {
@@ -276,7 +275,7 @@ void spotTurnWithNoAngleWrap(float theta, int maxSpeed, int vecCount, int timeLi
     //std::cout << .007*integral << std::endl;
     
     
-    if ((greatest < 5) || (Brain.timer(msec)-startTime > timeLimit)) {
+    if ((greatest < 4) || (Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
       break;
