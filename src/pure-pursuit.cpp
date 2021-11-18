@@ -1,7 +1,7 @@
 #include "pure-pursuit.h"
 #include "vex.h"
 
-/* declared in header file
+/* declared in header file, this is the point data structure
 struct Point {
   float x = 0;
   float y = 0;
@@ -24,20 +24,30 @@ std::vector<Point> path1 = {
   Point(100,100)
 };
 
+
+/**
+*This inject function takes a vector of defined waypoints and uses linear injection to insert evenly spaced points between each waypoint.
+*
+*/
 std::vector<Point> inject(std::vector<Point> waypoints, float spacing) {
   std::vector<Point> newPoints;
 
   for(int i = 0; i < waypoints.size()-1; i++) {
+    //find vector from one waypoint to adjacent one
     float vecX = waypoints[i+1].x - waypoints[i].x;
     float vecY = waypoints[i+1].y - waypoints[i].y;
 
+    //magnitude of path segment we are injecting to
     float magnitude = sqrt((vecX*vecX) + (vecY*vecY));
 
+    //amount of points to be added
     float possiblePoints = ceil(magnitude/spacing);
 
+    //a unit vector that is used to add the distance from one point to another
     vecX = (vecX / magnitude) * spacing;
     vecY = (vecY / magnitude) * spacing;
 
+    //add the each point to the newly generated path vector
     for(int j = 0; j < possiblePoints; j++) {
       newPoints.push_back( { waypoints[i].x + (vecX * j), waypoints[i].y + (vecY * j) } );
     }
@@ -46,10 +56,16 @@ std::vector<Point> inject(std::vector<Point> waypoints, float spacing) {
   return newPoints;
 }
 
+/**
+* The smoother function takes a vector of points (should be an output of inject) and uses gradient descent to optimize the path for robot movement
+* If a path takes too long to generate, it means that the algorithm does not properly converge. when this happens, just up the tolerance.
+*/
 std::vector<Point> smoother(std::vector<Point> points, float b, float tolerance) {
   std::vector<Point> newPath(points);
   float a = 1.0 - b;
   float change = tolerance;
+
+  //ill be honest i have no idea whats going on here
   while(change >= tolerance) {
     change = 0.0;
     for(int i = 1; i < points.size()-1; i++) {
@@ -69,6 +85,8 @@ std::vector<Point> smoother(std::vector<Point> points, float b, float tolerance)
   return newPath;
 }
 
+
+//draws a path to the brain screen using circles as nodes. nice for debugging.
 void drawOnBrain(std::vector<Point> points, vex::color Color, int radius) {
   //Brain.Screen.clearScreen();
   Brain.Screen.setPenColor(Color);

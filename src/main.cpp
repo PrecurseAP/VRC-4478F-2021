@@ -320,12 +320,7 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
-  //drawOnBrain(inject(path1, 10), color::white);   
- drawOnBrain(path1,color::white, 4);
-  drawOnBrain(smoother(inject(path1, 15), .9, 1), color::red, 2);
-  
-  wait(1000000, msec);
-  Controller1.ButtonA.pressed(clawToggle);
+  Controller1.ButtonA.pressed(clawToggle); //little callback for toggling the claw pneumatics
   bool LockDrive=false;
   while(1) {
 
