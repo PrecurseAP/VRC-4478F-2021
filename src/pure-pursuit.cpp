@@ -1,9 +1,14 @@
 #include "pure-pursuit.h"
 #include "vex.h"
+#include <algorithm>
 
 template <typename G> 
 int sgn2(G val) { //SIGNUM
     return (G(0) < val) - (val < G(0));
+}
+
+float clip(float n, float lower, float upper) {
+  return std::max(lower, std::min(n, upper));
 }
 
 /* declared in header file, this is the point data structure
@@ -23,10 +28,10 @@ struct Point {
 */
 
 std::vector<Point> path1 = {
-  Point(30,30),
-  Point(380,50),
-  Point(300,200),
-  Point(100,100)
+  Point(0, 0),
+  Point(0, 20),
+  Point(20, 20),
+  Point(20, 0)
 };
 
 
@@ -135,6 +140,8 @@ std::vector<Point> calculateCurvatures(std::vector<Point> path) {
   return newPath;
 }
 
+//maximum velocity that the robot can move at is 4.72 ft/sec or 56.7 in/s (this is for 5:3 speed drive with 3.25" omnis)
+//normal 200 rpm drive with 4" omnis is 41.8 in/sec, or 3.49 ft/sec
 std::vector<Point> calculateVelocities(std::vector<Point> path, float pathMaxVel, float k, float a) {
   std::vector<Point> newPath(path);
   
@@ -155,7 +162,8 @@ std::vector<Point> calculateVelocities(std::vector<Point> path, float pathMaxVel
   return newPath;
 }
 
-struct purePursuitData {
+// in header file
+/* struct purePursuitData {
   int closestPoint;
   int prevClosestPoint = 0;
   Point lookaheadPoint = Point(0,0);
@@ -168,11 +176,12 @@ struct purePursuitData {
     prevLookahead = 0.0;
   }
 
-};
+};*/
+
 float robotX = 0; //placeholders for when we actually have odometry.
 float robotY = 0;
 float robotTheta = 0;
-float robotTrackWidth = 14;
+float robotTrackWidth = 12;
 
 float distanceFormula(Point a, Point b) {
   return sqrt((b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y));
@@ -181,14 +190,14 @@ float distanceFormula(Point a, Point b) {
 int purePursuit(std::vector<Point> path, float lookahead) {
   purePursuitData data = purePursuitData(path[0]);
 
+  float PrevLimitedVelocity = 0;
+  float vOutput = 0;
+
   int start_time = Brain.timer(msec);
   int prevTime = 0;
 
   bool done = false;
   while(!done) {
-    int currentTime = Brain.timer(msec);
-    int delta_time = currentTime - prevTime;
-    prevTime = currentTime;
 
     //find closest point
     for (int i = data.prevClosestPoint, least = 0; i < path.size(); i++) {
@@ -260,10 +269,26 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     float signedCurvature = lookaheadCurvature * side; //that took a while
 
     //begin wheel velocity calculation
+
+    int currentTime = Brain.timer(msec);
+    int delta_time = currentTime - prevTime;
+    prevTime = currentTime;
+
+    float maxChange = (delta_time/1000) * 15;
+    vOutput += clip(path[data.closestPoint].targetVelocity - PrevLimitedVelocity, -maxChange, maxChange);
+
+
     float targetLeftVelocity = path[data.closestPoint].targetVelocity * ((2 + signedCurvature*robotTrackWidth) / 2);
     float targetRightVelocity = path[data.closestPoint].targetVelocity - ((2 + signedCurvature*robotTrackWidth) / 2);
 
+    float targetLeftPower = (targetLeftVelocity / (4 * M_PI)) * 60;
+    float targetRightPower = (targetRightVelocity / (4 * M_PI)) * 60;
 
+
+    mLUpper.spin(forward, targetLeftPower, rpm);
+    mLLower.spin(forward, targetLeftPower, rpm);
+    mRUpper.spin(forward, targetRightPower, rpm);
+    mRLower.spin(forward, targetRightPower, rpm);
 
     wait(20, msec);
   }

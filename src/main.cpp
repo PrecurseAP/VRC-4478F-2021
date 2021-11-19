@@ -320,6 +320,22 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
+  /*std::vector<Point> path2 = {
+  Point(-20, -20),
+  Point(0, 35),
+  Point(40, 0),
+  Point(40, 45)
+};
+
+
+  std::vector<Point> autoPath = inject(path2, 5);
+  autoPath = smoother(autoPath, .9, .1);
+  autoPath = calculateDistances(autoPath);
+  autoPath = calculateCurvatures(autoPath);
+  autoPath = calculateVelocities(autoPath, 50,5, 20);
+
+  purePursuit(autoPath, 15);
+*/
   Controller1.ButtonA.pressed(clawToggle); //little callback for toggling the claw pneumatics
   bool LockDrive=false;
   while(1) {
