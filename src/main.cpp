@@ -45,6 +45,7 @@ void cycleAuton() {
   } else {
     autonSelection++;
   }
+  Brain.Screen.print(autonSelection);
 }
 
 template <typename T> 
@@ -71,6 +72,8 @@ void clawToggle() {
 
 void pre_auton() {
   vexcodeInit();
+
+  Brain.Screen.pressed(cycleAuton);
   Brain.Screen.print(autonSelection);
   GPS.startCalibration();
   GYRO.startCalibration();
@@ -167,7 +170,7 @@ void autonomous(void) {
       raiseTilterWithGoal(false);
       wait(250, msec);
       //spinConveyor();
-      move(-27, 100, 12, 1500);
+      move(-26, 100, 12, 1500);
       //mConveyor.stop(coast);
 
       spotTurnWithTilterGoal(133, 100, 15, 2500);
@@ -201,11 +204,11 @@ void autonomous(void) {
       //raiseLift(true);
       //mConveyor.stop(coast);
 
-      spotTurnWithNoAngleWrap(236, 100, 18, 4000);
-      lowerTilter(false);
+      spotTurnWithNoAngleWrap(229, 100, 18, 4000);
+      //lowerTilter(false);
       wait(500, msec);
-      move(-30, 100, 8, 1600);
-      raiseTilter(false);
+      move(-34, 100, 8, 1600);
+      //raiseTilter(false);
       //raiseTilterWithGoal(false);
       clawToggle();
       wait(300, msec);
@@ -256,7 +259,7 @@ void autonomous(void) {
 
 
       break;
-    case testing:
+    case testing: //skills
       clawToggle();
       wait(250, msec);
       raiseLiftFully(true);
@@ -320,22 +323,24 @@ void autonomous(void) {
 }
 
 void usercontrol(void) {
-  /*std::vector<Point> path2 = {
-  Point(-20, -20),
-  Point(0, 35),
-  Point(40, 0),
-  Point(40, 45)
-};
-
+  
+  std::vector<Point> path2 = {
+    Point(-20, -20),
+    Point(0, 35),
+    Point(40, 0),
+    Point(40, 45)
+  };
 
   std::vector<Point> autoPath = inject(path2, 5);
   autoPath = smoother(autoPath, .9, .1);
   autoPath = calculateDistances(autoPath);
   autoPath = calculateCurvatures(autoPath);
-  autoPath = calculateVelocities(autoPath, 50,5, 20);
+  autoPath = calculateVelocities(autoPath, 5, .09, 1);
 
-  purePursuit(autoPath, 15);
-*/
+  wait(3000, msec);
+
+  int a = purePursuit(autoPath, 10);
+
   Controller1.ButtonA.pressed(clawToggle); //little callback for toggling the claw pneumatics
   bool LockDrive=false;
   while(1) {

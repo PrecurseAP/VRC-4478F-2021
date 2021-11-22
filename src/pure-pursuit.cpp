@@ -190,8 +190,10 @@ float distanceFormula(Point a, Point b) {
 int purePursuit(std::vector<Point> path, float lookahead) {
   purePursuitData data = purePursuitData(path[0]);
 
-  float PrevLimitedVelocity = 0;
+  float prevLimitedVelocity = 0;
   float vOutput = 0;
+
+  float maxRate = 50;
 
   int start_time = Brain.timer(msec);
   int prevTime = 0;
@@ -199,29 +201,29 @@ int purePursuit(std::vector<Point> path, float lookahead) {
   bool done = false;
   while(!done) {
 
+    robotX = GPS.xPosition(inches);
+    robotY = GPS.yPosition(inches);
+    robotTheta = GPS.heading(degrees) - 180;
+
     //find closest point
-    for (int i = data.prevClosestPoint, least = 0; i < path.size(); i++) {
+    for (int i = data.closestPoint; i < path.size(); i++) {
       float distanceToPoint = distanceFormula(Point(robotX, robotY), path[i]);
-      if (distanceToPoint < distanceFormula(Point(robotX, robotY), path[least])) {
-        data.prevClosestPoint = i; //dont need prev variable because it is not need, closestPoint is preserved
-        least = i;
-      }
-      if(i == path.size()-1) {
-        data.closestPoint = least;
+      if (distanceToPoint < distanceFormula(Point(robotX, robotY), path[data.closestPoint])) {
+        data.closestPoint = i; 
       }
     }
 
     //calculate lookahead point
-    for (int i = data.prevLookahead; i < path.size()-1; i++) {
+    for (int i = floor(data.prevLookahead); i < path.size()-1; i++) {
       float dx = path[i+1].x - path[i].x;
       float dy = path[i+1].y - path[i].y;
 
       float fx = path[i].x - robotX;
       float fy = path[i].y - robotY;
 
-      float a = dx*dy + dx*dy;
+      float a = dx*dx + dy*dy;
       float b = 2.0 * ((fx*dx) + (fy*dy));
-      float c = (fx*fy + fx*fy) - lookahead*lookahead;
+      float c = (fx*fx + fy*fy) - (lookahead*lookahead);
       float discriminant = b*b - 4*a*c;
 
       if (discriminant < 0) {
@@ -258,13 +260,22 @@ int purePursuit(std::vector<Point> path, float lookahead) {
       //otherwise no intersection
     }
 
-    float xFromRobotToLookahead = fabs((-tan(robotTheta)*data.lookaheadPoint.x)
+    //old method
+    /*float xFromRobotToLookahead = fabs((-tan(robotTheta)*data.lookaheadPoint.x)
                                         + data.lookaheadPoint.y 
                                         + (tan(robotTheta)*robotX - robotY))
-                                        / sqrt((-tan(robotTheta))*(-tan(robotTheta)) + 1);
-    float lookaheadCurvature = (2*xFromRobotToLookahead)/ (lookahead*lookahead);
-    float side = sgn2(sin(robotTheta)*(data.lookaheadPoint.x - robotX) 
-                      - cos(robotTheta)*(data.lookaheadPoint.y - robotY));
+                                        / sqrt((-tan(robotTheta))*(-tan(robotTheta)) + 1);*/
+
+    //new method
+    float cosHeading = cos((M_PI/180)*robotTheta);
+    float sinHeading = sin((M_PI/180)*robotTheta);
+
+    float xFromRobotToLookahead = (data.lookaheadPoint.x-robotX)*cosHeading + (data.lookaheadPoint.y-robotY)*sinHeading;
+    float yFromRobotToLookahead = -(data.lookaheadPoint.x-robotX)*sinHeading + (data.lookaheadPoint.y-robotY)*cosHeading;
+
+    float lookaheadCurvature = (2*xFromRobotToLookahead) / (float)(lookahead*lookahead);
+
+    float side = -sgn2(sinHeading*xFromRobotToLookahead - cosHeading*yFromRobotToLookahead);
 
     float signedCurvature = lookaheadCurvature * side; //that took a while
 
@@ -274,17 +285,31 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     int delta_time = currentTime - prevTime;
     prevTime = currentTime;
 
-    float maxChange = (delta_time/1000) * 15;
-    vOutput += clip(path[data.closestPoint].targetVelocity - PrevLimitedVelocity, -maxChange, maxChange);
+    if (path[data.closestPoint].targetVelocity > prevLimitedVelocity) {
+      maxRate = 15;
+    } else {
+      maxRate = 100;
+    }
 
+    float maxChange = (delta_time/1000) * maxRate;
+    vOutput += clip(path[data.closestPoint].targetVelocity - prevLimitedVelocity, -maxChange, maxChange);
+    prevLimitedVelocity = vOutput;
 
-    float targetLeftVelocity = path[data.closestPoint].targetVelocity * ((2 + signedCurvature*robotTrackWidth) / 2);
-    float targetRightVelocity = path[data.closestPoint].targetVelocity - ((2 + signedCurvature*robotTrackWidth) / 2);
+    float targetLeftVelocity = path[data.closestPoint].targetVelocity * (2 + signedCurvature*robotTrackWidth) / 2;
+    float targetRightVelocity = path[data.closestPoint].targetVelocity * (2 - signedCurvature*robotTrackWidth) / 2;
 
     float targetLeftPower = (targetLeftVelocity / (4 * M_PI)) * 60;
     float targetRightPower = (targetRightVelocity / (4 * M_PI)) * 60;
 
-
+    std::cout << robotX << std::endl << robotY << std::endl << std::endl << robotTheta << std::endl;
+    Brain.Screen.clearScreen();
+    drawOnBrain(path, color::red, 2);
+    Brain.Screen.setPenColor(color::green);
+    Brain.Screen.drawCircle(path[data.closestPoint].x+40, path[data.closestPoint].y+40, 3);
+    Brain.Screen.setPenColor(color::white);
+    Brain.Screen.drawCircle(data.lookaheadPoint.x+40, data.lookaheadPoint.y+40, 2);
+    Brain.Screen.setPenColor(color::yellow);
+    Brain.Screen.drawCircle(robotX+40, robotY+40, 1);
     mLUpper.spin(forward, targetLeftPower, rpm);
     mLLower.spin(forward, targetLeftPower, rpm);
     mRUpper.spin(forward, targetRightPower, rpm);
@@ -300,6 +325,6 @@ void drawOnBrain(std::vector<Point> points, vex::color Color, int radius) {
   //Brain.Screen.clearScreen();
   Brain.Screen.setPenColor(Color);
   for(int i = 0; i < points.size(); i++) {
-    Brain.Screen.drawCircle(points[i].x, points[i].y, radius);
+    Brain.Screen.drawCircle(points[i].x+40, points[i].y+40, radius);
   }
 }
