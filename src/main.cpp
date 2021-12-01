@@ -1,17 +1,10 @@
-#include "vex.h"
-#include "auton-movement.h"
-#define TOGGLED_ON true
-#define TOGGLED_OFF false
-#include <string>
-#include <iostream>
-#include "pure-pursuit.h"
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
 // Controller1          controller                    
 // mLUpper              motor         12              
 // mLLower              motor         11              
-// mRUpper              motor         20              
+// mRUpper              motor         15              
 // mRLower              motor         19              
 // GPS                  gps           16              
 // mConveyor            motor         18              
@@ -21,8 +14,22 @@
 // GYRO                 inertial      17              
 // mRTray               motor         14              
 // ---- END VEXCODE CONFIGURED DEVICES ----
+#include "vex.h"
+#include "auton-movement.h"
+#define TOGGLED_ON true
+#define TOGGLED_OFF false
+#include <string>
+#include <iostream>
+#include "pure-pursuit.h"
 
 using namespace vex;
+
+int deploy() {
+  raiseLift(true);
+  lowerLift(false);
+
+  return 0; 
+}
 
 int autonSelection = 0;
 
@@ -84,143 +91,130 @@ void pre_auton() {
   
 }
 
+thread _deploy;
+
 void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  //autonSelection=leftNoAWP;
+  autonSelection=rightAWP;
   //move(-25, 100, 12, 3000);
   //wait(1000, msec);
   
   switch(autonSelection) {
-    case rightAWP:
-      raiseLift(false);
+    case rightAWP: { // big goals
+      thread _deploy = thread(deploy);
 
-      lowerTilter(false);
-
-      move(43, 100, 5, 2500);
-      lowerLift(false);
-
-      raiseTilterWithGoal(false);
+      move(-47, 100, 4, 1500);
+      clawToggle();
       wait(250, msec);
-      move(-20, 100, 12, 1400);
+      //lowerTilter(false);
+      raiseLift(false);
+      moveSlow(29, 100, 7, 1300);
 
-      spotTurnWithTilterGoal(180, 100, 8, 1700);
-
-      move(22, 100, 13, 1500);
-
-      lowerTilter(true);
-
-      move(-10, 100, 10, 1500);
-
-      spotTurn(90, 100, 12, 1500);
-
-      move(15, 100, 15, 1000);
-
-      raiseTilterWithGoal(false);
-      wait(500, msec);
-      spinConveyor();
-      move(-23, 100, 14, 1500);
-      mConveyor.stop(coast);
-
-      lowerTilter(false);
-      break;
-
-    case leftAWP: 
+      spotTurnWithClawGoal(137.5, 100, 25, 1700);
+      moveSlow(-15, 100, 5, 700);
+      //lowerLift(true);
+      clawToggle();
+      wait(250, msec);
+      lowerLift(false);
+      move(35, 100, 10, 1600);
+      spotTurn(327, 100, 2, 1200);
+      moveSlow(-14, 100, 2, 1000);
+      clawToggle();
+      wait(250, msec);
       raiseLift(true);
-      //spotTurn(9.5, 100, 7, 700);
-      lowerLift(false);
-      
-      move(-49, 100, 7, 1900); 
-      mArm.stop(hold);
-
-      clawToggle();
-      wait(300, msec);
-
-      move(30, 100, 16, 2000);
-
-      clawToggle();
-      wait(300, msec);
-
-      //spotTurn(6, 100, 10, 1400);
-
-      moveSlow(16, 100, 15, 1500);
-
-      spotTurn(267, 100, 13, 1250);
+      move(48, 100, 12, 1900);
 
       //lowerTilter(false);
-      
-      moveSlow(-6, 100, 6, 900);
-      lowerTilterWithValue(true, -550);
-      moveSlow(12, 100, 6, 1200);
-      lowerTilterWithValue(true, -270);
+      lowerTilter(false);
+      spotTurnWithClawGoal(265, 100, 10, 1200);
+      clawToggle();
 
-      moveSlow(-5, 100, 10, 1000);  
-      spinConveyor();                                       //HIIIIIIII AIDEEEEEN!!!!!!!!!!!!!!!
-      wait(900, msec);                                      //from connor (!)
+      moveSlow(13, 100, 10, 800);
+
+      raiseTilterWithGoal(true);
+
+      spinConveyor();
+      move(-30, 100, 2, 1000);
       mConveyor.stop(coast);
       break;
+    }
+    case leftAWP: {
+      thread _deploy = thread(deploy);
 
-    case rightNoAWP:
-      raiseLift(false);
-      lowerTilter(false);
-
-      move(43, 100, 5, 2000);
-      lowerLift(false);
-      raiseTilterWithGoal(false);
+      move(-49, 100, 2, 1500);
+      clawToggle();
       wait(250, msec);
-      //spinConveyor();
-      move(-26, 100, 12, 1500);
-      //mConveyor.stop(coast);
+      move(33, 100, 20, 2500);
+      raiseLift(true);
+      spotTurnWithClawGoal(340, 100, 30, 3000);
+      moveSlow(8, 100, 20, 1500);
+      spinConveyor();
+      wait(1500, msec);
+      mConveyor.stop(coast);
 
-      spotTurnWithTilterGoal(133, 100, 15, 2500);
+      break;
+    }
+    case rightNoAWP: { //big rinigs
+      thread _deploy = thread(deploy);
 
-      move(-38, 100, 12, 1500);
-
+      move(-46, 100, 2, 1500);
+      clawToggle();
+      wait(250, msec);
+      move(27, 100, 10, 1500);
+      spotTurnWithClawGoal(274, 100, 15, 1500);
       clawToggle();
       wait(300, msec);
+      moveSlow(-10, 100, 15, 1000);
+      lowerTilter(true);
+      moveSlow(18, 100, 15, 1000);
+      raiseTilterWithGoal(true);
+      spinConveyor();
+      moveSlow(-10, 100, 12, 900);
+      spotTurnWithTilterGoal(180, 100, 20, 1500);
+      moveRightSide(40);
+      moveLeftSide(40);
+      wait(2000, msec);
+      mConveyor.stop(coast);
+      move(-50, 100, 2, 2000);
 
-      spotTurnWith2Goals(133, 100, 12, 2000);
-      move(56, 100, 10, 2800);
-
-      lowerTilter(false);
       break;
+    }
+    case leftNoAWP: { //40
+      thread _deploy = thread(deploy);
 
-    case leftNoAWP:
-      raiseLift(false);
-      //spotTurn(9.5, 100, 12, 800);
-      //lowerLift(false);
-      lowerTilter(false);
-
-
-      move(46, 100, 4, 2500);  
-      lowerLift(false);
-      raiseTilterWithGoal(false);
-      //clawToggle();
+      move(-47, 100, 4, 1500);
+      clawToggle();
       wait(250, msec);
+      raiseLift(false);
 
-      //spinConveyor();
-      move(-14, 100, 13, 1400);
-      //raiseLift(true);
-      //mConveyor.stop(coast);
-
-      spotTurnWithNoAngleWrap(229, 100, 18, 4000);
-      //lowerTilter(false);
+      move(22, 90, 4, 1200);
+      lowerTilter(false);
+      spotTurn(219, 100, 17, 1800);
+      lowerLift(true);
+      clawToggle();
+      wait(250, msec);
+      moveSlow(20, 100, 4, 1000);
+      spotTurn(40, 100, 7, 1100);
+      raiseTilter(false);
+      moveSlow(-12, 100, 4, 800);
+      clawToggle();
       wait(500, msec);
-      move(-34, 100, 8, 1600);
-      //raiseTilter(false);
-      //raiseTilterWithGoal(false);
+      raiseLift(false);
+      move(54, 100, 4, 2000);
       clawToggle();
-      wait(300, msec);
+      wait(100, msec);
+      spotTurn(322, 100, 4, 1000);
+      moveSlow(9, 100, 4, 1500);
+      spinConveyor();
+      wait(1000, msec);
+      mConveyor.stop();
 
-      //move(28, 100, 10, 1400);
-
-      spotTurnWith2Goals(213, 100, 12, 1500);
-
-      move(50, 100, 12, 2000);
 
       break;
-    case fullAWP:
+    }
+    case fullAWP: {
       raiseLift(true);
       lowerLift(false);
       move(-45, 100, 1, 2200);
@@ -259,7 +253,8 @@ void autonomous(void) {
 
 
       break;
-    case testing: //skills
+    }
+    case testing: {//skills 
       clawToggle();
       wait(250, msec);
       raiseLiftFully(true);
@@ -316,30 +311,31 @@ void autonomous(void) {
 
 
       break;
-    default:
+    }
+    default: {
       break;
-  
+    }
   }
 }
 
 void usercontrol(void) {
   
   std::vector<Point> path2 = {
-    Point(-20, -20),
-    Point(0, 35),
-    Point(40, 0),
-    Point(40, 45)
+    Point(24, -24),    
+    Point(24, 24),
+    Point(-24, 24),
+    Point(-24, -24)
   };
 
-  std::vector<Point> autoPath = inject(path2, 5);
-  autoPath = smoother(autoPath, .9, .1);
+  std::vector<Point> autoPath = inject(path2, 4);
+  autoPath = smoother(autoPath, .90, .1);
   autoPath = calculateDistances(autoPath);
   autoPath = calculateCurvatures(autoPath);
-  autoPath = calculateVelocities(autoPath, 5, .09, 1);
+  autoPath = calculateVelocities(autoPath, 10, .4, 2, .75);
 
-  wait(3000, msec);
+  //wait(3000, msec);
 
-  int a = purePursuit(autoPath, 10);
+  //int a = purePursuit(autoPath, 11);
 
   Controller1.ButtonA.pressed(clawToggle); //little callback for toggling the claw pneumatics
   bool LockDrive=false;

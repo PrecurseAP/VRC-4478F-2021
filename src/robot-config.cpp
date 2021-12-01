@@ -11,7 +11,7 @@ brain  Brain;
 controller Controller1 = controller(primary);
 motor mLUpper = motor(PORT12, ratio18_1, false);
 motor mLLower = motor(PORT11, ratio18_1, true);
-motor mRUpper = motor(PORT20, ratio18_1, true);
+motor mRUpper = motor(PORT15, ratio18_1, true);
 motor mRLower = motor(PORT19, ratio18_1, false);
 gps GPS = gps(PORT16, 120.65, 63.50, mm, 90);
 motor mConveyor = motor(PORT18, ratio18_1, true);

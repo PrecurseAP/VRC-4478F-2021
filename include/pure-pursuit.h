@@ -28,7 +28,7 @@ extern std::vector<Point> path1;
 extern std::vector<Point> smoother(std::vector<Point>, float, float);
 extern std::vector<Point> calculateDistances(std::vector<Point>);
 extern std::vector<Point> calculateCurvatures(std::vector<Point>);
-extern std::vector<Point> calculateVelocities(std::vector<Point>, float, float, float);
+extern std::vector<Point> calculateVelocities(std::vector<Point>, float, float, float, float);
 
 extern float robotX, robotY, robotTheta, robotTrackWidth;
 

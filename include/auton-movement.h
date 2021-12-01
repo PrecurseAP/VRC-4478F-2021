@@ -2,6 +2,8 @@
 #define __AUTONMOVEMENT
 
 //mess
+extern void moveRightSide(int);
+extern void moveLeftSide(int);
 extern void turnMoveToPoint(float, float, int);
 extern void spotTurn(float, int, int, int);
 extern void moveForward(float, int);

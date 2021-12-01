@@ -68,7 +68,7 @@ class Graph {
 
 void raiseLift(bool wait = true) {
   mArm.setVelocity(100, percent);
-  mArm.spinToPosition(40, degrees, wait);
+  mArm.spinToPosition(100, degrees, wait);
 }
 void raiseLiftFully(bool wait = true) {
   mArm.setVelocity(100, percent);
@@ -90,8 +90,8 @@ void lowerTilter(bool wait = true) {
   mRTray.spinToPosition(-540, degrees, wait);
 }
 void lowerTilterSlow(bool wait = true) {
-  mLTray.setVelocity(40, percent);
-  mRTray.setVelocity(40, percent);
+  mLTray.setVelocity(25, percent);
+  mRTray.setVelocity(25, percent);
   mLTray.spinToPosition(-540, degrees, false);
   mRTray.spinToPosition(-540, degrees, wait);
 }
@@ -105,13 +105,13 @@ void lowerTilterWithValue(bool wait = true, int val = -540) {
 void raiseTilterWithGoal(bool wait = true) {
   mLTray.setVelocity(100, percent);
   mRTray.setVelocity(100, percent);
-  mLTray.spinToPosition(-270, degrees, false);
-  mRTray.spinToPosition(-270, degrees, wait);
+  mLTray.spinToPosition(-255, degrees, false);
+  mRTray.spinToPosition(-255, degrees, wait);
 }
 
 void raiseTilter(bool wait = true) {
-  mLTray.setVelocity(100, percent);
-  mRTray.setVelocity(100, percent);
+  mLTray.setVelocity(75, percent);
+  mRTray.setVelocity(75, percent);
   mLTray.spinToPosition(0, degrees, false);
   mRTray.spinToPosition(0, degrees, wait);
 }
@@ -367,7 +367,7 @@ void spotTurnWithClawGoal(float theta, int maxSpeed, int vecCount, int timeLimit
   float integral = 0;
 
   float kP = 0.71;
-  float kI = 0.0008;
+  float kI = 0.001;
   float kD = .55;
 
   std::vector<float> prevValues;
@@ -616,7 +616,7 @@ void move(float d, int maxSpeed, int vecCount, int timeLimit) {
     prevLeftValues.erase(prevLeftValues.begin());
     prevRightValues.erase(prevRightValues.begin());
     prevLeftValues.push_back(leftError);
-    prevRightValues.push_back(leftError);
+    prevRightValues.push_back(rightError);
 
     if (fabs(leftError) < 13) {
       leftIntegral += leftError * delta_time;
@@ -714,7 +714,7 @@ void moveSlow(float d, int maxSpeed, int vecCount, int timeLimit) {
     prevLeftValues.erase(prevLeftValues.begin());
     prevRightValues.erase(prevRightValues.begin());
     prevLeftValues.push_back(leftError);
-    prevRightValues.push_back(leftError);
+    prevRightValues.push_back(rightError);
 
     if (fabs(leftError) < 6) {
       leftIntegral += leftError * delta_time;

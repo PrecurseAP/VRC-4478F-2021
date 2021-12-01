@@ -142,14 +142,14 @@ std::vector<Point> calculateCurvatures(std::vector<Point> path) {
 
 //maximum velocity that the robot can move at is 4.72 ft/sec or 56.7 in/s (this is for 5:3 speed drive with 3.25" omnis)
 //normal 200 rpm drive with 4" omnis is 41.8 in/sec, or 3.49 ft/sec
-std::vector<Point> calculateVelocities(std::vector<Point> path, float pathMaxVel, float k, float a) {
+std::vector<Point> calculateVelocities(std::vector<Point> path, float pathMaxVel, float k, float a, float k2) {
   std::vector<Point> newPath(path);
   
   newPath[0].targetVelocity = pathMaxVel;
   newPath[newPath.size()-1].targetVelocity = 0;
 
   for(int i = 1; i < newPath.size()-1; i++) {
-    newPath[i].targetVelocity = std::min(pathMaxVel, k/newPath[i].curvature);
+    newPath[i].targetVelocity = std::min(pathMaxVel, k/(k2*newPath[i].curvature));
   }
 
   for(int i = newPath.size()-2; i >= 0; i--) {
@@ -201,9 +201,9 @@ int purePursuit(std::vector<Point> path, float lookahead) {
   bool done = false;
   while(!done) {
 
-    robotX = GPS.xPosition(inches);
-    robotY = GPS.yPosition(inches);
-    robotTheta = GPS.heading(degrees) - 180;
+    robotX = round(GPS.xPosition(inches));
+    robotY = round(GPS.yPosition(inches));
+    robotTheta = round((180/M_PI)*atan2(-sin((M_PI/180)*GYRO.heading(degrees)), cos((M_PI/180)*GYRO.heading(degrees))));
 
     //find closest point
     for (int i = data.closestPoint; i < path.size(); i++) {
@@ -273,7 +273,7 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     float xFromRobotToLookahead = (data.lookaheadPoint.x-robotX)*cosHeading + (data.lookaheadPoint.y-robotY)*sinHeading;
     float yFromRobotToLookahead = -(data.lookaheadPoint.x-robotX)*sinHeading + (data.lookaheadPoint.y-robotY)*cosHeading;
 
-    float lookaheadCurvature = (2*xFromRobotToLookahead) / (float)(lookahead*lookahead);
+    float lookaheadCurvature = (2.0*xFromRobotToLookahead) / (float)(lookahead*lookahead);
 
     float side = -sgn2(sinHeading*xFromRobotToLookahead - cosHeading*yFromRobotToLookahead);
 
@@ -286,9 +286,9 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     prevTime = currentTime;
 
     if (path[data.closestPoint].targetVelocity > prevLimitedVelocity) {
-      maxRate = 15;
+      maxRate = 25;
     } else {
-      maxRate = 100;
+      maxRate = 500;
     }
 
     float maxChange = (delta_time/1000) * maxRate;
@@ -298,11 +298,11 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     float targetLeftVelocity = path[data.closestPoint].targetVelocity * (2 + signedCurvature*robotTrackWidth) / 2;
     float targetRightVelocity = path[data.closestPoint].targetVelocity * (2 - signedCurvature*robotTrackWidth) / 2;
 
-    float targetLeftPower = (targetLeftVelocity / (4 * M_PI)) * 60;
-    float targetRightPower = (targetRightVelocity / (4 * M_PI)) * 60;
+    float targetLeftPower = ((targetLeftVelocity / (4 * M_PI)) * 60);
+    float targetRightPower = ((targetRightVelocity / (4 * M_PI)) * 60);
 
-    std::cout << robotX << std::endl << robotY << std::endl << std::endl << robotTheta << std::endl;
-    Brain.Screen.clearScreen();
+    std::cout << path[data.closestPoint].targetVelocity << std::endl;
+    /*Brain.Screen.clearScreen();
     drawOnBrain(path, color::red, 2);
     Brain.Screen.setPenColor(color::green);
     Brain.Screen.drawCircle(path[data.closestPoint].x+40, path[data.closestPoint].y+40, 3);
@@ -310,10 +310,40 @@ int purePursuit(std::vector<Point> path, float lookahead) {
     Brain.Screen.drawCircle(data.lookaheadPoint.x+40, data.lookaheadPoint.y+40, 2);
     Brain.Screen.setPenColor(color::yellow);
     Brain.Screen.drawCircle(robotX+40, robotY+40, 1);
-    mLUpper.spin(forward, targetLeftPower, rpm);
-    mLLower.spin(forward, targetLeftPower, rpm);
-    mRUpper.spin(forward, targetRightPower, rpm);
-    mRLower.spin(forward, targetRightPower, rpm);
+
+    float X1 = robotX;
+    float Y1 = robotY;
+    float X2 = data.lookaheadPoint.x;
+    float Y2 = data.lookaheadPoint.y;
+
+    float xa = (X2-X1)/2;
+    float ya = (Y2-Y1)/2;
+
+    float X0 = X1+xa;
+    float Y0 = Y1+ya;
+
+    float a = sqrt( (xa*xa) + (ya*ya) );
+
+    float r = 0;
+
+    if (signedCurvature != 0) {
+      r = 1/signedCurvature;
+    } else {
+      r = 50;
+    }
+
+    float b = side*sqrt(fabs(r*r) - a*a);
+
+    float X3 = X0 + ((b*ya)/a);
+    float Y3 = Y0 - ((b*xa)/a);
+    Brain.Screen.setPenColor(color::blue);
+    Brain.Screen.drawCircle(X3, Y3, r, false);*/
+  
+
+    mLUpper.spin(forward, -targetRightPower, rpm);
+    mLLower.spin(forward, -targetRightPower, rpm);
+    mRUpper.spin(forward, -targetLeftPower, rpm);
+    mRLower.spin(forward, -targetLeftPower, rpm);
 
     wait(20, msec);
   }
@@ -322,7 +352,7 @@ int purePursuit(std::vector<Point> path, float lookahead) {
 
 //draws a path to the brain screen using circles as nodes. nice for debugging.
 void drawOnBrain(std::vector<Point> points, vex::color Color, int radius) {
-  //Brain.Screen.clearScreen();
+  Brain.Screen.clearScreen();
   Brain.Screen.setPenColor(Color);
   for(int i = 0; i < points.size(); i++) {
     Brain.Screen.drawCircle(points[i].x+40, points[i].y+40, radius);
