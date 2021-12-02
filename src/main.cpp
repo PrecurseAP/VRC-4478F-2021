@@ -1,19 +1,3 @@
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// mLUpper              motor         12              
-// mLLower              motor         11              
-// mRUpper              motor         15              
-// mRLower              motor         19              
-// GPS                  gps           16              
-// mConveyor            motor         18              
-// mLTray               motor         1               
-// mArm                 motor         13              
-// clawPiston           digital_out   F               
-// GYRO                 inertial      17              
-// mRTray               motor         14              
-// ---- END VEXCODE CONFIGURED DEVICES ----
 #include "vex.h"
 #include "auton-movement.h"
 #define TOGGLED_ON true
@@ -41,10 +25,6 @@ enum autonPath {
   fullAWP = 4,
   testing = 5
 };
-
-std::string autonSelections[6] = { "Right Side With AWP", "Left Side With AWP", 
-                                "Right Side Without AWP", "Left Side Without AWP",
-                                "fullAWP", "testing" };
 
 void cycleAuton() {
   if (autonSelection+1 == 6) {
@@ -77,6 +57,8 @@ void clawToggle() {
   clawState = !clawState;
 }
 
+thread _deploy;
+
 void pre_auton() {
   vexcodeInit();
 
@@ -91,18 +73,14 @@ void pre_auton() {
   
 }
 
-thread _deploy;
-
 void autonomous(void) {
   mArm.setPosition(0, degrees);
   mLTray.setPosition(0, degrees);
   mRTray.setPosition(0, degrees);
-  autonSelection=rightAWP;
-  //move(-25, 100, 12, 3000);
-  //wait(1000, msec);
+  //autonSelection=rightAWP;
   
   switch(autonSelection) {
-    case rightAWP: { // big goals
+    case rightAWP: { //big goals
       thread _deploy = thread(deploy);
 
       move(-47, 100, 4, 1500);
@@ -156,7 +134,7 @@ void autonomous(void) {
 
       break;
     }
-    case rightNoAWP: { //big rinigs
+    case rightNoAWP: { //big rings
       thread _deploy = thread(deploy);
 
       move(-46, 100, 2, 1500);
@@ -343,8 +321,6 @@ void usercontrol(void) {
 
     float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));
     float RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(float)(12.0/100.0));
-
-    //std::cout << LSpeed << std::endl;
 
     mLUpper.spin(forward, LSpeed, volt);
     mLLower.spin(forward, LSpeed, volt);
