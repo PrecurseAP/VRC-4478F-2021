@@ -19,7 +19,7 @@ motor mLTray = motor(PORT1, ratio36_1, true);
 motor mArm = motor(PORT13, ratio36_1, false);
 digital_out clawPiston = digital_out(Brain.ThreeWirePort.F);
 inertial GYRO = inertial(PORT17);
-motor mRTray = motor(PORT14, ratio36_1, false);
+motor mRTray = motor(PORT10, ratio36_1, false);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

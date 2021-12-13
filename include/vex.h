@@ -24,3 +24,9 @@
 
 #define repeat(iterations)                                                     \
   for (int iterator = 0; iterator < iterations; iterator++)
+
+extern brakeType lockDrive;
+
+extern void lockDriveHold(void);
+
+extern void lockDriveCoast(void);
