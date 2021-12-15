@@ -20,6 +20,8 @@ motor mArm = motor(PORT13, ratio36_1, false);
 digital_out clawPiston = digital_out(Brain.ThreeWirePort.F);
 inertial GYRO = inertial(PORT17);
 motor mRTray = motor(PORT10, ratio36_1, false);
+limit limLift = limit(Brain.ThreeWirePort.H);
+pot potTilter = pot(Brain.ThreeWirePort.G);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

@@ -18,8 +18,10 @@ void raiseLift(int val /* = 100*/, bool wait /* = true*/) {
   mArm.spinToPosition(val, degrees, wait);
 }
 
-void lowerLift(bool wait /* = true*/) {
-  mArm.spinToPosition(-40, degrees, wait);
+void lowerLift() {
+  while(!limLift.pressing()) {
+    mArm.spin(reverse, 100, percent);
+  }
 }
 
 void spinConveyor() {
@@ -33,9 +35,16 @@ void lowerTilter(int speed/* = 100*/, int val /*= -540*/, bool wait /* = true*/)
   mRTray.spinToPosition(val, degrees, wait);
 }
 
-int deploy(int val /* = 100*/) {
-  raiseLift(true);
-  lowerLift(false);
+void raiseTilterWithGoal(bool wait /* = true */) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(-310, degrees, false);
+  mRTray.spinToPosition(-310, degrees, wait);
+}
+
+int deploy() {
+  raiseLift(150, true);
+  lowerLift();
 
   return 0; 
 }
@@ -101,7 +110,7 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
     mRUpper.spin(forward, -driveSpeed, percent);
     mRLower.spin(forward, -driveSpeed, percent);
 
-    if ((fabs(error) < .7) ||(Brain.timer(msec)-startTime > timeLimit)) {
+    if ((fabs(error) < .85) ||(Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
       break;
@@ -112,16 +121,34 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
   return 1;
 }
 
-/*int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd) {
+int turnWithTilterGoal(float d, int t, float kp, float ki, float kd) {
+  return turnToAngle(d, t, kp, ki, kd);
+}
+
+int turnWith2Goals(float d, int t, float kp, float ki, float kd) {
+  return turnToAngle(d, t, kp, ki, kd);
+}
+
+int turnWithClawGoal(float d, int t, float kp, float ki, float kd) {
+  return turnToAngle(d, t, kp, ki, kd);
+}
+
+int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd) {
+
+  mLLower.setPosition(0, degrees);
+  mLUpper.setPosition(0, degrees);
+  mRLower.setPosition(0, degrees);
+  mRUpper.setPosition(0, degrees);
+
 
   float startTime = Brain.timer(msec);
   float prevTime = startTime, deltaTime, currentTime;
-  float integral = 0, error = 0, derivative = 0, prevError = 0;
+  float LIntegral = 0, RIntegral = 0, LError = 0, RError, LDerivative = 0, RDerivative = 0, LPrevError = 0, RPrevError = 0;
   bool done = false;
   float currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
   float currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
 
-  Graph graph = Graph(currentAngle, 250);
+  Graph graph = Graph(currentLeft, 250);
 
   while(!done) {
 
@@ -143,8 +170,14 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
     LDerivative = (LError - LPrevError) / deltaTime;
     RDerivative = (RError - RPrevError) / deltaTime;
 
-    LIntegral += LError * deltaTime;
-    RIntegral += RError * deltaTime;
+    if (fabs(LError) < 8) {
+      LIntegral += LError * deltaTime;
+      RIntegral += RError * deltaTime;
+    } else {
+      LIntegral = 0;
+      RIntegral = 0;
+    }
+
 
     float leftDriveSpeed = kp*LError + ki*LIntegral + kd*LDerivative;
     float rightDriveSpeed = kp*RError + ki*RIntegral + kd*RDerivative;
@@ -154,7 +187,7 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
     mRUpper.spin(forward, rightDriveSpeed, percent);
     mRLower.spin(forward, rightDriveSpeed, percent);
 
-    if ((fabs(error) < .7) ||(Brain.timer(msec)-startTime > timeLimit)) {
+    if (((fabs(LError) < .7) && (fabs(RError) < .7)) ||(Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
       break;
@@ -164,4 +197,3 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
 
   return 1;
 }
-*/

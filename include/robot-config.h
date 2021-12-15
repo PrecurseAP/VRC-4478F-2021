@@ -15,6 +15,8 @@ extern motor mArm;
 extern digital_out clawPiston;
 extern inertial GYRO;
 extern motor mRTray;
+extern limit limLift;
+extern pot potTilter;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
