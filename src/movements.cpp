@@ -42,10 +42,22 @@ void raiseTilterWithGoal(bool wait /* = true */) {
   mRTray.spinToPosition(-310, degrees, wait);
 }
 
-int deploy() {
-  raiseLift(150, true);
-  lowerLift();
+void raiseTilter(bool wait /* = true */) {
+  mLTray.setVelocity(100, percent);
+  mRTray.setVelocity(100, percent);
+  mLTray.spinToPosition(0, degrees, false);
+  mRTray.spinToPosition(0, degrees, wait);
+}
 
+void raiseLiftFully(bool wait) {
+  mArm.setVelocity(100, percent);
+  mArm.spinToPosition(665, degrees, wait);
+}
+
+int deploy() {
+  raiseLift(100, true);
+  lowerLift();
+  mArm.setPosition(0, degrees);
   return 0; 
 }
 
@@ -66,6 +78,16 @@ void stopAllDrive(brakeType bt) {
   mLLower.stop(bt);
 }
 
+int depositAndDrop() {
+  mConveyor.spin(forward, 169, rpm);
+  wait(300, msec);
+  mConveyor.stop(hold);
+  lowerTilter();
+  raiseTilter();
+
+  return 0;
+}
+
 int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* = .001 */, float kd/* = 3.0 */) {
   
   float startTime = Brain.timer(msec);
@@ -74,7 +96,7 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
   bool done = false;
   float currentAngle = GYRO.heading(degrees);
 
-  Graph graph = Graph(currentAngle, 250);
+ // Graph graph = Graph(currentAngle, 250);
 
   while(!done) {
 
@@ -84,8 +106,8 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
 
     currentAngle = GYRO.heading(degrees);
 
-    graph.updateData(currentAngle);
-    graph.drawGraph();
+    //graph.updateData(currentAngle);
+    //graph.drawGraph();
 
     error = goalAngle - currentAngle;
 
@@ -140,7 +162,6 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
   mRLower.setPosition(0, degrees);
   mRUpper.setPosition(0, degrees);
 
-
   float startTime = Brain.timer(msec);
   float prevTime = startTime, deltaTime, currentTime;
   float LIntegral = 0, RIntegral = 0, LError = 0, RError, LDerivative = 0, RDerivative = 0, LPrevError = 0, RPrevError = 0;
@@ -148,7 +169,7 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
   float currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
   float currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
 
-  Graph graph = Graph(currentLeft, 250);
+  //Graph graph = Graph(currentLeft, 250);
 
   while(!done) {
 
@@ -159,13 +180,13 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
     currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
     currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
 
-    graph.updateData(currentLeft);
-    graph.drawGraph();
+    //graph.updateData(currentLeft);
+    //graph.drawGraph();
 
     LError = goalDistance - currentLeft;
     RError = goalDistance - currentRight;
 
-    std::cout << LError << std::endl;
+    //std::cout << LError << std::endl;
 
     LDerivative = (LError - LPrevError) / deltaTime;
     RDerivative = (RError - RPrevError) / deltaTime;

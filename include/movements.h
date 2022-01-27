@@ -13,6 +13,8 @@ extern int deploy();
 
 extern void lowerLift();
 
+extern void raiseLiftFully(bool wait = true);
+
 extern void spinConveyor(void);
 
 extern void lowerTilter(int speed = 100, int val = -540, bool wait = true);
@@ -34,5 +36,9 @@ extern int turnWith2Goals(float, int, float kp = .50, float ki = 0.000011, float
 extern int turnWithClawGoal(float, int, float kp = .55, float ki = 0.00001, float kd = .35);
 
 extern int moveStraight(float, int, float kp = 7.0, float ki = 0.000035, float kd = 1.9);
+
+extern void raiseTilter(bool wait = true);
+
+extern int depositAndDrop();
 
 #endif
