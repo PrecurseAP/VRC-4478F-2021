@@ -7,7 +7,7 @@ extern bool clawState;
 
 extern void clawToggle(void);
 
-extern void raiseLift(int val = 100, bool wait = false);
+extern void raiseLift(int val = 60, bool wait = false);
 
 extern int deploy();
 
@@ -27,18 +27,20 @@ extern void moveLeftSide(int);
 
 extern void stopAllDrive(brakeType);
 
-extern int turnToAngle(float, int, float kp = .67, float ki = 0.0, float kd = .19);
+extern int turnToAngle(float, float, float kp = .715, float ki = 0.000, float kd = .19);
 
-extern int turnWithTilterGoal(float, int, float kp = .58, float ki = 0.00001, float kd = .29);
+extern int turnWithTilterGoal(float, float, float kp = .60, float ki = 0.00001, float kd = .29);
 
-extern int turnWith2Goals(float, int, float kp = .50, float ki = 0.000011, float kd = .55);
+extern int turnWith2Goals(float, float, float kp = .55, float ki = 0.000011, float kd = .55);
 
-extern int turnWithClawGoal(float, int, float kp = .55, float ki = 0.00001, float kd = .35);
+extern int turnWithClawGoal(float, float, float kp = .575, float ki = 0.00001, float kd = .35);
 
-extern int moveStraight(float, int, float kp = 7.0, float ki = 0.000035, float kd = 1.9);
+extern int moveStraight(float, float, float kp = 6.0, float ki = 0.002, float kd = 3.6);
 
 extern void raiseTilter(bool wait = true);
 
 extern int depositAndDrop();
+
+extern float driveRatio;
 
 #endif

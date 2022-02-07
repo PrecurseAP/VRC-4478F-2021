@@ -1,35 +1,12 @@
-/*********************************
-* Main utilties file, for things like math macros and functions
-*********************************/
-
 #include "vex.h"
 #include "math.h"
 #include "utils.h"
-
-/*enum autonPath {
-  Right40 = 0,
-  Right20 = 1,
-  RightTallGoal = 2,
-  Left40 = 3,
-  Left20 = 4,
-  LeftTallGoal = 5, 
-  FullAWP = 6,
-  Skills = 7
-};*/
 
 //signum function, returns -1 if negative, 0 if 0, and 1 if positive
 template <typename T> 
 int sign(T val) {  
   //compares input and 0, true and false are interpreted as 1 and 0 in c++
   return (T(0) < val) - (val < T(0));
-}
-
-/*logarithmic drive function, squares input and divides it by the maximum.
-/ basically it changes the derivative of the drive function from 1 to x/6,
-/ which makes controlling drive motors at lower speeds much smoother and more precise */
-float logDrive(float s) {
-  //we have to use the sign function to give the output a sign, because squaring rids the sign
-  return (s*s) / 12.0 * sign(s);
 }
 
 template <typename T>
@@ -85,7 +62,7 @@ void Graph::drawGraph() {
   //Brain.Screen.printAt(graphLeftBorder-75, graphTopBorder, "%.2f", this->greatest);
   Brain.Screen.printAt(graphLeftBorder-75, py, "%.2f", graphData[graphData.size()-1]);
   Brain.Screen.setPenColor(color::red);
-  py = 272 - (graphTopBorder*2 + ((180 - this->least) * ((graphBottomBorder - graphTopBorder)/(this->greatest - this->least))));
+  py = 272 - (graphTopBorder*2 + ((90 - this->least) * ((graphBottomBorder - graphTopBorder)/(this->greatest - this->least))));
   Brain.Screen.drawLine(graphLeftBorder, py, graphRightBorder, py);
   Brain.Screen.render();
 }

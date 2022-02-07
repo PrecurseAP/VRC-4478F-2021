@@ -6,89 +6,41 @@
 #include "utils.h"
 #include "vex.h"
 
-bool clawState = false;
+float driveRatio = 3.0/7.0;
 
-void clawToggle() {
-  clawPiston.set(!clawState);
-  clawState = !clawState;
-}
-
-void raiseLift(int val /* = 100*/, bool wait /* = true*/) {
-  mArm.setVelocity(100, percent);
-  mArm.spinToPosition(val, degrees, wait);
+void raiseLift(int val /* = 60*/, bool wait /* = true*/) {
+  mLift.setVelocity(100, percent);
+  mLift.spinToPosition(val, degrees, wait);
 }
 
 void lowerLift() {
-  while(!limLift.pressing()) {
-    mArm.spin(reverse, 100, percent);
-  }
-}
-
-void spinConveyor() {
-  mConveyor.spin(forward, 169, rpm);
-}
-
-void lowerTilter(int speed/* = 100*/, int val /*= -540*/, bool wait /* = true*/) {
-  mLTray.setVelocity(speed, percent);
-  mRTray.setVelocity(speed, percent);
-  mLTray.spinToPosition(val, degrees, false);
-  mRTray.spinToPosition(val, degrees, wait);
-}
-
-void raiseTilterWithGoal(bool wait /* = true */) {
-  mLTray.setVelocity(100, percent);
-  mRTray.setVelocity(100, percent);
-  mLTray.spinToPosition(-310, degrees, false);
-  mRTray.spinToPosition(-310, degrees, wait);
-}
-
-void raiseTilter(bool wait /* = true */) {
-  mLTray.setVelocity(100, percent);
-  mRTray.setVelocity(100, percent);
-  mLTray.spinToPosition(0, degrees, false);
-  mRTray.spinToPosition(0, degrees, wait);
-}
-
-void raiseLiftFully(bool wait) {
-  mArm.setVelocity(100, percent);
-  mArm.spinToPosition(665, degrees, wait);
-}
-
-int deploy() {
-  raiseLift(100, true);
-  lowerLift();
-  mArm.setPosition(0, degrees);
-  return 0; 
-}
-
-void moveRightSide(int speed) {
-  mRUpper.spin(forward, speed, percent);
-  mRLower.spin(forward, speed, percent);
-}
-
-void moveLeftSide(int speed) {
-  mLUpper.spin(forward, speed, percent);
-  mLLower.spin(forward, speed, percent);
+  mLift.setVelocity(100, percent);
+  mLift.spinToPosition(0, degrees, false);
 }
 
 void stopAllDrive(brakeType bt) {
-  mRUpper.stop(bt);
-  mRLower.stop(bt);
-  mLUpper.stop(bt);
-  mLLower.stop(bt);
+  mFrontRight.stop(bt);
+  mMidRight.stop(bt);
+  mBackRight.stop(bt);
+  mFrontLeft.stop(bt);
+  mMidLeft.stop(bt);
+  mBackLeft.stop(bt);
 }
 
-int depositAndDrop() {
-  mConveyor.spin(forward, 169, rpm);
-  wait(300, msec);
-  mConveyor.stop(hold);
-  lowerTilter();
-  raiseTilter();
+int deploy() {
+  mLift.setVelocity(100, percent);
+  mLift.spin(forward, 100, percent);
+  wait(350, msec);
+  mLift.spinToPosition(0, degrees, true);
 
   return 0;
 }
 
-int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* = .001 */, float kd/* = 3.0 */) {
+void spinConveyor() {
+  mConveyor.spin(forward, 400, rpm);
+}
+
+int turnToAngle(float goalAngle, float timeLimit, float kp/* = 4.0 */, float ki/* = .001 */, float kd/* = 3.0 */) {
   
   float startTime = Brain.timer(msec);
   float prevTime = startTime, deltaTime, currentTime;
@@ -96,7 +48,7 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
   bool done = false;
   float currentAngle = GYRO.heading(degrees);
 
- // Graph graph = Graph(currentAngle, 250);
+ Graph graph = Graph(currentAngle, 250);
 
   while(!done) {
 
@@ -106,8 +58,8 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
 
     currentAngle = GYRO.heading(degrees);
 
-    //graph.updateData(currentAngle);
-    //graph.drawGraph();
+    graph.updateData(currentAngle);
+    graph.drawGraph();
 
     error = goalAngle - currentAngle;
 
@@ -117,8 +69,6 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
       error = 360 + error;
     }
 
-    std::cout << error << std::endl;
-
     derivative = (error - prevError) / deltaTime;
 
     prevError = error;
@@ -127,14 +77,17 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
 
     float driveSpeed = kp*error + ki*integral + kd*derivative;
     
-    mLUpper.spin(forward, driveSpeed, percent);
-    mLLower.spin(forward, driveSpeed, percent);
-    mRUpper.spin(forward, -driveSpeed, percent);
-    mRLower.spin(forward, -driveSpeed, percent);
+    mFrontLeft.spin(forward, driveSpeed, percent);
+    mMidLeft.spin(forward, driveSpeed, percent);
+    mBackLeft.spin(forward, driveSpeed, percent);
+    mFrontRight.spin(forward, -driveSpeed, percent);
+    mMidRight.spin(forward, -driveSpeed, percent);
+    mBackRight.spin(forward, -driveSpeed, percent);
 
-    if ((fabs(error) < .85) ||(Brain.timer(msec)-startTime > timeLimit)) {
+    if ((fabs(error) < .85) || (Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
+      std::cout << "turn: " << Brain.timer(msec)-startTime << std::endl;
       break;
     }
     wait(20, msec);
@@ -143,33 +96,35 @@ int turnToAngle(float goalAngle, int timeLimit, float kp/* = 4.0 */, float ki/* 
   return 1;
 }
 
-int turnWithTilterGoal(float d, int t, float kp, float ki, float kd) {
+int turnWithTilterGoal(float d, float t, float kp, float ki, float kd) {
   return turnToAngle(d, t, kp, ki, kd);
 }
 
-int turnWith2Goals(float d, int t, float kp, float ki, float kd) {
+int turnWith2Goals(float d, float t, float kp, float ki, float kd) {
   return turnToAngle(d, t, kp, ki, kd);
 }
 
-int turnWithClawGoal(float d, int t, float kp, float ki, float kd) {
+int turnWithClawGoal(float d, float t, float kp, float ki, float kd) {
   return turnToAngle(d, t, kp, ki, kd);
 }
 
-int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd) {
+int moveStraight(float goalDistance, float timeLimit, float kp, float ki, float kd) {
 
-  mLLower.setPosition(0, degrees);
-  mLUpper.setPosition(0, degrees);
-  mRLower.setPosition(0, degrees);
-  mRUpper.setPosition(0, degrees);
+  mFrontLeft.setPosition(0, degrees);
+  mMidLeft.setPosition(0, degrees);
+  mBackLeft.setPosition(0, degrees);
+  mFrontRight.setPosition(0, degrees);
+  mMidRight.setPosition(0, degrees);
+  mBackRight.setPosition(0, degrees);
 
   float startTime = Brain.timer(msec);
   float prevTime = startTime, deltaTime, currentTime;
-  float LIntegral = 0, RIntegral = 0, LError = 0, RError, LDerivative = 0, RDerivative = 0, LPrevError = 0, RPrevError = 0;
+  float LIntegral = 0, RIntegral = 0, LError = 0, RError = 0, LDerivative = 0, RDerivative = 0, LPrevError = 0, RPrevError = 0;
   bool done = false;
-  float currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
-  float currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
+  float currentLeft = (((mFrontLeft.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
+  float currentRight = (((mFrontRight.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
 
-  //Graph graph = Graph(currentLeft, 250);
+  Graph graph = Graph(currentLeft, 250);
 
   while(!done) {
 
@@ -177,11 +132,11 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
     deltaTime = currentTime - prevTime;
     prevTime = currentTime;
 
-    currentLeft = (mLLower.position(degrees)/360.0) * 4.0 * M_PI;
-    currentRight = (mRLower.position(degrees)/360.0) * 4.0 * M_PI;
+    currentLeft = (((mFrontLeft.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
+    currentRight = (((mFrontRight.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
 
-    //graph.updateData(currentLeft);
-    //graph.drawGraph();
+    graph.updateData(currentLeft);
+    graph.drawGraph();
 
     LError = goalDistance - currentLeft;
     RError = goalDistance - currentRight;
@@ -191,7 +146,10 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
     LDerivative = (LError - LPrevError) / deltaTime;
     RDerivative = (RError - RPrevError) / deltaTime;
 
-    if (fabs(LError) < 8) {
+    LPrevError = LError;
+    RPrevError = RError;
+
+    if (fabs(LError) < 12) {
       LIntegral += LError * deltaTime;
       RIntegral += RError * deltaTime;
     } else {
@@ -199,18 +157,20 @@ int moveStraight(float goalDistance, int timeLimit, float kp, float ki, float kd
       RIntegral = 0;
     }
 
-
     float leftDriveSpeed = kp*LError + ki*LIntegral + kd*LDerivative;
     float rightDriveSpeed = kp*RError + ki*RIntegral + kd*RDerivative;
-
-    mLUpper.spin(forward, leftDriveSpeed, percent);
-    mLLower.spin(forward, leftDriveSpeed, percent);
-    mRUpper.spin(forward, rightDriveSpeed, percent);
-    mRLower.spin(forward, rightDriveSpeed, percent);
-
-    if (((fabs(LError) < .7) && (fabs(RError) < .7)) ||(Brain.timer(msec)-startTime > timeLimit)) {
+    //std::cout << leftDriveSpeed << std::endl;
+    mFrontLeft.spin(forward, leftDriveSpeed, percent);
+    mMidLeft.spin(forward, leftDriveSpeed, percent);
+    mBackLeft.spin(forward, leftDriveSpeed, percent);
+    mFrontRight.spin(forward, rightDriveSpeed, percent);
+    mMidRight.spin(forward, rightDriveSpeed, percent);
+    mBackRight.spin(forward, rightDriveSpeed, percent);
+    
+    if (((fabs(LError) < .7) && (fabs(RError) < .7)) || (Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
+      std::cout << "move: " << Brain.timer(msec) - startTime << std::endl;
       break;
     }
     wait(20, msec);
