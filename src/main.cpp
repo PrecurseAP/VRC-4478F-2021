@@ -46,19 +46,19 @@ void cycleAuton() {
 
   switch (autonSelection) {
     case 0: {
-      autonPath = "RIGHT GOAL DASH 20P";
+      autonPath = "RIGHT 20p + rings";
       break;
     }
     case 1: {
-      autonPath = "LEFT GOAL DASH 20P";
+      autonPath = "LEFT 20P";
       break;
     }
     case 2: {
-      autonPath = "RIGHT SIDE 40 WITH NO RINGS";
+      autonPath = "RIGHT SIDE 40 WITH RINGS";
       break;
     }
     case 3: {
-      autonPath = "SKILLS!!!";
+      autonPath = "left center goal dash!!!";
       break;
     }
     case 4: {
@@ -66,19 +66,19 @@ void cycleAuton() {
       break;
     }
     case 5: {
-      autonPath = "Left side center sprint";
+      autonPath = "right side center sprint";
       break;
     }
     case 6: {
-      autonPath = "Left Side 40 wit da winpoint";
+      autonPath = "left 20";
       break;
     }
     case 7: {
-      autonPath = "skills";
+      autonPath = "SKILLS";
       break;
     }
     default: {
-      autonPath = "what the hell";
+      autonPath = "something happened, restart the program :)";
       break;
     }
   }
@@ -119,15 +119,35 @@ void autonomous(void) {
   mLift.setPosition(0, degrees);
   mConveyor.setPosition(0, degrees);
   
-  autonSelection = 3;
+  autonSelection = 8;
 
   switch(autonSelection) {
     case 0: /*right 20*/ {
+      tilterPiston.set(true);
       clawPiston.set(true);
       moveStraight(44, 1200, 5.9);
       clawPiston.set(false);
       wait(75, msec);
       moveStraight(-30, 1500);
+
+      //turn to alliance goal
+      raiseLift(100, true);
+      turnWithClawGoal(270, 1500);
+      clawPiston.set(true);
+      wait(50, msec);
+      moveStraight(-10, 1500);
+      moveStraight(-3, 500, 5.50);
+      tilterPiston.set(false);
+      
+      raiseLift(200, true);
+      moveStraight(8, 1000);
+      turnWithTilterGoal(0, 1500);
+
+      mConveyor.spin(forward, 600, percent);
+      basicDrive(30);
+      wait(1700, msec);
+      moveStraight(-35, 1500);
+
       break;
     }
     case 1: /*left 20*/ {
@@ -139,6 +159,8 @@ void autonomous(void) {
       break;
     }
     case 2: /*right 40 no ring*/ {
+      int startTime = Brain.timer(msec);
+      tilterPiston.set(true);
       clawPiston.set(true);
       moveStraight(45, 1200, 5.9);
       clawPiston.set(false);
@@ -150,107 +172,49 @@ void autonomous(void) {
       raiseLift(0, false);
       moveStraight(-20, 1000);
       turnToAngle(320, 1000);
-      moveStraight(14, 750, 5.2);
+      moveStraight(17, 750, 5.2);
       clawPiston.set(false);
       raiseLift(60, false);
-      moveStraight(-35, 1200);
+      moveStraight(-39, 1200);
       turnWithClawGoal(270, 1000);
       raiseLift(0, true);
       clawPiston.set(true);
-      moveStraight(-18, 1000);
-      tilterPiston.set(true);
-      wait(200, msec);
-      moveStraight(6, 500, 5.5);
-      turnWithClawGoal(0, 1000);
-      break;
-    }
-    case 3: /*skills*/ {
-      int startTime = Brain.timer(msec);
-      //mConveyor.spin(forward, 300, percent);
-      clawPiston.set(true);
-      tilterPiston.set(true);
-
-      moveStraight(5, 700, 5.3);
-
-      clawPiston.set(false);
-      raiseLift(500, true);
-      moveStraight(-2, 600);
-      turnWithClawGoal(91, 1800);
-      raiseLift(60, false);
-      moveStraight(-99, 3500);
+      moveStraight(-21, 1000);
       moveStraight(-3, 500);
       tilterPiston.set(false);
-      wait(100, msec);
-      moveStraight(10, 1000, 5);
-      turnToAngle(2, 2000, .62);
-      wait(300, msec);
+      wait(200, msec);
+      raiseLift(200, false);
+      moveStraight(9, 500, 5.5);
+      turnWithClawGoal(0, 800);
+      mConveyor.spin(forward, 600, percent);
+      basicDrive(30);
+      wait(1700, msec);
+      moveStraight(-35, 1500);
+
+      std::cout << "Auton completed in " << Brain.timer(msec) - startTime << " ms." << std::endl;
+      break;
+    }
+    case 3: /*left center dash*/ {
+      int startTime = Brain.timer(msec);
+      //mConveyor.spin(forward, 300, percent);
+
+      clawPiston.set(true);
       tilterPiston.set(true);
-      wait(300, msec);
-      moveStraight(23, 1000);
-      raiseLift(375, true);
-      turnWith2Goals(270, 1500);
-      moveStraight(6.5, 1000, 4.5);
-      //raiseLift(, true);
-      clawPiston.set(true);
-      moveStraight(-4, 1000);
-      turnToAngle(186, 1500);
-      raiseLift(0, false);
-      moveStraight(37, 1500, 5.35);
+      moveStraight(35, 1250, 5.82);
+      turnToAngle(245, 1500);
+      moveStraight(-20, 1500);
+      turnToAngle(69, 1500);
+      moveStraight(17, 800, 5.50);
       clawPiston.set(false);
+      wait(200, msec);
+      turnWithClawGoal(45, 1500);
+      moveStraight(-48, 1500);
+      clawPiston.set(true);
       wait(100, msec);
-      turnWithClawGoal(350, 1500);
-      moveStraight(-7, 1200, 5);
+      turnToAngle(330, 1500);
+      moveStraight(-10, 1500);
       tilterPiston.set(false);
-      wait(100, msec);
-      moveStraight(3, 500);
-      turnWith2Goals(7, 2000);
-      moveStraight(47, 1500);
-      //tilterPiston.set(true);
-      //wait(300, msec);
-      raiseLift(500, true);
-      turnWith2Goals(270, 2000);
-      moveStraight(5, 1000, 5.5);
-      turnWithClawGoal(270, 1500);
-      moveStraight(5, 1000, 5.5);
-      raiseLift(350, true);
-      clawPiston.set(true);
-      wait(200, msec);
-      moveStraight(-5, 1000, 5.5);
-      turnToAngle(0, 1000);
-      raiseLift(0, true);
-      moveStraight(35, 900, 5.4);
-      turnWithTilterGoal(90, 1500);
-
-      //raise the lift a bit, then clear the front of the bot of rings with the conveyor
-      raiseLift(200, true);
-      mConveyor.spin(forward, 320, rpm);
-      moveStraight(14, 2000, 5);
-      mConveyor.stop();     
-      raiseLift(0, true);
-      turnWithTilterGoal(90, 1500);
-      moveStraight(14, 1000, 5);
-      clawPiston.set(false);
-      wait(50, msec);
-
-
-      raiseLift(100, true);
-      turnWith2Goals(120, 1500); //turn towards the secondary platform
-      moveStraight(42, 1500);
-      raiseLift(375, true);
-      moveStraight(6, 700, 5.5);
-      clawPiston.set(true);
-      wait(200, msec);
-      moveStraight(-8, 900);
-      turnWithTilterGoal(355, 1000);
-      raiseLift(0, true);
-      moveStraight(32, 1500, 5.5);
-      clawPiston.set(false);
-      wait(50, msec);
-      raiseLift(100, true);
-      moveStraight(-5, 700);
-      turnWith2Goals(180, 1500);
-
-
+      mConveyor.spin(forward, 550, rpm);
       
       /*turnToAngle(270, 1500);
       moveStraight(15, 1000, 5);
@@ -304,6 +268,158 @@ void autonomous(void) {
       std::cout << "Auton completed in " << Brain.timer(msec) - startTime << " ms." << std::endl;
       break;
     }
+    case 5: /* right center dash + rings*/ {
+      int startTime = Brain.timer(msec);
+
+      clawPiston.set(true);
+      tilterPiston.set(true);
+
+      moveStraight(17.5, 1000);
+      turnToAngle(315, 1000);
+
+      moveStraight(38.5, 1500, 5.5);
+
+      clawPiston.set(false);
+      wait(100, msec);
+
+      raiseLift(50, true);
+      moveStraight(-40, 1500);
+
+      turnWithClawGoal(270, 1500);
+
+      clawPiston.set(true);
+
+      wait(50, msec);
+
+      moveStraight(-18, 1500);
+      moveStraight(-3, 500);
+
+      tilterPiston.set(false);
+
+      moveStraight(11, 1000);
+
+      turnWithTilterGoal(0, 1500);
+
+      raiseLift(200, true);
+      mConveyor.spin(forward, 600, percent);
+      basicDrive(30);
+      wait(1700, msec);
+      moveStraight(-35, 1500);
+
+      std::cout << "Auton completed in " << Brain.timer(msec) - startTime << " ms." << std::endl;
+      break;
+    }
+    case 6: /* Left 20 with awp */ {
+      int startTime = Brain.timer(msec);      
+      
+      clawPiston.set(true);
+      tilterPiston.set(true);
+      moveStraight(47, 1250, 5.82);
+      clawPiston.set(false);
+      wait(50, msec);
+      moveStraight(-42, 1500);
+
+      clawPiston.set(true);
+      turnToAngle(280, 1500);
+      moveStraight(-10, 1500);
+      tilterPiston.set(false);
+      wait(100, msec);
+      mConveyor.spin(forward, 550, rpm);
+      wait(1000, msec);
+      mConveyor.stop();
+
+      std::cout << "Auton completed in " << Brain.timer(msec) - startTime << " ms." << std::endl;
+      break;
+    }
+    case 7: /* skills */ {
+      clawPiston.set(true);
+      tilterPiston.set(true);
+
+      moveStraight(5, 700, 5.3);
+
+      clawPiston.set(false);
+      raiseLift(500, true);
+      moveStraight(-2, 600);
+      turnWithClawGoal(93, 2500);
+      moveStraight(-15, 1000, 5.1);
+      raiseLift(100, true);
+      moveStraight(-29, 3500);
+      moveStraight(-3, 500);
+      moveStraight(-3, 500);
+      tilterPiston.set(false);
+      wait(100, msec);
+      moveStraight(-44.5, 1500);
+      turnToAngle(2, 2000, .62);
+      moveStraight(3, 500, 5.1);
+      wait(300, msec);
+      tilterPiston.set(true);
+      wait(300, msec);
+      moveStraight(23, 1000, 5.5);
+      raiseLift(385, true);
+      turnWith2Goals(270, 1500);
+      moveStraight(8, 1000, 4.5);
+      wait(100, msec);
+      //raiseLift(, true);
+      clawPiston.set(true);
+      moveStraight(-5.5, 1000);
+      turnToAngle(185, 1500);
+      raiseLift(0, false);
+      moveStraight(38, 1500, 5.35);
+      clawPiston.set(false);
+      wait(200, msec);
+      turnWithClawGoal(7, 1500);
+      moveStraight(-7, 1200, 5);
+      tilterPiston.set(false);
+      wait(100, msec);
+      moveStraight(3, 500);
+      turnWith2Goals(4, 2000);
+      moveStraight(47, 1500);
+      //tilterPiston.set(true);
+      //wait(300, msec);
+      raiseLift(500, true);
+      turnWith2Goals(270, 2000);
+      moveStraight(5, 1000, 5.5);
+      turnWithClawGoal(270, 1500);
+      moveStraight(5, 1000, 5.5);
+      raiseLift(350, true);
+      clawPiston.set(true);
+      wait(200, msec);
+      moveStraight(-5, 1000, 5.5);
+      turnToAngle(0, 1000);
+      raiseLift(0, true);
+      moveStraight(31, 1500, 5.4);
+      turnWithTilterGoal(90, 1500);
+
+      //raise the lift a bit, then clear the front of the bot of rings with the conveyor
+      raiseLift(200, true);
+      mConveyor.spin(forward, 320, rpm);
+      moveStraight(11, 2000, 5.5);
+      mConveyor.stop();     
+      raiseLift(0, true);
+      turnWithTilterGoal(90, 1500);
+      moveStraight(14, 1000, 5);
+      clawPiston.set(false);
+      wait(50, msec);
+
+
+      raiseLift(100, true);
+      turnWith2Goals(128, 1500); //turn towards the secondary platform
+      moveStraight(35, 1500);
+      raiseLift(450, true);
+      moveStraight(25, 700, 5.5);
+      clawPiston.set(true);
+      wait(200, msec);
+      moveStraight(-8, 900);
+      turnWithTilterGoal(355, 1000);
+      raiseLift(0, true);
+      moveStraight(32, 1500, 5.5);
+      clawPiston.set(false);
+      wait(50, msec);
+      raiseLift(100, true);
+      moveStraight(-5, 700);
+      turnWith2Goals(180, 1500);
+      break;
+    }
   }
 
 }
@@ -343,7 +459,6 @@ void usercontrol(void) {
   while (1) {
     float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));
     float RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(float)(12.0/100.0));
-    //FIX LOCKDRIVE!!!!!!
 
     if (LSpeed != 0) {
       mFrontLeft.spin(forward, LSpeed, volt);

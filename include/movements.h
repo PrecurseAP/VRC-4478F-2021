@@ -3,6 +3,8 @@
 
 #include "vex.h"
 
+extern void basicDrive(int);
+
 extern bool clawState;
 
 extern void clawToggle(void);

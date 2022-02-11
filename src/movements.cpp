@@ -27,6 +27,15 @@ void stopAllDrive(brakeType bt) {
   mBackLeft.stop(bt);
 }
 
+void basicDrive(int speed) {
+  mFrontLeft.spin(forward, speed, percent);
+  mMidLeft.spin(forward, speed, percent);
+  mBackLeft.spin(forward, speed, percent);
+  mFrontRight.spin(forward, speed, percent);
+  mMidRight.spin(forward, speed, percent);
+  mBackRight.spin(forward, speed, percent);
+}
+
 int deploy() {
   mLift.setVelocity(100, percent);
   mLift.spin(forward, 100, percent);
