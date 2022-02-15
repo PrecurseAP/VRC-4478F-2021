@@ -18,10 +18,11 @@ float clip(float n, float lower, float upper) {
   return std::max(lower, std::min(n, upper));
 }
 
-Graph::Graph(float var, int ms) {
+Graph::Graph(float var, int ms, float g) {
   least = var;
   greatest = var;
   maxSize = ms;
+  goal = g;
 }
 
 void Graph::updateData(float dataPoint) {
@@ -62,7 +63,7 @@ void Graph::drawGraph() {
   //Brain.Screen.printAt(graphLeftBorder-75, graphTopBorder, "%.2f", this->greatest);
   Brain.Screen.printAt(graphLeftBorder-75, py, "%.2f", graphData[graphData.size()-1]);
   Brain.Screen.setPenColor(color::red);
-  py = 272 - (graphTopBorder*2 + ((90 - this->least) * ((graphBottomBorder - graphTopBorder)/(this->greatest - this->least))));
+  py = 272 - (graphTopBorder*2 + ((this->goal - this->least) * ((graphBottomBorder - graphTopBorder)/(this->greatest - this->least))));
   Brain.Screen.drawLine(graphLeftBorder, py, graphRightBorder, py);
   Brain.Screen.render();
 }

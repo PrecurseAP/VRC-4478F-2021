@@ -57,7 +57,7 @@ int turnToAngle(float goalAngle, float timeLimit, float kp/* = 4.0 */, float ki/
   bool done = false;
   float currentAngle = GYRO.heading(degrees);
 
- Graph graph = Graph(currentAngle, 250);
+ Graph graph = Graph(currentAngle, 250, goalAngle);
 
   while(!done) {
 
@@ -133,7 +133,7 @@ int moveStraight(float goalDistance, float timeLimit, float kp, float ki, float 
   float currentLeft = (((mFrontLeft.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
   float currentRight = (((mFrontRight.position(degrees) / 360.0) * driveRatio) * 4.0 * 3.14);
 
-  Graph graph = Graph(currentLeft, 250);
+  Graph graph = Graph(currentLeft, 250, goalDistance);
 
   while(!done) {
 

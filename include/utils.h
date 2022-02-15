@@ -33,6 +33,7 @@ extern class Graph {
     float* dataVar;
     int least;
     int greatest;
+    float goal;
     float prevX = 0;
     float prevY = 0;
     float px = 0;
@@ -45,7 +46,7 @@ extern class Graph {
 
     std::vector<float> graphData;
 
-    Graph(float, int);
+    Graph(float, int, float);
 
     void updateData(float);
 
