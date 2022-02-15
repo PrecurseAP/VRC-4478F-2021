@@ -27,8 +27,16 @@ int rightBasic20Rings() {
   turnWithTilterGoal(0, 1500);
 
   mConveyor.spin(forward, 600, percent);
-  basicDrive(30);
-  wait(1700, msec);
+  basicDrive(40);
+  wait(1400, msec);
+  turnWithTilterGoal(90, 1000);
+  basicDrive(45);
+  wait(600, msec);
+  stopAllDrive(hold);
+  moveStraight(-12, 600);
+  
+  //turn back to home and run away
+  turnWithTilterGoal(0, 1000);
   moveStraight(-35, 1500);
 
   return Brain.timer(msec) - t;
@@ -40,17 +48,19 @@ int leftBasic20Rings() {
   clawPiston.set(true);
   tilterPiston.set(true);
   moveStraight(46, 1250, 5.80);
+  moveStraight(1, 250);
   clawPiston.set(false);
   wait(50, msec);
-  moveStraight(-42, 1500);
+  moveStraight(-40, 1500);
 
   clawPiston.set(true);
   turnToAngle(280, 1500);
-  moveStraight(-10, 1500);
+  moveStraight(-9, 1500);
   tilterPiston.set(false);
   wait(100, msec);
+  moveStraight(12, 700);
   mConveyor.spin(forward, 550, rpm);
-  wait(1000, msec);
+  wait(5000, msec);
   mConveyor.stop();
 
   return Brain.timer(msec) - t;
@@ -138,30 +148,49 @@ int soloAWP() {
 
   //grip da ally goal and ring it
   clawPiston.set(true);
+  tilterPiston.set(true);
+  wait(150, msec);
+  moveStraight(-4, 500);
   tilterPiston.set(false);
-  mConveyor.spin(forward, 450, rpm);
+  mConveyor.spin(forward, 500, rpm);
 
   //move up a bit and turn to midfield
   moveStraight(5, 500);
   turnWithTilterGoal(270, 1500);
-  moveStraight(-30, 1000);
+  moveStraight(-32, 1000);
 
   //turn to +'s of rings and deposit them (hopefully)
-  turnWithTilterGoal(180, 1200);
-  basicDrive(35);
-  wait(2000, msec);
+  raiseLift(150, false);
+  turnWithTilterGoal(180, 1100);
+  basicDrive(45);
+  wait(2600, msec);
   stopAllDrive(hold);
 
   //let go of goal and turn to ally goal, move to it
   tilterPiston.set(true);
-  turnToAngle(0, 1000);
-  moveStraight(40, 1500, 5);
+  mConveyor.stop(hold);
+  turnToAngle(18, 1000);
+  mConveyor.spin(reverse, 150, rpm);
+  moveStraight(-28, 1000, 5.2);
 
   //grab dat goal and start ringing it
   tilterPiston.set(false);
   wait(50, msec);
+  mConveyor.spin(forward, 500, rpm);
   moveStraight(10, 750);
-  turnWithTilterGoal(90, 1200);
+  turnWithTilterGoal(90, 1100);
+  basicDrive(50);
+  wait(1090, msec);
+  stopAllDrive(hold);
+  turnWithTilterGoal(180, 1000);
+  basicDrive(45);
+  wait(500, msec);
+  stopAllDrive(hold);
+  moveStraight(-8, 600);
+  
+  //turn back to home and run away
+  turnWithTilterGoal(135, 1000);
+  moveStraight(-30, 1500);
 
   /*
   old route

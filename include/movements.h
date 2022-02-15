@@ -31,11 +31,11 @@ extern void stopAllDrive(brakeType);
 
 extern int turnToAngle(float, float, float kp = .715, float ki = 0.000, float kd = .19);
 
-extern int turnWithTilterGoal(float, float, float kp = .60, float ki = 0.00001, float kd = .29);
+extern int turnWithTilterGoal(float, float, float kp = .65, float ki = 0.000014, float kd = .49);
 
 extern int turnWith2Goals(float, float, float kp = .55, float ki = 0.000011, float kd = .55);
 
-extern int turnWithClawGoal(float, float, float kp = .575, float ki = 0.00001, float kd = .35);
+extern int turnWithClawGoal(float, float, float kp = .595, float ki = 0.00001, float kd = .35);
 
 extern int moveStraight(float, float, float kp = 6.0, float ki = 0.002, float kd = 3.6);
 

@@ -118,7 +118,7 @@ void autonomous(void) {
   mBackRight.setPosition(0, degrees);
   mLift.setPosition(0, degrees);
   mConveyor.setPosition(0, degrees);
-  
+
   switch(autonSelection) {
     case 0: /*right 20*/ {
       int t = rightBasic20Rings();
@@ -185,8 +185,15 @@ void lockDriveCoast() {
 
 void usercontrol(void) {
 
-  turnToAngle(90, 1500);
-
+  //testing for turning functions ignore these
+  /*clawPiston.set(false);
+  tilterPiston.set(false);
+  wait(250, msec);
+  raiseLift(100, true);
+  wait(500, msec);
+  turnWith2Goals(270, 2500);
+  raiseLift(0, true);
+  wait(5000, msec);*/
   Controller1.ButtonR2.pressed(toggleTilter);
   Controller1.ButtonR1.pressed(toggleClaw);
 
