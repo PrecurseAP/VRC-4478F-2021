@@ -16,6 +16,8 @@ extern controller Controller2;
 extern digital_out tilterPiston;
 extern digital_out clawPiston;
 extern inertial GYRO;
+extern rotation twLeft;
+extern rotation twRight;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

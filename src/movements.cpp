@@ -93,7 +93,7 @@ int turnToAngle(float goalAngle, float timeLimit, float kp/* = 4.0 */, float ki/
     mMidRight.spin(forward, -driveSpeed, percent);
     mBackRight.spin(forward, -driveSpeed, percent);
 
-    if ((fabs(error) < .85) || (Brain.timer(msec)-startTime > timeLimit)) {
+    if ((fabs(error) < .75) || (Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
       std::cout << "turn: " << Brain.timer(msec)-startTime << std::endl;
@@ -117,7 +117,7 @@ int turnWithClawGoal(float d, float t, float kp, float ki, float kd) {
   return turnToAngle(d, t, kp, ki, kd);
 }
 
-int moveStraight(float goalDistance, float timeLimit, float kp, float ki, float kd) {
+int moveStraight(float goalDistance, float timeLimit, float kp, float maxSpeed, float ki, float kd) {
 
   mFrontLeft.setPosition(0, degrees);
   mMidLeft.setPosition(0, degrees);
@@ -168,6 +168,15 @@ int moveStraight(float goalDistance, float timeLimit, float kp, float ki, float 
 
     float leftDriveSpeed = kp*LError + ki*LIntegral + kd*LDerivative;
     float rightDriveSpeed = kp*RError + ki*RIntegral + kd*RDerivative;
+
+    if (maxSpeed != 100) {
+      if (fabs(leftDriveSpeed) > maxSpeed) {
+        leftDriveSpeed = maxSpeed * (int(0) < leftDriveSpeed) - (leftDriveSpeed < int(0));
+      }
+      if (fabs(rightDriveSpeed) > maxSpeed) {
+        rightDriveSpeed = maxSpeed * (int(0) < rightDriveSpeed) - (rightDriveSpeed < int(0));
+      }
+    }
     //std::cout << leftDriveSpeed << std::endl;
     mFrontLeft.spin(forward, leftDriveSpeed, percent);
     mMidLeft.spin(forward, leftDriveSpeed, percent);
@@ -176,7 +185,7 @@ int moveStraight(float goalDistance, float timeLimit, float kp, float ki, float 
     mMidRight.spin(forward, rightDriveSpeed, percent);
     mBackRight.spin(forward, rightDriveSpeed, percent);
     
-    if (((fabs(LError) < .7) && (fabs(RError) < .7)) || (Brain.timer(msec)-startTime > timeLimit)) {
+    if (((fabs(LError) < .6) && (fabs(RError) < .6)) || (Brain.timer(msec)-startTime > timeLimit)) {
       done = true;
       stopAllDrive(hold);
       std::cout << "move: " << Brain.timer(msec) - startTime << std::endl;

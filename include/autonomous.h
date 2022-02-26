@@ -1,6 +1,8 @@
 #ifndef __AUTON__
 #define __AUTON__
 
+//declarations for autonomous route functions.
+
 int rightBasic20Rings(void);
 
 int leftBasic20Rings(void);
@@ -14,5 +16,7 @@ int rightCenterDash(void);
 int soloAWP(void);
 
 int runSkills(void);
+
+int rightNeutralLast(void);
 
 #endif

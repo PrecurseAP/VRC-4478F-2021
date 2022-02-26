@@ -1,6 +1,8 @@
 #ifndef __UTILS__
 #define __UTILS__
 
+//declarations for utilities such as graphing classes and math functions.
+
 #include <vector>
 #include <string>
 #include <iostream>

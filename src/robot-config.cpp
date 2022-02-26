@@ -21,6 +21,8 @@ controller Controller2 = controller(partner);
 digital_out tilterPiston = digital_out(Brain.ThreeWirePort.A);
 digital_out clawPiston = digital_out(Brain.ThreeWirePort.H);
 inertial GYRO = inertial(PORT10);
+rotation twLeft = rotation(PORT15, true);
+rotation twRight = rotation(PORT16, false);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

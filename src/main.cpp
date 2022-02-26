@@ -1,3 +1,7 @@
+//code written by Aiden Pringle :3
+
+#include "vex.h"
+
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
@@ -14,9 +18,9 @@
 // tilterPiston         digital_out   A               
 // clawPiston           digital_out   H               
 // GYRO                 inertial      10              
+// twLeft               rotation      15              
+// twRight              rotation      16              
 // ---- END VEXCODE CONFIGURED DEVICES ----
-
-#include "vex.h"
 #include "utils.h"
 #include "movements.h"
 #include "autonomous.h"
@@ -25,32 +29,42 @@ using namespace vex;
 competition Competition;
 
 template <typename T> 
-int sgn(T val) { //SIGNUM
-    return (T(0) < val) - (val < T(0));
+int sgn(T val) {
+  //signum function: returns the sign of the input
+  //x < 0: -1
+  //x = 0: 0
+  //x > 0: 1
+  return (T(0) < val) - (val < T(0));
 }
 
 template <typename S>
 S logDriveVolt(S s) {
+  //logarithmic drive function, written for voltage.
   return pow(12, 2.6) / pow(12, 1.6) * sgn(s);
 }
 
 int autonSelection = 0;
-std::string autonPath = "CYCLE AUTONS NOW PLEASE";
+std::string autonPath = "Right 20P + rings";
 
 void cycleAuton() {
+  //auton choice cycling function
+  //loops a variable from 0 to a number each time the screen is tapped.
+  //Number depends on the amount of auton paths, each number 0 to n corresponds to a route
+
   if (autonSelection < 7) {
     autonSelection++;
   } else {
     autonSelection = 0;
   }
 
+  //names for each route, these are drawn on the screen so we know what we are choosing
   switch (autonSelection) {
     case 0: {
       autonPath = "RIGHT 20p + rings";
       break;
     }
     case 1: {
-      autonPath = "LEFT 20p, dont use, left 20 with rings is better";
+      autonPath = "LEFT 20p + RINGS";
       break;
     }
     case 2: {
@@ -62,7 +76,7 @@ void cycleAuton() {
       break;
     }
     case 4: {
-      autonPath = "FULL AWP!! (RIGHT SIDE)";
+      autonPath = "SOLOAWP";
       break;
     }
     case 5: {
@@ -70,7 +84,7 @@ void cycleAuton() {
       break;
     }
     case 6: {
-      autonPath = "left 20 WITH RINGS USE THIS ONE";
+      autonPath = "right ally then neutral";
       break;
     }
     case 7: {
@@ -91,15 +105,14 @@ void cycleAuton() {
 void pre_auton(void) {
   vexcodeInit();
 
-  clawPiston.set(false);
-  tilterPiston.set(false);
-
+  //set up for the route selection
   Brain.Screen.setCursor(1, 1);
   Brain.Screen.print(autonPath.c_str());
   Brain.Screen.render();
 
   Brain.Screen.pressed(cycleAuton);
 
+  //calibrate the inertial sensor
   GYRO.startCalibration();
   while(GYRO.isCalibrating()) {
     wait(100, msec);
@@ -110,6 +123,11 @@ void pre_auton(void) {
 
 void autonomous(void) {
 
+  //The autonomous function.
+  //The selected path carries over from the preauton function and is used in the switch statement.
+  //Each number has a corresponding path, this is where the path is then run.
+
+  //reset ALL motors to default positions
   mFrontLeft.setPosition(0, degrees);
   mMidLeft.setPosition(0, degrees);
   mBackLeft.setPosition(0, degrees);
@@ -119,7 +137,10 @@ void autonomous(void) {
   mLift.setPosition(0, degrees);
   mConveyor.setPosition(0, degrees);
 
+  autonSelection = 7;
+
   switch(autonSelection) {
+    //each path prints to the vexcode console, in ms, how much time the route took to finish.
     case 0: /*right 20*/ {
       int t = rightBasic20Rings();
       std::cout << "Auton completed in " << t << " ms." << std::endl;
@@ -150,7 +171,12 @@ void autonomous(void) {
       std::cout << "Auton completed in " << t << " ms." << std::endl;
       break;
     }
-    case 6: /* skills */ {
+    case 6: /*Right ally then neutral*/{
+      int t = rightNeutralLast();
+      std::cout << "Auton completed in " << t << " ms." << std::endl;
+      break;
+    }
+    case 7: /* skills */ {
       int t = runSkills();
       std::cout << "Auton completed in " << t << " ms." << std::endl;
       break;
@@ -159,14 +185,14 @@ void autonomous(void) {
 
 }
 
-bool tilterToggled = false;
+bool tilterToggled = true;
 
 void toggleTilter() {
   tilterPiston.set(!tilterToggled);
   tilterToggled = !tilterToggled;
 }
 
-bool clawToggled = false;
+bool clawToggled = true;
 
 void toggleClaw() {
   clawPiston.set(!clawToggled);
@@ -184,28 +210,26 @@ void lockDriveCoast() {
 }
 
 void usercontrol(void) {
+  //User control function. Runs during driver control. (duh)
 
   //testing for turning functions ignore these
-  /*clawPiston.set(false);
-  tilterPiston.set(false);
-  wait(250, msec);
-  raiseLift(100, true);
-  wait(500, msec);
-  turnWith2Goals(270, 2500);
-  raiseLift(0, true);
-  wait(5000, msec);*/
+
+  //set up callbacks for piston toggles and braketype toggles.
   Controller1.ButtonR2.pressed(toggleTilter);
   Controller1.ButtonR1.pressed(toggleClaw);
 
   Controller2.ButtonA.pressed(toggleTilter);
 
-  Controller1.ButtonX.pressed(lockDriveHold); //callbacks for toggling the locking drive code
+  Controller1.ButtonX.pressed(lockDriveHold); 
   Controller1.ButtonY.pressed(lockDriveCoast);
 
   while (1) {
+
+    //get logarithmic drive speed, scale percentage to voltage
     float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));
     float RSpeed = logDriveVolt(Controller1.Axis2.position(percent)*(float)(12.0/100.0));
 
+    //set motors to respective speeds
     if (LSpeed != 0) {
       mFrontLeft.spin(forward, LSpeed, volt);
       mMidLeft.spin(forward, LSpeed, volt);
@@ -217,6 +241,7 @@ void usercontrol(void) {
       mBackRight.spin(forward, RSpeed, volt);
     }
 
+    //Lockdrive, basically we toggle between hold and coast based on situation. (parking vs defense etc)
     if (LSpeed == 0) {
       mFrontLeft.stop(lockDrive);
       mMidLeft.stop(lockDrive);
@@ -228,6 +253,7 @@ void usercontrol(void) {
       mBackRight.stop(lockDrive);
     }
 
+    //run lift and conveyor based on controller inputs
     if (Controller1.ButtonL1.pressing()) {
       mLift.spin(forward, 100, percent);
     } else if (Controller1.ButtonL2.pressing()) {
@@ -248,7 +274,9 @@ void usercontrol(void) {
   }
 }
 
+
 int main() {
+  //Main function. I never touch this, only sets up competition template.
 
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);

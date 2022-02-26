@@ -1,6 +1,8 @@
 #ifndef __MOVEMENTS__
 #define __MOVEMENTS__
 
+//definitions for all autonomous drive functions (PID'S, conveyor, lift etc)
+
 #include "vex.h"
 
 extern void basicDrive(int);
@@ -37,7 +39,7 @@ extern int turnWith2Goals(float, float, float kp = .55, float ki = 0.000011, flo
 
 extern int turnWithClawGoal(float, float, float kp = .595, float ki = 0.00001, float kd = .35);
 
-extern int moveStraight(float, float, float kp = 6.0, float ki = 0.002, float kd = 3.6);
+extern int moveStraight(float, float, float kp = 6.0, float maxSpeed = 100, float ki = 0.002, float kd = 3.6);
 
 extern void raiseTilter(bool wait = true);
 
