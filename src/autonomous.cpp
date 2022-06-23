@@ -18,20 +18,20 @@ int rightBasic20Rings() {
   moveStraight(44, 1200, 5.9);
   clawPiston.set(false);
   wait(75, msec);
-  moveStraight(-30, 1500);
+  moveStraight(-30, 15000);
 
   //turn to alliance goal, grab it in tilter
   raiseLift(100, true);
   turnWithClawGoal(270, 1500);
   clawPiston.set(true);
   wait(50, msec);
-  moveStraight(-10, 1500);
+  moveStraight(-11, 1500);
   moveStraight(-3, 500, 5.50);
   tilterPiston.set(false);
     
   //raise lift so rings have clearance, align bot with ring line on field
   raiseLift(200, true);
-  moveStraight(8, 1000);
+  moveStraight(9, 1000);
   turnWithTilterGoal(0, 1500);
 
   //begin suckage of rings onto the alliance goal. Turn to other line of rings against wall
@@ -48,38 +48,86 @@ int rightBasic20Rings() {
   turnWithTilterGoal(0, 1000);
   moveStraight(-35, 1500);
 
+  tilterPiston.set(true);
+
+  moveStraight(10, 1500);
+
   return Brain.timer(msec) - t;
 }
 
 //left auton that grabs leftmost neutral goal
 int leftBasic20Rings() {
-  int t = Brain.timer(msec);      
-      
+  int t = Brain.timer(msec);
   clawPiston.set(true);
   tilterPiston.set(true);
   
   //dash to neut goal, pick it up, move back
-  moveStraight(46, 1250, 5.80);
+  moveStraight(45.6, 1250, 5.80);
   moveStraight(1, 250);
   clawPiston.set(false);
   wait(50, msec);
-  moveStraight(-40, 1500);
+  moveStraight(-40, 15000);
 
   //turn to alliance goal against platform, run up to it, shoot preloads. No grabbing, too inconsistent
   clawPiston.set(true);
   turnToAngle(280, 1500);
   moveStraight(-11, 1500);
-  /*wait(300, msec);
+  wait(300, msec);
   tilterPiston.set(false);
-  wait(100, msec);
+  /*wait(100, msec);
   moveStraight(12, 700);*/
   mConveyor.spin(forward, 550, rpm);
-  wait(5000, msec);
+  wait(1500, msec);
   mConveyor.stop();
+  moveStraight(15, 1500);
+  tilterPiston.set(true);
+  moveStraight(4, 500);
+  moveStraight(-8, 800);
+  
+
+  //tilterPiston.set(true);
+  
 
   return Brain.timer(msec) - t;
 }
+int left40Point() {
+  int t = Brain.timer(msec);
 
+  clawPiston.set(true);
+  tilterPiston.set(true);
+  
+
+  followArc(65, 40, 1500, 200, 1, false);
+  wait(75, msec);
+  clawPiston.set(false);
+  wait(50, msec);
+  moveStraight(-30, 1500);
+  raiseLift(180, false);
+  odomTurn(60, 30, 1500);
+
+  mConveyor.spin(forward, 90, percent);
+  moveStraight(55, 2000);
+  mConveyor.stop(hold);
+  odomTurn(50, -70, 2000);
+  moveStraight(-12, 1500, 5);
+  wait(100, msec);
+  tilterPiston.set(false);
+  odomTurn(-10, 0, 1500); 
+  moveStraight(65, 2500);
+
+  tilterPiston.set(true);
+  
+  odomTurn(-100, 35, 1000);
+
+  moveStraight(-15, 1500, 5.5);
+  wait(50, msec);
+  tilterPiston.set(false);
+  mConveyor.spin(forward, 100, percent);
+  turnToAngle(270, 1000);
+  moveStraight(20, 2500, 5.5, 30);
+
+  return Brain.timer(msec) - t;
+}
 int right40AWP() {
   int t = Brain.timer(msec);
      
@@ -93,15 +141,15 @@ int right40AWP() {
   raiseLift(60, false);
   moveStraight(-34, 1500);
 
-  turnWithClawGoal(140, 1500);
+  turnWithClawGoal(138, 1500);
   clawPiston.set(true);
   raiseLift(0, false);
   moveStraight(-20, 1000);
-  turnToAngle(320, 1000);
-  moveStraight(17, 750, 5.2);
+  turnToAngle(319, 1000);
+  moveStraight(19, 750, 5.2);
   clawPiston.set(false);
   raiseLift(60, false);
-  moveStraight(-40, 1200);
+  moveStraight(-41, 1200);
   turnWithClawGoal(270, 1000);
   raiseLift(0, true);
   clawPiston.set(true);
@@ -116,6 +164,8 @@ int right40AWP() {
   basicDrive(30);
   wait(1700, msec);
   moveStraight(-35, 1500);
+
+  tilterPiston.set(true);
   
   return Brain.timer(msec) - t;
 }
@@ -125,21 +175,17 @@ int leftCenterDash() {
 
   clawPiston.set(true);
   tilterPiston.set(true);
-  moveStraight(33, 1250, 5.82);
-  turnToAngle(245, 1500);
-  moveStraight(-20, 1500);
-  turnToAngle(69, 1500);
-  moveStraight(19, 800, 5.50);
+  moveStraight(38, 1500, 5.82);
+  turnToAngle(270, 1500);
+  moveStraight(-58, 2500);
+  moveStraight(6, 800);
+  turnToAngle(0, 1500);
+  moveStraight(10, 1500, 5.50, 40);
   clawPiston.set(false);
   wait(200, msec);
+  raiseLift(100, false);
   turnWithClawGoal(45, 1500);
-  moveStraight(-55, 1500);
-  clawPiston.set(true);
-  wait(100, msec);
-  turnToAngle(307, 1500);
-  moveStraight(-10, 1500);
-  tilterPiston.set(false);
-  mConveyor.spin(forward, 550, rpm);
+  moveStraight(-66, 1500);
       
   /*turnToAngle(270, 1500);
   moveStraight(15, 1000, 5);
@@ -157,6 +203,8 @@ int leftCenterDash() {
   moveStraight(-5, 1000);
   */
 
+  tilterPiston.set(true);
+
   return Brain.timer(msec) - t;
 }
 
@@ -173,14 +221,14 @@ int soloAWP() {
 
   //move up a bit and turn to midfield
   moveStraight(5, 500);
-  turnWithTilterGoal(270, 1300);
+  turnWithTilterGoal(268, 1300);
   moveStraight(-32, 900);
 
   //turn to +'s of rings and deposit them (hopefully)
   raiseLift(150, false);
   turnWithTilterGoal(180, 1000);
   basicDrive(45);
-  wait(2600, msec);
+  wait(2810, msec);
   stopAllDrive(hold);
 
   //let go of goal and turn to ally goal, move to it
@@ -208,6 +256,8 @@ int soloAWP() {
   //turn back to home and run away
   turnWithTilterGoal(135, 1000);
   moveStraight(-30, 1500);
+
+  tilterPiston.set(true);
 
   /*
   old route
@@ -247,14 +297,14 @@ int rightCenterDash() {
 
   //move up, then turn to the center goal
   moveStraight(17.5, 1000);
-  turnToAngle(315, 1000);
+  turnToAngle(313, 1000);
 
   //move to it, then grab it and run back
-  moveStraight(38.5, 1500, 5.5);
+  moveStraight(39.5, 1500, 5.5);
   clawPiston.set(false);
   wait(100, msec);
   raiseLift(50, true);
-  moveStraight(-40, 1500);
+  moveStraight(-41, 1500);
 
   //drop tall goal in home zone, move up to alliance goal
   turnWithClawGoal(270, 1500);
@@ -275,6 +325,8 @@ int rightCenterDash() {
   wait(1700, msec);
   moveStraight(-35, 1500);
 
+  tilterPiston.set(true);
+
   return Brain.timer(msec) - t;
 }
 
@@ -285,7 +337,7 @@ int rightNeutralLast() {
   clawPiston.set(true);
 
   //move up to alliance goal, grab it in tilter
-  moveStraight(-7, 1000);
+  moveStraight(-8, 1000);
   moveStraight(-3, 400);
   tilterPiston.set(false);
   wait(100, msec);
@@ -296,7 +348,7 @@ int rightNeutralLast() {
   moveStraight(-21, 1000);
   mConveyor.stop();
   turnWithTilterGoal(180, 1100);
-  moveStraight(31, 900);
+  moveStraight(33, 1500, 5.3);
   moveStraight(2, 250);
   clawPiston.set(false);
 
@@ -312,7 +364,7 @@ int rightNeutralLast() {
   basicDrive(30);
   wait(2000, msec);
   basicDrive(-10);
-  wait(800, msec);
+  wait(1400, msec);
   raiseLift(60, true);
   /*repeat(5) {
     basicDrive(30);
@@ -321,6 +373,9 @@ int rightNeutralLast() {
     wait(300, msec);
   }*/// made u look
   stopAllDrive(hold);
+
+  tilterPiston.set(true);
+
   return Brain.timer(msec) - t;
 }
 
@@ -344,6 +399,7 @@ int runSkills() {
   turnWithTilterGoal(107, 1300);
   moveStraight(15, 1400, 6, 40);
   moveStraight(3, 300);
+  wait(100, msec);
 
   //grab the goal, move back some
   clawPiston.set(false);
@@ -372,7 +428,7 @@ int runSkills() {
   
 
   //turn to the next neutral goal, go and grab it
-  turnWithTilterGoal(90, 1000);
+  turnWithTilterGoal(89, 1000);
   raiseLift(0, false);
   moveStraight(12, 1400, 6, 50);
   moveStraight(3, 300, 6, 50);
@@ -398,7 +454,7 @@ int runSkills() {
   //move back a bit, turn to center goal, grab it 
   moveStraight(-18, 1000);
   raiseLift(0, false);
-  turnWithTilterGoal(95, 1500);
+  turnWithTilterGoal(89, 1500);
   moveStraight(16, 1800, 6, 40);
   moveStraight(2, 200);
   clawPiston.set(false);
@@ -425,15 +481,17 @@ int runSkills() {
   //move back a bit, turn towards opposite platform, run to it.
   moveStraight(-5, 700);
   raiseLift(150, true);
-  turnWith2Goals(69, 1500);
+  turnWith2Goals(61, 1500);
   mConveyor.spin(forward, 600, rpm);
-  moveStraight(71, 3500);
+  moveStraight(72, 3500);
 
   //raise lift, then try to level the platform and put the mobile onto it.
+  raiseLift(450, true);
+  moveStraight(18, 1500, 6, 50);
+  raiseLift(375, true);
   raiseLift(420, true);
-  moveStraight(15, 1500, 6, 50);
   moveStraight(-5, 1500, 6, 50);
-  turnWith2Goals(90, 1500);
+  turnWith2Goals(95, 1500);
   moveStraight(8, 1500, 6, 40);
   clawPiston.set(true);
 
@@ -442,15 +500,71 @@ int runSkills() {
   raiseLift(0, true);
   moveStraight(5, 600);
   tilterPiston.set(true);
-  moveStraight(5, 1000);
-  turnToAngle(270, 1500);
-  moveStraight(12, 1500, 6, 60);
+  wait(200, msec);
+  moveStraight(9, 1000);
+  turnToAngle(273, 1500);
+  moveStraight(17, 1500, 6, 60);
   clawPiston.set(false);
   raiseLift(400, true);
-  turnWithClawGoal(90, 1500);
-  moveStraight(13, 1500, 6, 50);
+  turnWithClawGoal(95, 1500);
+  moveStraight(32, 2000, 6, 50);
   clawPiston.set(true);
   moveStraight(-10, 1500);
 
+  //turn to red ally goal and grab it hopefully
+  turnToAngle(11, 1500);
+  raiseLift(0, false);
+  moveStraight(56, 2000);
+  moveStraight(3, 300);
+  clawPiston.set(false);
+  wait(100, msec);
+  moveStraight(-10, 1000);
+  turnWithClawGoal(270, 1000);
+  moveStraight(70, 2500);
+  
+
+
   return Brain.timer(msec) - t;
+}
+
+int leftAllyFirst() {
+  int t = Brain.timer(msec);
+  
+  clawPiston.set(true);
+  tilterPiston.set(true);
+
+  //grab first allied goal
+  wait(150, msec);
+  moveStraight(-4, 500);
+  tilterPiston.set(false);
+
+  //jump back, turn and move to neutral goal
+  moveStraight(5, 500);
+  turnWithTilterGoal(271, 1300);
+  mConveyor.spin(forward, 500, rpm);
+  moveStraight(-30, 1100);
+
+  //adjust ange so that we can grab yellow, move into it
+  turnWithTilterGoal(115, 1300);
+  mConveyor.spin(reverse, 150, rpm);
+  moveStraight(17, 1400, 6, 40);
+  wait(100, msec);
+
+  //grab the goal, move back some
+  clawPiston.set(false);
+  wait(50, msec);
+  moveStraight(-15, 1000);
+  raiseLift(450, false);
+
+  //turn back to field wall
+  turnToAngle(270, 2000);
+  moveStraight(14, 1500);
+  mConveyor.spin(forward, 500, rpm);
+  moveStraight(40, 2500, 6, 40);
+  moveStraight(-15, 2000);
+
+  tilterPiston.set(true);
+
+  return Brain.timer(msec) - t;
+
 }

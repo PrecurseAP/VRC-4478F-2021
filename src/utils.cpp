@@ -58,9 +58,6 @@ void Graph::drawGraph() {
     prevY = py; 
   }
   
-  //Brain.Screen.printAt(100, 100, "%.2f", py);
-  //Brain.Screen.printAt(graphLeftBorder-75, graphBottomBorder, "%.2f", this->least);
-  //Brain.Screen.printAt(graphLeftBorder-75, graphTopBorder, "%.2f", this->greatest);
   Brain.Screen.printAt(graphLeftBorder-75, py, "%.2f", graphData[graphData.size()-1]);
   Brain.Screen.setPenColor(color::red);
   py = 272 - (graphTopBorder*2 + ((this->goal - this->least) * ((graphBottomBorder - graphTopBorder)/(this->greatest - this->least))));

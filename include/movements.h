@@ -47,4 +47,11 @@ extern int depositAndDrop();
 
 extern float driveRatio;
 
+extern void odomTurn(float, float, float);
+
+extern void odomStraight(float, float, float);
+
+extern void followArc(float, float, float, float, int, bool bypass = false);
+
 #endif
+//

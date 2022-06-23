@@ -18,12 +18,15 @@
 // tilterPiston         digital_out   A               
 // clawPiston           digital_out   H               
 // GYRO                 inertial      10              
-// twLeft               rotation      15              
-// twRight              rotation      16              
+// twLeft               rotation      9               
+// twRight              rotation      15              
+// twBack               rotation      8               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 #include "utils.h"
 #include "movements.h"
 #include "autonomous.h"
+#include "odometry.h"
+#include "purepursuit.h"
 using namespace vex;
 
 competition Competition;
@@ -40,7 +43,7 @@ int sgn(T val) {
 template <typename S>
 S logDriveVolt(S s) {
   //logarithmic drive function, written for voltage.
-  return pow(12, 2.6) / pow(12, 1.6) * sgn(s);
+  return pow(12, 2) / 12 * sgn(s);
 }
 
 int autonSelection = 0;
@@ -51,7 +54,7 @@ void cycleAuton() {
   //loops a variable from 0 to a number each time the screen is tapped.
   //Number depends on the amount of auton paths, each number 0 to n corresponds to a route
 
-  if (autonSelection < 7) {
+  if (autonSelection < 8) {
     autonSelection++;
   } else {
     autonSelection = 0;
@@ -91,6 +94,10 @@ void cycleAuton() {
       autonPath = "SKILLS";
       break;
     }
+    case 8: {
+      autonPath = "Left side ally first";
+      break;
+    }
     default: {
       autonPath = "something happened, restart the program :)";
       break;
@@ -121,6 +128,20 @@ void pre_auton(void) {
 
 }
 
+bool tilterToggled = true;
+
+void toggleTilter() {
+  tilterPiston.set(!tilterToggled);
+  tilterToggled = !tilterToggled;
+}
+
+bool clawToggled = true;
+
+void toggleClaw() {
+  clawPiston.set(!clawToggled);
+  clawToggled = !clawToggled;
+}
+
 void autonomous(void) {
 
   //The autonomous function.
@@ -137,18 +158,22 @@ void autonomous(void) {
   mLift.setPosition(0, degrees);
   mConveyor.setPosition(0, degrees);
 
-  autonSelection = 7;
+  //autonSelection = 6;
 
   switch(autonSelection) {
     //each path prints to the vexcode console, in ms, how much time the route took to finish.
     case 0: /*right 20*/ {
       int t = rightBasic20Rings();
       std::cout << "Auton completed in " << t << " ms." << std::endl;
+      clawToggled = true;
+      tilterToggled = true;
       break;
     }
     case 1: /*left 20*/ {
       int t = leftBasic20Rings();
       std::cout << "Auton completed in " << t << " ms." << std::endl;
+      clawToggled = true;
+      tilterToggled = true;
       break;
     }
     case 2: /*right 40 awp*/ {
@@ -181,22 +206,12 @@ void autonomous(void) {
       std::cout << "Auton completed in " << t << " ms." << std::endl;
       break;
     }
+    case 8: /* left side ally first */
+      int t = leftAllyFirst();
+      std::cout << "Auton completed in " << t << " ms." << std::endl;
+      break;
   }
 
-}
-
-bool tilterToggled = true;
-
-void toggleTilter() {
-  tilterPiston.set(!tilterToggled);
-  tilterToggled = !tilterToggled;
-}
-
-bool clawToggled = true;
-
-void toggleClaw() {
-  clawPiston.set(!clawToggled);
-  clawToggled = !clawToggled;
 }
 
 brakeType lockDrive = coast;
@@ -210,6 +225,40 @@ void lockDriveCoast() {
 }
 
 void usercontrol(void) {
+  /*GYRO.startCalibration();
+  while(GYRO.isCalibrating()) {
+    wait(100, msec);
+  }
+  wait(2800, msec);
+
+  thread odom = thread(trackingLoop);
+
+  wait(100, msec);
+  /*
+  odomTurn(-20, 25, 1500);
+  odomTurn(-20, -15, 1500);
+  odomTurn(20, -25, 1500);
+  odomTurn(20, 15, 1500);*/
+/*
+  std::vector<Point> path2 = {
+    Point(0, 0),    
+    Point(0, 30),
+    Point(30, 30),
+    Point(30, 60)
+  };
+
+  std::vector<Point> autoPath = inject(path2, 4);
+  autoPath = smoother(autoPath, .90, .1);
+  autoPath = calculateDistances(autoPath);
+  autoPath = calculateCurvatures(autoPath);
+  autoPath = calculateVelocities(autoPath, 10, .5, 1, .9);
+
+  wait(1000, msec);
+
+  int a = purePursuit(autoPath, 14, &pose);
+
+  */
+  //left40Point();
   //User control function. Runs during driver control. (duh)
 
   //testing for turning functions ignore these
@@ -224,6 +273,8 @@ void usercontrol(void) {
   Controller1.ButtonY.pressed(lockDriveCoast);
 
   while (1) {
+    //std::cout << pose.x << ", " << pose.y << ", " << pose.theta * (180/M_PI) << std::endl << std::endl;
+    //std::cout << GYRO.heading(degrees) << ", " << twRight.position(degrees) << ", " << twBack.position(degrees) << std::endl << std::endl;
 
     //get logarithmic drive speed, scale percentage to voltage
     float LSpeed = logDriveVolt(Controller1.Axis3.position(percent)*(float)(12.0/100.0));

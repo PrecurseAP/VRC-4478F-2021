@@ -35,13 +35,13 @@ extern std::vector<Point> calculateDistances(std::vector<Point>);
 
 extern std::vector<Point> calculateCurvatures(std::vector<Point>);
 
-extern std::vector<Point> calculateVelocities(std::vector<Point>, float, float, float);
+extern std::vector<Point> calculateVelocities(std::vector<Point>, float, float, float, float);
 
 extern float robotX, robotY, robotTheta, robotTrackWidth;
 
 extern float distanceFormula(Point, Point);
 
-extern int purePursuit(std::vector<Point>, float, robotPosition);
+extern int purePursuit(std::vector<Point>, float, robotPosition*);
 
 extern float clip(float, float, float);
 

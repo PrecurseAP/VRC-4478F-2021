@@ -19,4 +19,8 @@ int runSkills(void);
 
 int rightNeutralLast(void);
 
+int leftAllyFirst(void);
+
+int left40Point(void);
+
 #endif

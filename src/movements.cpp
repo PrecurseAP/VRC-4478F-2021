@@ -5,6 +5,7 @@
 #include "movements.h"
 #include "utils.h"
 #include "vex.h"
+#include "odometry.h"
 
 float driveRatio = 3.0/7.0;
 
@@ -195,4 +196,115 @@ int moveStraight(float goalDistance, float timeLimit, float kp, float maxSpeed, 
   }
 
   return 1;
+}
+
+void odomTurn(float gx, float gy, float t) {
+  //float currentTheta = 450 - GYRO.heading(degrees);
+  float rx = pose.x;
+  float ry = pose.y;
+
+  float dx = gx - rx;
+  float dy = gy - ry;
+
+  dx = (dx == 0) ? .01 : dx;
+  dy = (dy == 0) ? .01 : dy;
+
+  float gTheta = 0;
+
+  if (dx < 0) {
+    gTheta = (180/M_PI) * atan(dy/dx) + 180;
+  } else {
+    gTheta = (180/M_PI) * atan(dy/dx);
+  }
+
+  gTheta = fmod(fabs(gTheta-450), 360);
+
+  if (gTheta < 0) {
+    gTheta += 360;
+  }
+  if (gTheta > 360) {
+    gTheta -= 360;
+  }
+  std::cout << gTheta << std::endl;
+  turnWith2Goals(gTheta, t);
+}
+
+void odomStraight(float gx, float gy, float t) {
+
+  float gTheta = GYRO.heading(degrees);
+
+  float cx = pose.x;
+  float cy = pose.y;
+
+  float dx = gx - cx;
+  float dy = gy - cy;
+
+  float d = sqrt( (dx*dx) + (dy*dy) );
+
+  moveStraight(d, t);
+}
+
+template <typename G> 
+int sgn3(G val) { //SIGNUM
+    return (G(0) < val) - (val < G(0));
+}
+
+void followArc(float r, float d, float t, float c2, int dir, bool bypass) {
+
+  float startTime = Brain.timer(msec);
+
+  float curvature = 1.0 / r;
+
+  float prevX = pose.y;
+  float prevY = pose.y;
+
+  float dTotal = 0;
+
+  bool done = false;
+
+  while(!done) {
+    float rX = pose.x;
+    float rY = pose.y;
+
+    float dX = rX - prevX;
+    float dY = rY - prevY;
+
+    prevX = rX;
+    prevY = rY;
+
+    dTotal += sqrt( dX*dX + dY*dY );
+
+    float c = c2 / (2 + curvature*14.25);
+
+    float v = c * std::cbrt(((d - (dTotal / 2)) / d));
+    
+    v = bypass ? c : v;
+
+    float leftV = v * ((2 + dir*curvature*14.25) / 2);
+    float rightV = v * ((2 - dir*curvature*14.25) / 2);
+
+    /*if ((fabs(leftV) > 100) && (curvature > 0)) {
+      rightV = 100 - (leftV - 100);
+      leftV = 100;
+    }
+    if ((fabs(rightV) > 100) && (curvature < 0)) {
+      leftV = 100 - (rightV - 100);
+      rightV = 100;
+    }*/
+
+    mFrontLeft.spin(forward, leftV, percent);
+    mMidLeft.spin(forward, leftV, percent);
+    mBackLeft.spin(forward, leftV, percent);
+    mFrontRight.spin(forward, rightV, percent);
+    mMidRight.spin(forward, rightV, percent);
+    mBackRight.spin(forward, rightV, percent);
+
+    std::cout << leftV << std::endl;
+
+    if ((fabs(d - dTotal) < 1) || ((Brain.timer(msec) - startTime) > t)) {
+      done = true;
+      stopAllDrive(hold);
+    }
+    wait(20, msec);
+  }
 }
